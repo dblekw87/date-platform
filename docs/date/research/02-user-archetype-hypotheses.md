@@ -1,8 +1,8 @@
-# User Archetype Hypotheses
+# User Archetype Hypotheses 문서
 
 이 문서는 DATE의 최종 핵심 사용자를 확정하지 않는다. 각 유형은 검증 전 후보이며, 후속 Research에서 유지, 통합, 제외될 수 있다.
 
-## Behavioral Separation Rule
+## 행동 구분 규칙
 
 Archetype은 투자 기간만으로 구분하지 않는다. 각 후보는 진입 Trigger, 반복 Task, 신뢰 요구, 시간 민감도, 개인화 요구, 현재 도구 조합의 차이로 검증한다. 후속 Research에서 행동 차이가 작게 관찰되면 통합하거나 제외한다.
 

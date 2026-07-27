@@ -1,4 +1,4 @@
-# DATE Research Brief
+# DATE Research Brief 문서
 
 ## DATE의 목적
 

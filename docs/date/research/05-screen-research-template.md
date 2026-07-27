@@ -1,11 +1,11 @@
-# Screen Research Template
+# Screen Research Template 문서
 
 아래 템플릿은 Benchmark 화면을 반복 조사할 때 복사해서 사용한다. 관찰한 사실과 해석을 분리하고, 확인하지 못한 항목은 `Unknown` 또는 `Not verified`로 기록한다.
 
 ```markdown
-# Screen Research: [Service] — [Screen]
+# Screen Research 기록: [Service] — [Screen]
 
-## Basic Metadata
+## 기본 메타데이터
 
 - Service:
 - Screen:
@@ -18,13 +18,13 @@
 - Device:
 - Viewport:
 
-## Scenario Context
+## Scenario Context 기록
 
 - User Goal:
 - Entry Point:
 - Expected Outcome:
 
-## Entity Context
+## Entity Context 기록
 
 - Primary Entity:
 - Secondary Entities:
@@ -32,7 +32,7 @@
 - Global Navigation Position:
 - Local Navigation:
 
-## Actions and Controls
+## Action과 Control
 
 - Primary Action:
 - Secondary Actions:
@@ -40,7 +40,7 @@
 - Keyboard Support:
 - Context Preservation:
 
-## Information Architecture
+## Information Architecture 기록
 
 - Information Hierarchy:
 - Density Strategy:
@@ -51,13 +51,13 @@
 - Freshness:
 - Trust Signal:
 
-## State Coverage
+## State Coverage 기록
 
 - Empty State:
 - Loading State:
 - Error State:
 
-## Decision Support
+## Decision Support 기록
 
 - Effective Decision:
 - Why It Works:
@@ -65,14 +65,14 @@
 - Structural Weakness:
 - Observation vs Interpretation Boundary:
 
-## DATE Implication
+## DATE Implication 기록
 
 - DATE Applicability:
 - Conditions Required:
 - Do Not Copy:
 - Open Question:
 
-## Observation Record
+## Observation 기록
 
 Observation:
 
@@ -87,7 +87,7 @@ Confidence:
 Evidence:
 ```
 
-## Usage Notes
+## 사용 규칙
 
 - `Observation`에는 실제 확인한 화면 사실만 기록한다.
 - `Interpretation`에는 왜 그런 구조를 사용했는지에 대한 해석을 기록한다.

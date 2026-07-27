@@ -1,8 +1,8 @@
-# Investment Decision Journey Candidates
+# Investment Decision Journey Candidates 문서
 
 이 문서는 초기 후보를 정의한다. 하나의 Journey를 최종안으로 선택하지 않는다.
 
-## Differentiation Rules
+## 차별화 규칙
 
 - Market-first는 시장 변화에서 시작한다.
 - Entity-first는 특정 투자 대상 검색에서 시작한다.
@@ -12,7 +12,7 @@
 
 각 Journey는 진입점이 다르더라도 Exploration, Comparison, Evidence Validation 단계에서 서로 만날 수 있다. 이 겹침은 중복이 아니라 투자 분석의 연결성을 검증하기 위한 의도적 설계다.
 
-## J-001 Market-first Journey
+## J-001 Market-first Journey 후보
 
 - Entry Trigger: 장 시작 전후 또는 시장 급변
 - User Question: 오늘 시장에서 무엇이 변했고 왜 중요한가?
@@ -28,7 +28,7 @@
 - Required Entities: Market, Index, Sector, Industry, Company, Security, Event, News, Macro Indicator
 - Required Product Capabilities: Market discovery 후보, cause grouping 후보, entity transition, source/freshness display, watchlist/workspace save
 
-## J-002 Entity-first Journey
+## J-002 Entity-first Journey 후보
 
 - Entry Trigger: 특정 회사, 종목, ETF, 산업을 검색한다.
 - User Question: 이 대상은 지금 투자 검토할 만한가?
@@ -44,7 +44,7 @@
 - Required Entities: Company, Security, ETF, Industry, Peer Group, News, Event, Financial Metric
 - Required Product Capabilities: Search 후보, entity profile 후보, related entity graph 후보, comparison tools, evidence save, revisit history
 
-## J-003 Evidence-first Journey
+## J-003 Evidence-first Journey 후보
 
 - Entry Trigger: 뉴스, 공시, 리포트, SNS 링크, macro release를 발견한다.
 - User Question: 이 근거는 어떤 투자 대상과 판단에 영향을 주는가?
@@ -60,7 +60,7 @@
 - Required Entities: Evidence, Source, News, Filing, Event, Company, Security, Industry, Macro Indicator
 - Required Product Capabilities: evidence capture 후보, source trail, relationship mapping 후보, annotation, confidence/status tracking
 
-## J-004 Portfolio-monitoring Journey
+## J-004 Portfolio-monitoring Journey 후보
 
 - Entry Trigger: 보유 자산 점검, 급변 알림, 리밸런싱 일정
 - User Question: 내 보유/관심 대상에 영향을 주는 변화는 무엇인가?
@@ -76,7 +76,7 @@
 - Required Entities: Portfolio, Holding, Watchlist, Company, Security, Event, News, Macro Indicator, Decision Note
 - Required Product Capabilities: personalized dashboard 후보, impact grouping 후보, alerting, decision log, workspace continuity
 
-## J-005 Event-driven Journey
+## J-005 Event-driven Journey 후보
 
 - Entry Trigger: 실적 발표, M&A, 규제, 제품 출시, 금리 발표, 공급망 충격
 - User Question: 이 이벤트는 어떤 자산과 산업에 어떤 방향으로 영향을 주는가?

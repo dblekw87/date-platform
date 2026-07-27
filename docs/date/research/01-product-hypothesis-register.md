@@ -1,8 +1,8 @@
-# DATE Product Hypothesis Register
+# DATE Product Hypothesis Register 문서
 
 Status 값은 `Proposed`, `Needs Evidence`, `Partially Supported`, `Rejected`, `Decision Candidate` 중 하나를 사용한다. Phase 0의 모든 가설은 기본적으로 `Proposed` 또는 `Needs Evidence` 상태다.
 
-## Non-overlap Rules
+## 중복 방지 규칙
 
 - H-004는 Home의 역할 가설이고, H-015는 Discovery 정보 grouping 방식 가설이다.
 - H-006은 한 세션 안에서 화면 이동 중 맥락이 유지되는지에 대한 가설이고, H-014는 날짜가 바뀐 뒤 이전 분석을 재개할 수 있는지에 대한 가설이다.

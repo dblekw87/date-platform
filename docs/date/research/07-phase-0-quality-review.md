@@ -1,4 +1,4 @@
-# Phase 0 Quality Review
+# Phase 0 Quality Review 문서
 
 ## 검토 기준
 
@@ -93,4 +93,3 @@ Phase 1 진입은 가능하다.
 - 경쟁 서비스의 기능 수를 비교하지 말고 설계 이유를 관찰한다.
 - Phase 1 중에도 IA, Navigation, Entity Model, Screen System을 확정하지 않는다.
 - 모든 화면 분석은 `05-screen-research-template.md`의 Observation Record 형식을 사용한다.
-

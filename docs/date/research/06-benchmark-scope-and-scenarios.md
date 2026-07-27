@@ -1,8 +1,8 @@
-# Benchmark Scope and Research Scenarios
+# Benchmark Scope and Research Scenarios 문서
 
 이 문서는 각 Benchmark의 조사 범위와 공통 Research Scenario를 정의한다. 실제 조사에서 접근 제한, 로그인 요구, 유료 기능 제한은 사실처럼 추정하지 않고 별도 기록한다.
 
-## Comparable Recording Fields
+## 비교 가능한 기록 항목
 
 각 서비스는 아래 필드를 같은 순서로 기록한다.
 
@@ -21,7 +21,7 @@
 
 접근 상태는 `Public`, `Login Required`, `Paid Required`, `Unavailable`, `Not Verified` 중 하나로 기록한다. 공개 자료로만 확인한 Bloomberg Terminal interaction처럼 직접 조작하지 못한 항목은 Interpretation과 Evidence에 명확히 표시한다.
 
-## EidosLayer
+## EidosLayer 조사 범위
 
 - Research Objective: AI/knowledge-layer 기반 투자 리서치에서 entity, evidence, question flow가 어떻게 연결되는지 확인한다.
 - Public Access Scope: 공식 웹사이트, 공개 데모, 공개 문서, 공개 화면.
@@ -36,7 +36,7 @@
 - Evidence Patterns: source trail, claim-to-source linkage, generated summary verification.
 - Known Research Limitations: 접근 권한과 제품 성숙도에 따라 확인 가능한 화면이 제한될 수 있다.
 
-## TradingView
+## TradingView 조사 범위
 
 - Research Objective: Chart 중심 전문 도구가 search, watchlist, panel, community, alert를 어떻게 결합하는지 분석한다.
 - Public Access Scope: 공개 chart, market pages, symbols, ideas, screeners.
@@ -51,7 +51,7 @@
 - Evidence Patterns: chart annotations, news panel, community ideas.
 - Known Research Limitations: 실시간 데이터와 고급 레이아웃은 구독 등급에 따라 다를 수 있다.
 
-## Koyfin
+## Koyfin 조사 범위
 
 - Research Objective: Professional research terminal이 dashboard, graph, entity, macro, portfolio를 어떻게 통합하는지 확인한다.
 - Public Access Scope: 공개 마케팅 자료, 공개 문서, 제한된 무료 기능.
@@ -66,7 +66,7 @@
 - Evidence Patterns: data source visibility, chart/data table linkage.
 - Known Research Limitations: 유료 데이터와 기관용 기능은 제한적으로만 관찰한다.
 
-## Finviz
+## Finviz 조사 범위
 
 - Research Objective: 높은 정보 밀도와 screener/table 중심 discovery가 왜 빠른 판단을 돕는지 분석한다.
 - Public Access Scope: 시장 맵, screener, quote pages, news headlines, groups.
@@ -81,7 +81,7 @@
 - Evidence Patterns: news headlines, insider/financial data, analyst data.
 - Known Research Limitations: 일부 freshness와 real-time 기능은 paid tier에서만 확인 가능하다.
 
-## Yahoo Finance
+## Yahoo Finance 조사 범위
 
 - Research Objective: 대중형 금융 서비스가 search, quote page, news, portfolio를 낮은 학습 비용으로 연결하는 방식을 분석한다.
 - Public Access Scope: quote pages, news, charts, financials, screeners 일부.
@@ -111,7 +111,7 @@
 - Evidence Patterns: source-tagged news, data provenance, time-sensitive feeds.
 - Known Research Limitations: 직접 terminal 접근 없이 공개 자료만 볼 경우 실제 interaction은 추정으로 분리한다.
 
-## Common Research Scenarios
+## 공통 Research Scenario
 
 | Scenario ID | Scenario | Primary Question | Evidence to Capture |
 |---|---|---|---|
@@ -128,7 +128,7 @@
 | S-011 | 하나의 News에서 Company, Industry, Event로 전환 | evidence에서 관련 entity로 이동할 수 있는가? | news links, side panel, related entities |
 | S-012 | 하나의 Entity에서 관련 Entity를 연속 탐색 | 분석 흐름이 끊기지 않고 확장되는가? | entity graph, related links, context preservation |
 
-## Scenario Recording Format
+## Scenario 기록 형식
 
 ```text
 Observation:

@@ -1,8 +1,8 @@
-# Benchmark Evaluation Framework
+# Benchmark Evaluation Framework 문서
 
 점수는 보조 도구일 뿐 자동 결론 기준이 아니다. 각 항목은 Observation, Interpretation, User Impact, DATE Implication, Confidence, Evidence와 함께 기록한다.
 
-## Overlap Controls
+## 중복 방지 기준
 
 - Decision Speed는 task completion의 속도와 단계 수를 본다. Cognitive Load는 화면 이해와 선택 비용을 본다.
 - Context Preservation은 같은 세션 안의 상태 유지다. Personal Continuity는 시간 경과 후 이전 분석 재개다. Workspace Reusability는 저장된 구성의 반복 사용 가능성이다.

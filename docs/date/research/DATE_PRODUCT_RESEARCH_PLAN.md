@@ -1,12 +1,12 @@
-# DATE Product Research Plan
+# DATE Product Research Plan 문서
 
-## Product Descriptor
+## Product Descriptor 설명
 
 **DATE — 투자 근거 연결 플랫폼**
 
 DATE는 기존 Invest Community를 개발하거나 개선하는 프로젝트가 아니다. DATE는 새로운 투자 플랫폼을 처음부터 설계하는 프로젝트다. 기존 구조, 코드, 문서, 메뉴, 페이지, 도메인 구조는 이번 작업의 기준으로 사용하지 않는다.
 
-## Role Scope
+## 역할 범위
 
 이번 Research Foundation 작업은 다음 역할 관점을 동시에 사용한다.
 
@@ -18,7 +18,7 @@ DATE는 기존 Invest Community를 개발하거나 개선하는 프로젝트가 
 
 이번 단계에서는 개발, UI 설계, 화면 목업, API 설계, 데이터베이스 스키마 설계를 수행하지 않는다.
 
-## Project Principles
+## 프로젝트 원칙
 
 DATE는 다음 전체 구조를 처음부터 다시 설계한다.
 
@@ -39,7 +39,7 @@ DATE는 다음 전체 구조를 처음부터 다시 설계한다.
 - UI의 외형보다 왜 그렇게 설계되었는지를 분석한다.
 - Research가 완료되기 전에 IA, Navigation, Entity, Screen System을 확정하지 않는다.
 
-## Required Benchmarks
+## 필수 Benchmark
 
 다음 서비스는 반드시 분석 대상에 포함한다.
 
@@ -62,7 +62,7 @@ Benchmark 분석은 기능 목록이 아니라 다음 설계 이유를 중심으
 - 왜 특정 정보는 새 페이지가 아니라 Side Panel이나 Overlay로 제공되는가.
 - 왜 전문 사용자는 학습 비용이 높은 인터페이스도 계속 사용하는가.
 
-## Phase 0 Scope
+## Phase 0 범위
 
 이번 작업은 **Phase 0 — Research Foundation**만 수행한다. 실제 경쟁 서비스 전체 분석은 완료하지 않는다. 목적은 다음 Research 작업이 동일한 기준으로 수행될 수 있도록 조사 기반을 만드는 것이다.
 
@@ -77,7 +77,7 @@ Phase 0 산출물:
 
 추가로 Research Foundation의 범위와 원칙을 설명하는 Research Brief와 README를 작성한다.
 
-## Required Document Structure
+## 필수 문서 구조
 
 ```text
 docs/
@@ -96,7 +96,7 @@ docs/
 
 DATE 문서는 기존 Invest Community 문서와 명확히 분리한다.
 
-## Research Recording Principle
+## Research 기록 원칙
 
 관찰과 해석을 명확히 분리한다. 확인하지 못한 사항은 추정으로 기록한다. 유료 기능이나 로그인 제한으로 확인하지 못한 구조를 사실처럼 작성하지 않는다.
 
@@ -122,7 +122,7 @@ Evidence:
 URL, 화면 위치, 캡처 또는 확인 근거
 ```
 
-## Prohibited in Phase 0
+## Phase 0 금지 사항
 
 이번 작업에서는 다음을 수행하지 않는다.
 
@@ -143,7 +143,7 @@ URL, 화면 위치, 캡처 또는 확인 근거
 - Commit
 - Push
 
-## Quality Criteria
+## 품질 기준
 
 산출물은 다음 조건을 만족해야 한다.
 
@@ -156,4 +156,3 @@ URL, 화면 위치, 캡처 또는 확인 근거
 - 중복된 설명을 최소화한다.
 - 용어를 문서 전체에서 일관되게 사용한다.
 - DATE와 Invest Community의 문서 경계를 명확하게 유지한다.
-

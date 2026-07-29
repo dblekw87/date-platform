@@ -122,6 +122,12 @@ export default function Home() {
             )
           )}
         </nav>
+        <div className={styles.guestHeaderActions} aria-label="Guest Header Actions">
+          <button type="button">Search</button>
+          <button type="button">Theme</button>
+          <button type="button">Notify</button>
+          <button type="button">Login</button>
+        </div>
       </header>
 
       <div className={styles.pageFrame}>

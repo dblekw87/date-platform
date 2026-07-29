@@ -40,7 +40,8 @@
 
 .globalNavigation {
   display: flex;
-  width: 100%;
+  flex: 1 1 auto;
+  width: auto;
   max-width: 100%;
   min-width: 0;
   gap: 8px;
@@ -53,9 +54,25 @@
   display: none;
 }
 
+.guestHeaderActions {
+  display: flex;
+  flex: 0 0 auto;
+  max-width: 100%;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.guestHeaderActions::-webkit-scrollbar {
+  display: none;
+}
+
 .navLink,
 .activeNavLink,
-.disabledNavLink {
+.disabledNavLink,
+.guestHeaderActions button {
   display: inline-flex;
   min-height: 36px;
   flex: 0 0 auto;
@@ -79,6 +96,11 @@
 
 .disabledNavLink span {
   font-size: 11px;
+}
+
+.guestHeaderActions button {
+  color: inherit;
+  cursor: pointer;
 }
 
 .pageFrame {
@@ -522,6 +544,7 @@
 .evidenceRow:focus-visible,
 .navLink:focus-visible,
 .activeNavLink:focus-visible,
+.guestHeaderActions button:focus-visible,
 .heroActions a:focus-visible,
 .searchPanel input:focus-visible,
 .drawerHeader button:focus-visible,
@@ -545,6 +568,11 @@
   .globalHeader {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .globalNavigation,
+  .guestHeaderActions {
+    width: 100%;
   }
 
   .hero,

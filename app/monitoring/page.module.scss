@@ -1,0 +1,453 @@
+.monitoringShell {
+  min-width: 0;
+  min-height: 100vh;
+  background: #f6f6f4;
+  color: #141414;
+}
+
+.globalHeader {
+  position: sticky;
+  z-index: 8;
+  top: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid #151515;
+  background: #f6f6f4;
+  padding: 14px 28px;
+}
+
+.logo,
+.navLink,
+.activeNavLink,
+.headerActions a,
+.breadcrumb a,
+.headerActionsRow a,
+.ruleGrid a,
+.changeFeed a,
+.compactGrid a,
+.listStack a,
+.reviewQueue a,
+.footer a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.globalNavigation,
+.headerActions,
+.headerActionsRow,
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+}
+
+.navLink,
+.activeNavLink,
+.disabledNavLink,
+.headerActions a,
+.headerActions button,
+.headerActionsRow a,
+.ruleGrid a,
+.changeFeed a,
+.compactGrid a,
+.listStack a,
+.reviewQueue a,
+.footer a {
+  display: inline-flex;
+  min-height: 36px;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  background: #f6f6f4;
+  color: inherit;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.activeNavLink,
+.headerActionsRow a:first-child {
+  border-width: 2px;
+  background: #ffffff;
+  font-weight: 700;
+}
+
+.disabledNavLink,
+.headerActions button:disabled {
+  color: #626262;
+  cursor: not-allowed;
+}
+
+.monitoringFrame {
+  display: grid;
+  width: min(100%, 1680px);
+  margin: 0 auto;
+  gap: 44px;
+  padding: 28px;
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb li {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  color: #626262;
+}
+
+.breadcrumb a[aria-current="page"] {
+  font-weight: 700;
+}
+
+.monitoringHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.55fr);
+  gap: 28px;
+  align-items: start;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 30px;
+}
+
+.monitoringHeader h1 {
+  max-width: 980px;
+  margin: 8px 0 14px;
+  font-size: 36px;
+  line-height: 1.16;
+}
+
+.monitoringHeader p,
+.sectionLead p,
+.changeFeed p,
+.listStack p,
+.compactGrid p,
+.reviewQueue p {
+  margin: 0;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.monitoringHeader dl,
+.ruleGrid dl,
+.changeFeed dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.monitoringHeader dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.monitoringHeader dl div,
+.ruleGrid dl div,
+.changeFeed dl div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  border-top: 1px solid #c8c8c5;
+  padding-top: 8px;
+}
+
+.monitoringHeader dt,
+.ruleGrid dt,
+.changeFeed dt,
+.kicker,
+.summaryGrid span,
+.ruleGrid span,
+.changeFeed span,
+.compactGrid span,
+.compactGrid small,
+.listStack span,
+.listStack small,
+.listStack em,
+.reviewQueue span,
+.reviewQueue small,
+.emptyStates small,
+.footer {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.monitoringHeader dd,
+.ruleGrid dd,
+.changeFeed dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.headerActionsRow {
+  grid-column: 1 / -1;
+}
+
+.summarySection,
+.section,
+.emptyStates {
+  display: grid;
+  gap: 18px;
+}
+
+.summarySection h2,
+.sectionLead h2,
+.emptyStates h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.sectionLead {
+  display: grid;
+  gap: 7px;
+  max-width: 920px;
+}
+
+.summaryGrid,
+.compactGrid,
+.emptyStates > div {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summaryGrid article,
+.ruleGrid article,
+.changeFeed article,
+.compactGrid article,
+.listStack article,
+.reviewQueue article,
+.emptyStates article {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 14px;
+}
+
+.summaryGrid strong,
+.ruleGrid strong,
+.changeFeed strong,
+.compactGrid strong,
+.listStack strong,
+.reviewQueue strong,
+.emptyStates strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ruleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ruleGrid h3,
+.changeFeed h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.changeFeed {
+  display: grid;
+  gap: 12px;
+}
+
+.changeFeed article {
+  grid-template-columns: minmax(150px, 0.25fr) minmax(0, 0.45fr) minmax(260px, 0.3fr);
+  align-items: start;
+}
+
+.changeFeed article > p,
+.changeFeed article > a {
+  grid-column: 2;
+}
+
+.changeFeed dl {
+  grid-column: 3;
+  grid-row: 1 / span 4;
+}
+
+.dualSections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.listStack {
+  display: grid;
+  gap: 12px;
+}
+
+.listStack em {
+  font-style: normal;
+}
+
+.reviewQueue {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.emptyStates {
+  border: 1px dashed #555;
+  background: #eeeeeb;
+  padding: 18px;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #151515;
+  padding: 18px 28px;
+}
+
+.navLink:focus-visible,
+.activeNavLink:focus-visible,
+.disabledNavLink:focus-visible,
+.headerActions a:focus-visible,
+.headerActions button:focus-visible,
+.breadcrumb a:focus-visible,
+.headerActionsRow a:focus-visible,
+.ruleGrid a:focus-visible,
+.changeFeed a:focus-visible,
+.compactGrid a:focus-visible,
+.listStack a:focus-visible,
+.reviewQueue a:focus-visible,
+.footer a:focus-visible {
+  outline: 2px solid #151515;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1440px) {
+  .monitoringFrame {
+    max-width: 1240px;
+  }
+
+  .summaryGrid,
+  .compactGrid,
+  .emptyStates > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ruleGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .globalHeader,
+  .monitoringHeader,
+  .changeFeed article,
+  .dualSections {
+    grid-template-columns: 1fr;
+  }
+
+  .changeFeed article > p,
+  .changeFeed article > a,
+  .changeFeed dl {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .reviewQueue {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .globalHeader,
+  .monitoringFrame,
+  .footer {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .monitoringHeader {
+    padding: 22px;
+  }
+
+  .monitoringHeader h1 {
+    font-size: 30px;
+  }
+
+  .summaryGrid,
+  .compactGrid,
+  .emptyStates > div,
+  .ruleGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .globalHeader,
+  .globalNavigation,
+  .headerActions,
+  .footer nav {
+    align-items: flex-start;
+  }
+
+  .globalHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .monitoringFrame {
+    gap: 34px;
+    padding-top: 18px;
+    padding-bottom: 34px;
+  }
+
+  .monitoringHeader h1 {
+    font-size: 26px;
+  }
+
+  .monitoringHeader dl,
+  .summaryGrid,
+  .compactGrid,
+  .emptyStates > div,
+  .ruleGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 340px) {
+  .globalHeader,
+  .monitoringFrame,
+  .monitoringHeader,
+  .emptyStates,
+  .footer {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}

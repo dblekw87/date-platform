@@ -652,6 +652,7 @@ function EvidenceDrawer({ evidence, onClose }: { evidence: Evidence; onClose: ()
             <dd>{evidence.openQuestion ?? "없음"}</dd>
           </div>
         </dl>
+        <Link href={`/evidence/${evidence.id}`}>Evidence Detail 보기</Link>
         <Link href="/research">Research에서 Evidence 검토</Link>
       </aside>
     </div>

@@ -353,6 +353,7 @@ export default function Home() {
                 <dd>{selectedEvidence.related}</dd>
               </div>
             </dl>
+            <Link href={`/evidence/${selectedEvidence.id}`}>Evidence Detail 보기</Link>
             <Link href="/research">Research에서 계속 보기</Link>
           </aside>
         </div>

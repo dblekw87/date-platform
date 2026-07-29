@@ -1,413 +1,318 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import styles from "./page.module.scss";
 
 type EvidenceItem = {
   id: string;
   title: string;
-  sources: string[];
-  status: string;
-  relatedContext: string;
-  openQuestion: string | null;
+  summary: string;
+  source: string;
+  freshness: string;
+  boundary: string;
+  related: string;
 };
 
-type MonitoringItem = {
-  id: string;
-  rule: string;
-  signal: string;
-  status: "확인 필요" | "정상 범위";
-  owner: string;
-  scope: string;
-};
-
-type InterestedEntity = {
-  symbol: string;
-  name: string;
-  reason: string;
-  state: string;
-};
-
-const workspaceNavigation = ["대시보드", "탐색", "리서치", "모니터", "저널"];
-const workspaceViews = ["개요", "근거", "타임라인", "모니터링"];
-
-const marketSnapshotItems = [
-  {
-    name: "KOSPI",
-    value: "Mock Prototype 2,7xx.xx",
-    change: "Mock +0.00%",
-    status: "Prototype market open",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "KOSDAQ",
-    value: "Mock Prototype 8xx.xx",
-    change: "Mock -0.00%",
-    status: "Prototype market open",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "NASDAQ",
-    value: "Mock Prototype 1x,xxx.xx",
-    change: "Mock +0.00%",
-    status: "Prototype delayed status",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "S&P 500",
-    value: "Mock Prototype 5,xxx.xx",
-    change: "Mock -0.00%",
-    status: "Prototype delayed status",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "USD/KRW",
-    value: "Mock Prototype 1,xxx.xx",
-    change: "Mock +0.00%",
-    status: "Prototype FX status",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "BTC",
-    value: "Mock Prototype xx,xxx USD",
-    change: "Mock -0.00%",
-    status: "Prototype crypto status",
-    updated: "Updated: Mock time placeholder"
-  }
+const navigationItems = [
+  { label: "Home", href: "/", enabled: true },
+  { label: "Discover", href: null, enabled: false },
+  { label: "Research", href: "/research", enabled: true },
+  { label: "Monitoring", href: null, enabled: false },
+  { label: "Journal", href: null, enabled: false },
+  { label: "Community", href: null, enabled: false },
+  { label: "Search", href: null, enabled: false },
+  { label: "Profile", href: null, enabled: false }
 ];
 
-const marketBlocks = [
-  { label: "시장 상태", value: "Mock: 방향 검토", state: "보조 상태: 판단 전" },
-  { label: "시장 폭", value: "Mock: 분산 확인", state: "보조 상태: 근거 필요" },
-  { label: "변동성", value: "Mock: 구간 관찰", state: "보조 상태: 이벤트 대기" },
-  { label: "거시 신호", value: "Mock: 영향 범위 확인", state: "보조 상태: 출처 검토" }
+const snapshotGroups = [
+  {
+    group: "국내",
+    items: [
+      { name: "KOSPI", value: "Mock Prototype 2,7xx.xx", change: "Mock +0.00%", status: "Prototype open", updated: "Mock time" },
+      { name: "KOSDAQ", value: "Mock Prototype 8xx.xx", change: "Mock -0.00%", status: "Prototype open", updated: "Mock time" }
+    ]
+  },
+  {
+    group: "미국",
+    items: [
+      { name: "NASDAQ", value: "Mock Prototype 1x,xxx.xx", change: "Mock +0.00%", status: "Prototype delayed", updated: "Mock time" },
+      { name: "S&P500", value: "Mock Prototype 5,xxx.xx", change: "Mock -0.00%", status: "Prototype delayed", updated: "Mock time" }
+    ]
+  },
+  {
+    group: "자산",
+    items: [
+      { name: "USD/KRW", value: "Mock Prototype 1,xxx.xx", change: "Mock +0.00%", status: "Prototype FX", updated: "Mock time" },
+      { name: "BTC", value: "Mock Prototype xx,xxx USD", change: "Mock -0.00%", status: "Prototype crypto", updated: "Mock time" }
+    ]
+  }
 ];
 
 const evidenceItems: EvidenceItem[] = [
   {
-    id: "EV-104",
-    title: "짧은 제목",
-    sources: ["제공처 A"],
-    status: "출처 확인 필요",
-    relatedContext: "시장 상태 / 매출 전망",
-    openQuestion: "동일 업종에도 같은 신호가 반복되는가?"
-  },
-  {
     id: "EV-117",
-    title: "정책 금리 변화와 환율 민감도가 동시에 반영되는 긴 제목의 근거 항목",
-    sources: ["제공처 B", "리서치 메모 C"],
-    status: "타임라인 연결됨",
-    relatedContext: "이벤트 흐름 / 거시 신호",
-    openQuestion: null
+    title: "정책 금리 변화와 환율 민감도가 동시에 관찰되는 근거",
+    summary: "환율과 성장주 민감도가 같은 방향으로 움직이는지 오늘 먼저 확인해야 하는 Prototype Evidence입니다.",
+    source: "Mock Source: 리서치 메모 A",
+    freshness: "Freshness: Prototype updated time",
+    boundary: "Boundary: Interpretation, not original evidence",
+    related: "Related: USD/KRW / NASDAQ / 국내 성장주"
   },
   {
     id: "EV-122",
-    title: "섹터 폭 차이",
-    sources: ["제공처 D"],
-    status: "비교 대기",
-    relatedContext: "시장 폭 / 관심 대상",
-    openQuestion: "현재 관찰 목록과 연결할 기준이 충분한가?"
+    title: "시장 폭 차이가 특정 테마에 집중되는지 확인",
+    summary: "대표 지수보다 내부 확산 여부가 약한 상태로 보이는지 비교하는 읽기용 근거입니다.",
+    source: "Mock Source: 제공처 B",
+    freshness: "Freshness: Prototype updated time",
+    boundary: "Boundary: Source cue is incomplete traceability",
+    related: "Related: KOSPI / KOSDAQ / Theme"
+  },
+  {
+    id: "EV-104",
+    title: "오전 이벤트 이후 모니터링 신호가 유지되는지 검토",
+    summary: "관심 종목의 반복 관찰 조건과 실제 Evidence cue가 같은 맥락인지 확인합니다.",
+    source: "Mock Source: 뉴스 요약 C",
+    freshness: "Freshness: Prototype updated time",
+    boundary: "Boundary: Prototype summary",
+    related: "Related: Watchlist / Signal / Timeline"
   }
 ];
 
-const eventFlowItems = [
-  { time: "09:30", label: "시장 맥락 열림", detail: "Overview에서 방향 검토가 시작된 상태" },
-  { time: "10:15", label: "근거가 관심 목록에 연결됨", detail: "선택 근거와 관심 대상의 관계 확인 필요" },
-  { time: "11:20", label: "모니터링 규칙 변경됨", detail: "알림 기준 변경 후 소유 범위 재확인" },
-  { time: "13:00", label: "판단 맥락 대기", detail: "Return Context에 복귀 단서 보존" }
+const monitoringItems = [
+  { title: "환율 민감도 관찰", status: "Mock active", detail: "USD/KRW 변화와 성장주 Evidence 연결 후보" },
+  { title: "시장 폭 약화", status: "Mock watch", detail: "KOSDAQ 내부 확산 지표 확인 필요" },
+  { title: "이벤트 재확인", status: "Mock calm", detail: "오후 일정 전까지 추가 Source 대기" }
 ];
 
-const monitoringItems: MonitoringItem[] = [
-  {
-    id: "MN-01",
-    rule: "매출 전망 조정이 관심 대상과 같은 방향으로 2회 이상 반복될 때",
-    signal: "브릭 에너지 관련 근거가 오전 이벤트 흐름과 연결됨",
-    status: "확인 필요",
-    owner: "Dashboard Workspace",
-    scope: "관심 목록 / 에너지"
-  },
-  {
-    id: "MN-02",
-    rule: "변동성 구간이 확대되더라도 출처가 단일 제공처에 머물 때",
-    signal: "추가 출처 없음, 기존 관찰 범위 유지",
-    status: "정상 범위",
-    owner: "Monitor Workspace",
-    scope: "시장 상태 / 변동성"
-  }
+const timelineItems = [
+  { time: "09:30", title: "시장 기준점 형성", detail: "대표 지수와 환율 Prototype 상태 확인" },
+  { time: "10:15", title: "핵심 Evidence 갱신 후보", detail: "Source와 Freshness boundary 확인 필요" },
+  { time: "11:20", title: "Monitoring Preview 변화", detail: "관심 Entity trigger가 반복되는지 관찰" },
+  { time: "13:00", title: "Research 진입 후보", detail: "선택 Evidence를 /research에서 깊게 검토" }
 ];
 
-const interestedEntities: InterestedEntity[] = [
-  {
-    symbol: "BRK",
-    name: "브릭 에너지",
-    reason: "선택 근거와 모니터링 알림이 같은 맥락을 공유",
-    state: "확인 필요"
-  },
-  {
-    symbol: "ALP",
-    name: "알파 시스템즈",
-    reason: "시장 폭 차이와 연결 가능성이 있으나 열린 질문 없음",
-    state: "관찰"
-  },
-  {
-    symbol: "CRN",
-    name: "크론 마켓",
-    reason: "현재 신호는 정상 범위에 머물러 복귀 우선순위 낮음",
-    state: "대기"
-  }
+const interestedEntities = [
+  { symbol: "BRK", name: "브릭 에너지", cue: "Evidence 연결 후보", state: "Mock watch" },
+  { symbol: "ALP", name: "알파 시스템즈", cue: "성장주 민감도", state: "Mock focus" },
+  { symbol: "CRN", name: "크론 마켓", cue: "시장 폭 확인", state: "Mock calm" },
+  { symbol: "USD/KRW", name: "달러/원", cue: "Macro link", state: "Mock active" }
 ];
 
 export default function Home() {
-  const [activeWorkspace, setActiveWorkspace] = useState(workspaceNavigation[0]);
-  const [activeView, setActiveView] = useState(workspaceViews[0]);
-  const [selectedEvidence, setSelectedEvidence] = useState(evidenceItems[0]);
-  const [selectedEntity, setSelectedEntity] = useState(interestedEntities[0]);
-  const [selectedMonitoring, setSelectedMonitoring] = useState(monitoringItems[0]);
-
-  const returnContextRows = useMemo(
-    () => [
-      ["선택 근거", selectedEvidence.id],
-      ["현재 맥락", activeView],
-      ["관련 대상", selectedEntity.symbol],
-      ["출처", selectedEvidence.sources.join(" / ")],
-      ["상태", selectedEvidence.status],
-      ["열린 질문", selectedEvidence.openQuestion ?? "없음"]
-    ],
-    [activeView, selectedEntity.symbol, selectedEvidence]
-  );
+  const [selectedEvidence, setSelectedEvidence] = useState<EvidenceItem | null>(null);
 
   return (
-    <main className={styles.shell}>
-      <aside className={styles.workspaceNavigation} aria-label="작업공간 전환">
-        <div className={styles.navHeader}>
-          <span className={styles.kicker}>Phase 17.1</span>
-          <strong>DATE</strong>
-          <small>작업공간 전환</small>
-        </div>
-        <div className={styles.navList}>
-          {workspaceNavigation.map((item) => (
-            <button
-              className={item === activeWorkspace ? styles.selectedControl : styles.control}
-              key={item}
-              onClick={() => setActiveWorkspace(item)}
-              type="button"
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <div className={styles.navFooter}>
-          <span>Entry Navigation</span>
-          <span>Workspace boundary</span>
-        </div>
-      </aside>
+    <main className={styles.homeShell}>
+      <header className={styles.globalHeader}>
+        <Link className={styles.logo} href="/" aria-label="DATE Home">
+          DATE
+        </Link>
+        <nav className={styles.globalNavigation} aria-label="Global Navigation">
+          {navigationItems.map((item) =>
+            item.enabled && item.href ? (
+              <Link className={item.href === "/" ? styles.activeNavLink : styles.navLink} href={item.href} key={item.label}>
+                {item.label}
+              </Link>
+            ) : (
+              <button className={styles.disabledNavLink} disabled key={item.label} type="button">
+                {item.label}
+                <span>준비 중</span>
+              </button>
+            )
+          )}
+        </nav>
+      </header>
 
-      <section className={styles.dashboardScreen} aria-label="대시보드 화면">
-        <header className={styles.screenHeader}>
-          <div>
-            <span className={styles.kicker}>Dashboard Workspace</span>
-            <h1>대시보드 구조 와이어프레임</h1>
-          </div>
-          <nav className={styles.viewNavigation} aria-label="현재 작업공간 보기 전환">
-            <span>Workspace View</span>
-            <div>
-              {workspaceViews.map((view) => (
-                <button
-                  className={view === activeView ? styles.selectedControl : styles.control}
-                  key={view}
-                  onClick={() => setActiveView(view)}
-                  type="button"
-                >
-                  {view}
-                </button>
-              ))}
-            </div>
-          </nav>
-        </header>
-
-        <section className={styles.overviewSection} aria-labelledby="overview-title">
-          <div className={styles.sectionHeader}>
-            <div>
-              <span className={styles.kicker}>Official Section</span>
-              <h2 id="overview-title">Overview</h2>
-            </div>
-            <span>Market Snapshot / Market Interpretation / Attention Evidence Preview / Event Flow Cue</span>
-          </div>
-
-          <div className={styles.marketSnapshotBlock} aria-label="Market Snapshot">
-            <div className={styles.blockHeader}>
-              <h3>Market Snapshot</h3>
-              <span>대표 지수와 주요 자산의 현재 상태를 빠르게 확인</span>
-            </div>
-            <div className={styles.marketSnapshotGrid}>
-              {marketSnapshotItems.map((item) => (
-                <article className={styles.snapshotItem} key={item.name}>
-                  <span>{item.name}</span>
-                  <strong>{item.value}</strong>
-                  <small>{item.change}</small>
-                  <em>{item.status}</em>
-                  <small>{item.updated}</small>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.marketInterpretationBlock} aria-label="Market Interpretation">
-            <div className={styles.blockHeader}>
-              <h3>Market Interpretation</h3>
-              <span>시장 상태, 시장 폭, 변동성, 거시 신호를 해석하는 요약</span>
-            </div>
-            <div className={styles.marketStateGrid}>
-              {marketBlocks.map((block) => (
-                <article className={styles.summaryItem} key={block.label}>
-                  <span>{block.label}</span>
-                  <strong>{block.value}</strong>
-                  <small>{block.state}</small>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.overviewGrid}>
-            <div className={styles.blockGroup} aria-label="Attention Evidence Preview">
-              <div className={styles.blockHeader}>
-                <h3>Attention Evidence Preview</h3>
-                <span>선택/비선택, 출처 수, 열린 질문 검증</span>
+      <div className={styles.pageFrame}>
+        <div className={styles.contentFlow}>
+          <section className={styles.hero} aria-labelledby="hero-title">
+            <div className={styles.heroCopy}>
+              <span className={styles.kicker}>Today · Prototype market 기준 시점</span>
+              <h1 id="hero-title">오늘 시장은 환율과 시장 폭을 먼저 확인하는 흐름입니다.</h1>
+              <p>
+                Mock 요약입니다. 실제 실시간 수치가 아니라 Home Content Shell의 정보 흐름을 검증하기 위한 Prototype 상태입니다.
+              </p>
+              <div className={styles.heroMetrics} aria-label="오늘 핵심 상태">
+                <span>핵심 Evidence 3개</span>
+                <span>Monitoring Mock active 2건</span>
+                <span>Research 진입 후보 1건</span>
               </div>
+              <div className={styles.heroActions}>
+                <a href="#todays-evidence">오늘의 근거 보기</a>
+                <Link href="/research">시장 분석 시작</Link>
+              </div>
+            </div>
+
+            <form className={styles.searchPanel} role="search" aria-label="Global Search">
+              <label htmlFor="home-search">종목명, ETF, 테마, 뉴스, Evidence 검색</label>
+              <div>
+                <input id="home-search" placeholder="예: KOSPI, 반도체, 환율, EV-117" type="search" />
+                <button disabled type="button">Prototype 검색</button>
+              </div>
+              <small>Search는 target type을 확인한 뒤 Research 또는 Evidence로 연결되는 Entry입니다.</small>
+            </form>
+          </section>
+
+          <section className={styles.snapshotSection} aria-labelledby="snapshot-title">
+            <div className={styles.sectionIntro}>
+              <span className={styles.kicker}>Market Snapshot</span>
+              <h2 id="snapshot-title">대표 시장 빠른 확인</h2>
+              <p>Market Interpretation과 분리된 Mock 현재 상태 strip입니다.</p>
+            </div>
+            <div className={styles.snapshotGroups}>
+              {snapshotGroups.map((group) => (
+                <div className={styles.snapshotGroup} key={group.group}>
+                  <strong>{group.group}</strong>
+                  {group.items.map((item) => (
+                    <article className={styles.snapshotItem} key={item.name}>
+                      <span>{item.name}</span>
+                      <b>{item.value}</b>
+                      <small>{item.change}</small>
+                      <em>{item.status} · Updated {item.updated}</em>
+                    </article>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.evidenceSection} id="todays-evidence" aria-labelledby="evidence-title">
+            <div className={styles.sectionIntro}>
+              <span className={styles.kicker}>Today Evidence</span>
+              <h2 id="evidence-title">오늘 먼저 읽을 근거</h2>
+              <p>Source, Freshness, Boundary를 유지한 콘텐츠형 Evidence preview입니다.</p>
+            </div>
+            <div className={styles.evidenceLayout}>
+              <button className={styles.leadEvidence} onClick={() => setSelectedEvidence(evidenceItems[0])} type="button">
+                <span>{evidenceItems[0].id}</span>
+                <strong>{evidenceItems[0].title}</strong>
+                <p>{evidenceItems[0].summary}</p>
+                <small>{evidenceItems[0].source}</small>
+                <small>{evidenceItems[0].freshness}</small>
+                <em>{evidenceItems[0].boundary}</em>
+              </button>
               <div className={styles.evidenceList}>
-                {evidenceItems.map((item) => (
-                  <button
-                    className={item.id === selectedEvidence.id ? styles.selectedEvidenceItem : styles.evidenceItem}
-                    key={item.id}
-                    onClick={() => setSelectedEvidence(item)}
-                    type="button"
-                  >
+                {evidenceItems.slice(1).map((item) => (
+                  <button className={styles.evidenceRow} key={item.id} onClick={() => setSelectedEvidence(item)} type="button">
                     <span>{item.id}</span>
                     <strong>{item.title}</strong>
-                    <small>Source: {item.sources.join(" / ")}</small>
-                    <small>Status: {item.status}</small>
-                    <small>Related: {item.relatedContext}</small>
-                    <em>Open Question: {item.openQuestion ?? "없음"}</em>
+                    <p>{item.summary}</p>
+                    <small>{item.source}</small>
+                    <em>{item.boundary}</em>
                   </button>
                 ))}
               </div>
             </div>
+          </section>
 
-            <div className={styles.blockGroup} aria-label="Event Flow Cue">
-              <div className={styles.blockHeader}>
-                <h3>Event Flow Cue</h3>
-                <span>시간 순서와 근거 연결 단서</span>
-              </div>
-              <ol className={styles.eventFlowList}>
-                {eventFlowItems.map((item) => (
-                  <li key={`${item.time}-${item.label}`}>
-                    <span>{item.time}</span>
-                    <div>
-                      <strong>{item.label}</strong>
-                      <small>{item.detail}</small>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+          <aside className={styles.nativeAd} aria-label="Native Advertisement Placeholder">
+            <span>Native Advertisement Placeholder</span>
+            <strong>Prototype ad slot</strong>
+            <small>실제 광고 또는 Google AdSense가 연결되지 않은 구조 검증 영역입니다.</small>
+          </aside>
+
+          <section className={styles.monitoringSection} aria-labelledby="monitoring-title">
+            <div className={styles.sectionIntro}>
+              <span className={styles.kicker}>Today Monitoring</span>
+              <h2 id="monitoring-title">오늘 관찰 중인 변화</h2>
             </div>
-          </div>
-        </section>
-
-        <section className={styles.monitoringSection} aria-labelledby="monitoring-title">
-          <div className={styles.sectionHeader}>
-            <div>
-              <span className={styles.kicker}>Official Section</span>
-              <h2 id="monitoring-title">Monitoring Preview</h2>
+            <div className={styles.monitoringPreview}>
+              {monitoringItems.map((item) => (
+                <article key={item.title}>
+                  <span>{item.status}</span>
+                  <strong>{item.title}</strong>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
             </div>
-            <span>Monitoring Alerts / Interested Entity Preview</span>
-          </div>
+          </section>
 
-          <div className={styles.monitoringGrid}>
-            <div className={styles.blockGroup} aria-label="Monitoring Alerts">
-              <div className={styles.blockHeader}>
-                <h3>Monitoring Alerts</h3>
-                <span>알림 발생 상태와 정상 상태 구분</span>
-              </div>
-              <div className={styles.monitoringList}>
-                {monitoringItems.map((item) => (
-                  <button
-                    className={item.id === selectedMonitoring.id ? styles.selectedMonitoringItem : styles.monitoringItem}
-                    key={item.id}
-                    onClick={() => setSelectedMonitoring(item)}
-                    type="button"
-                  >
-                    <span>{item.id}</span>
-                    <strong>{item.rule}</strong>
-                    <small>Signal: {item.signal}</small>
-                    <small>Status: {item.status}</small>
-                    <small>Owner: {item.owner}</small>
-                    <small>Scope: {item.scope}</small>
-                  </button>
-                ))}
-              </div>
+          <section className={styles.timelineSection} aria-labelledby="timeline-title">
+            <div className={styles.sectionIntro}>
+              <span className={styles.kicker}>Timeline Preview</span>
+              <h2 id="timeline-title">시간 흐름</h2>
             </div>
+            <ol className={styles.timelineFeed}>
+              {timelineItems.map((item) => (
+                <li key={`${item.time}-${item.title}`}>
+                  <time>{item.time}</time>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
 
-            <div className={styles.blockGroup} aria-label="Interested Entity Preview">
-              <div className={styles.blockHeader}>
-                <h3>Interested Entity Preview</h3>
-                <span>관심 대상 복귀 가능성</span>
-              </div>
-              <div className={styles.entityList}>
-                {interestedEntities.map((item) => (
-                  <button
-                    className={item.symbol === selectedEntity.symbol ? styles.selectedEntityItem : styles.entityItem}
-                    key={item.symbol}
-                    onClick={() => setSelectedEntity(item)}
-                    type="button"
-                  >
-                    <span>{item.symbol}</span>
-                    <strong>{item.name}</strong>
-                    <small>{item.reason}</small>
-                    <em>{item.state}</em>
-                  </button>
-                ))}
-              </div>
+          <section className={styles.entitySection} aria-labelledby="entity-title">
+            <div className={styles.sectionIntro}>
+              <span className={styles.kicker}>Interested Entity</span>
+              <h2 id="entity-title">관심 대상 Preview</h2>
             </div>
-          </div>
-        </section>
-      </section>
-
-      <aside className={styles.returnContext} aria-label="Return Context">
-        <div className={styles.sectionHeader}>
-          <div>
-            <span className={styles.kicker}>Official Section</span>
-            <h2>Return Context</h2>
-          </div>
-          <span>Selected Context Panel</span>
+            <div className={styles.entityStrip}>
+              {interestedEntities.map((item) => (
+                <article key={item.symbol}>
+                  <span>{item.symbol}</span>
+                  <strong>{item.name}</strong>
+                  <small>{item.cue}</small>
+                  <em>{item.state}</em>
+                </article>
+              ))}
+            </div>
+          </section>
         </div>
 
-        <div className={styles.returnContextPrimary}>
-          <span>Selected Entity 또는 Evidence</span>
-          <strong>{selectedEvidence.title}</strong>
-          <small>{selectedEntity.name} / {selectedMonitoring.status}</small>
-        </div>
+        <aside className={styles.adRail} aria-label="Optional Right Advertisement Rail">
+          <span>Optional Right Advertisement Rail</span>
+          <strong>Prototype ad rail</strong>
+          <small>1920px 이상에서만 표시되는 보조 광고 영역입니다.</small>
+        </aside>
+      </div>
 
-        <dl className={styles.returnContextRows}>
-          {returnContextRows.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
+      <footer className={styles.footer}>
+        <span>DATE Prototype</span>
+        <span>Market Entry · Evidence Boundary · Monitoring Preview</span>
+      </footer>
+
+      {selectedEvidence ? (
+        <div className={styles.drawerOverlay} role="presentation" onClick={() => setSelectedEvidence(null)}>
+          <aside
+            aria-labelledby="evidence-drawer-title"
+            aria-modal="true"
+            className={styles.evidenceDrawer}
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <div className={styles.drawerHeader}>
+              <span>{selectedEvidence.id}</span>
+              <button onClick={() => setSelectedEvidence(null)} type="button">닫기</button>
             </div>
-          ))}
-        </dl>
-
-        <div className={styles.returnContextBlock}>
-          <strong>Related Evidence</strong>
-          <p>{selectedEvidence.relatedContext}</p>
+            <h2 id="evidence-drawer-title">{selectedEvidence.title}</h2>
+            <p>{selectedEvidence.summary}</p>
+            <dl>
+              <div>
+                <dt>Source</dt>
+                <dd>{selectedEvidence.source}</dd>
+              </div>
+              <div>
+                <dt>Freshness</dt>
+                <dd>{selectedEvidence.freshness}</dd>
+              </div>
+              <div>
+                <dt>Boundary</dt>
+                <dd>{selectedEvidence.boundary}</dd>
+              </div>
+              <div>
+                <dt>Related</dt>
+                <dd>{selectedEvidence.related}</dd>
+              </div>
+            </dl>
+            <Link href="/research">Research에서 계속 보기</Link>
+          </aside>
         </div>
-
-        <div className={styles.returnContextBlock}>
-          <strong>Available Action</strong>
-          <button disabled type="button">
-            Prototype action disabled
-          </button>
-        </div>
-      </aside>
+      ) : null}
     </main>
   );
 }

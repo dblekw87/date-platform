@@ -139,7 +139,12 @@ export default function Home() {
         <nav className={styles.globalNavigation} aria-label="Global Navigation">
           {navigationItems.map((item) =>
             item.enabled && item.href ? (
-              <Link className={item.href === "/" ? styles.activeNavLink : styles.navLink} href={item.href} key={item.label}>
+              <Link
+                aria-current={item.href === "/" ? "page" : undefined}
+                className={item.href === "/" ? styles.activeNavLink : styles.navLink}
+                href={item.href}
+                key={item.label}
+              >
                 {item.label}
               </Link>
             ) : (
@@ -158,6 +163,16 @@ export default function Home() {
         </div>
       </header>
 
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <ol>
+          <li>
+            <Link aria-current="page" href="/">
+              Home
+            </Link>
+          </li>
+        </ol>
+      </nav>
+
       <div className={styles.pageFrame}>
         <div className={styles.contentFlow}>
           <section className={styles.hero} aria-labelledby="hero-title">
@@ -173,6 +188,7 @@ export default function Home() {
                 <span>Research 진입 후보 1건</span>
               </div>
               <div className={styles.heroActions}>
+                <Link href="/discover">Discover</Link>
                 <a href="#todays-evidence">오늘의 근거 보기</a>
                 <Link href="/research">시장 분석 시작</Link>
               </div>
@@ -317,7 +333,12 @@ export default function Home() {
 
       <footer className={styles.footer}>
         <span>DATE Prototype</span>
-        <span>Market Entry · Evidence Boundary · Monitoring Preview</span>
+        <nav aria-label="Footer Navigation">
+          <Link href="/discover">Discover</Link>
+          <Link href="/entity/005930">Samsung Electronics</Link>
+          <Link href="/evidence/EV-117">Lead Evidence</Link>
+          <Link href="/research">Research</Link>
+        </nav>
       </footer>
 
       {selectedEvidence ? (

@@ -23,12 +23,15 @@
 .logo,
 .navLink,
 .activeNavLink,
+.breadcrumb a,
 .heroActions a,
 .heroActions a:visited,
 .entityStrip a,
 .entityStrip a:visited,
 .evidenceDrawer a,
-.evidenceDrawer a:visited {
+.evidenceDrawer a:visited,
+.footer a,
+.footer a:visited {
   color: inherit;
   text-decoration: none;
 }
@@ -89,6 +92,43 @@
 
 .activeNavLink {
   border-width: 2px;
+}
+
+.breadcrumb {
+  border-bottom: 1px solid #c8c8c5;
+  padding: 10px 28px;
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: min(100%, 1840px);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb li {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  color: #626262;
+}
+
+.breadcrumb a {
+  overflow-wrap: anywhere;
+}
+
+.breadcrumb a[aria-current="page"] {
+  font-weight: 700;
 }
 
 .disabledNavLink {
@@ -212,6 +252,7 @@
 
 .heroActions a:first-child {
   border-width: 2px;
+  background: #ffffff;
 }
 
 .searchPanel {
@@ -495,9 +536,21 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  align-items: center;
   justify-content: space-between;
   border-top: 1px solid #151515;
   padding: 18px 28px;
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footer a {
+  border: 1px solid #151515;
+  padding: 7px 9px;
 }
 
 .drawerOverlay {
@@ -561,11 +614,13 @@
 .evidenceRow:focus-visible,
 .navLink:focus-visible,
 .activeNavLink:focus-visible,
+.breadcrumb a:focus-visible,
 .guestHeaderActions button:focus-visible,
 .heroActions a:focus-visible,
 .searchPanel input:focus-visible,
 .searchPanel button:focus-visible,
 .entityStrip a:focus-visible,
+.footer a:focus-visible,
 .drawerHeader button:focus-visible,
 .evidenceDrawer a:focus-visible {
   outline: 2px solid #151515;
@@ -627,6 +682,7 @@
 @media (max-width: 768px) {
   .pageFrame,
   .globalHeader,
+  .breadcrumb,
   .footer {
     padding-right: 18px;
     padding-left: 18px;
@@ -659,6 +715,12 @@
 @media (max-width: 520px) {
   .globalHeader {
     gap: 14px;
+  }
+
+  .globalNavigation,
+  .guestHeaderActions {
+    flex-wrap: wrap;
+    overflow: visible;
   }
 
   .pageFrame {
@@ -710,6 +772,7 @@
 @media (max-width: 340px) {
   .pageFrame,
   .globalHeader,
+  .breadcrumb,
   .footer {
     padding-right: 12px;
     padding-left: 12px;

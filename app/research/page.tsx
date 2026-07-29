@@ -275,6 +275,35 @@ export default function ResearchWorkspacePage() {
         </div>
       </header>
 
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <ol>
+          <li><Link href="/">Home</Link></li>
+          <li><Link href="/discover">Discovery</Link></li>
+          <li><Link href="/entity/005930">Entity</Link></li>
+          <li><Link href="/evidence/EV-117">Evidence</Link></li>
+          <li><Link aria-current="page" href="/research">Research</Link></li>
+        </ol>
+      </nav>
+
+      <aside className={styles.researchContextBar} aria-label="Research Context Bar">
+        <div>
+          <span>Active Workspace</span>
+          <strong>{workspace.title}</strong>
+        </div>
+        <div>
+          <span>Current Focus</span>
+          <strong>Samsung Electronics + Semiconductor</strong>
+        </div>
+        <div>
+          <span>Workspace Status</span>
+          <strong>{workspaceStatus}</strong>
+        </div>
+        <div>
+          <span>Selected Evidence</span>
+          <strong>EV-117</strong>
+        </div>
+      </aside>
+
       <section className={styles.researchHeader} aria-labelledby="research-title">
         <div className={styles.headerCopy}>
           <span className={styles.kicker}>Research Workspace / Mock Prototype</span>
@@ -321,11 +350,11 @@ export default function ResearchWorkspacePage() {
           </dl>
         </aside>
         <div className={styles.headerCtas} aria-label="Research actions">
+          <Link href="/evidence/EV-117">Return to Evidence</Link>
+          <a href="#comparison">Compare Evidence</a>
           <button type="button" disabled>
             Add Evidence Placeholder
           </button>
-          <a href="#comparison">Compare Evidence</a>
-          <Link href="/evidence/EV-117">Return to Evidence</Link>
         </div>
       </section>
 
@@ -568,6 +597,7 @@ export default function ResearchWorkspacePage() {
         <span>Workspace Footer / Mock Prototype</span>
         <Link href="/evidence/EV-117">Return to Evidence</Link>
         <Link href="/discover">Continue Discovery</Link>
+        <Link href="/entity/005930">Current Entity</Link>
       </footer>
     </main>
   );

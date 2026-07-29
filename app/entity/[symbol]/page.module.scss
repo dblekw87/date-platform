@@ -20,6 +20,7 @@
 
 .logo,
 .navLink,
+.breadcrumb a,
 .relatedStrip a,
 .relatedStrip a:visited,
 .unknownActions a,
@@ -27,7 +28,9 @@
 .evidenceDrawer a,
 .evidenceDrawer a:visited,
 .actionColumn a,
-.actionColumn a:visited {
+.actionColumn a:visited,
+.footer a,
+.footer a:visited {
   color: inherit;
   text-decoration: none;
 }
@@ -57,6 +60,7 @@
 .guestActions button,
 .actionColumn button,
 .actionColumn a,
+.primaryAction,
 .unknownActions a,
 .drawerHeader button,
 .timelineFeed button,
@@ -74,6 +78,57 @@
   line-height: 1.2;
 }
 
+.breadcrumb {
+  min-width: 0;
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb li {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  color: #626262;
+}
+
+.breadcrumb a {
+  overflow-wrap: anywhere;
+}
+
+.breadcrumb a[aria-current="page"] {
+  font-weight: 700;
+}
+
+.backContext {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  border: 1px dashed #555;
+  background: #eeeeeb;
+  padding: 12px 14px;
+}
+
+.backContext span,
+.backContext small {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .disabledNavLink {
   color: #626262;
   cursor: not-allowed;
@@ -84,6 +139,12 @@
 .timelineFeed button,
 .drawerHeader button {
   cursor: pointer;
+}
+
+.primaryAction {
+  border-width: 2px;
+  background: #ffffff;
+  font-weight: 700;
 }
 
 .entityFrame {
@@ -391,9 +452,23 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  align-items: center;
   justify-content: space-between;
   border-top: 1px solid #151515;
   padding: 18px 28px;
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footer a {
+  border: 1px solid #151515;
+  color: inherit;
+  padding: 7px 9px;
+  text-decoration: none;
 }
 
 .drawerOverlay {
@@ -444,17 +519,20 @@
 }
 
 .navLink:focus-visible,
+.breadcrumb a:focus-visible,
 .disabledNavLink:focus-visible,
 .guestActions button:focus-visible,
 .actionColumn button:focus-visible,
 .actionColumn a:focus-visible,
+.primaryAction:focus-visible,
 .leadEvidence:focus-visible,
 .evidenceRow:focus-visible,
 .timelineFeed button:focus-visible,
 .relatedStrip a:focus-visible,
 .drawerHeader button:focus-visible,
 .evidenceDrawer a:focus-visible,
-.unknownActions a:focus-visible {
+.unknownActions a:focus-visible,
+.footer a:focus-visible {
   outline: 2px solid #151515;
   outline-offset: 3px;
 }
@@ -506,6 +584,7 @@
 
 @media (max-width: 768px) {
   .globalHeader,
+  .breadcrumb,
   .entityFrame,
   .footer {
     padding-right: 18px;
@@ -547,6 +626,12 @@
 }
 
 @media (max-width: 520px) {
+  .globalNavigation,
+  .guestActions {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
   .entityFrame {
     gap: 38px;
     padding-top: 18px;
@@ -590,6 +675,7 @@
 
 @media (max-width: 340px) {
   .globalHeader,
+  .breadcrumb,
   .entityFrame,
   .entityHero,
   .leadEvidence,

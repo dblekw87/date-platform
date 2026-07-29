@@ -213,6 +213,19 @@ export default function DiscoverPage() {
     <main className={styles.discoveryShell}>
       <GlobalHeader />
 
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <ol>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          <li>
+            <Link aria-current="page" href="/discover">
+              Discovery
+            </Link>
+          </li>
+        </ol>
+      </nav>
+
       <div className={styles.discoveryFrame}>
         <section className={styles.hero} aria-labelledby="discovery-title">
           <div className={styles.heroCopy}>
@@ -458,7 +471,12 @@ export default function DiscoverPage() {
 
       <footer className={styles.footer}>
         <span>DATE Discovery Wireframe</span>
-        <span>Evidence-first discovery · Mock / Prototype only</span>
+        <nav aria-label="Footer Navigation">
+          <Link href="/">Home</Link>
+          <Link href="/entity/005930">Entity</Link>
+          <Link href="/evidence/EV-117">View Evidence</Link>
+          <Link href="/research">Research</Link>
+        </nav>
       </footer>
     </main>
   );
@@ -554,7 +572,12 @@ function GlobalHeader() {
       <nav className={styles.globalNavigation} aria-label="Global Navigation">
         {navigationItems.map((item) =>
           item.enabled && item.href ? (
-            <Link className={item.href === "/discover" ? styles.activeNavLink : styles.navLink} href={item.href} key={item.label}>
+            <Link
+              aria-current={item.href === "/discover" ? "page" : undefined}
+              className={item.href === "/discover" ? styles.activeNavLink : styles.navLink}
+              href={item.href}
+              key={item.label}
+            >
               {item.label}
             </Link>
           ) : (

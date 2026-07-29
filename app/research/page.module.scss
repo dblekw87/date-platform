@@ -21,6 +21,7 @@
 
 .brand,
 .globalHeader a,
+.breadcrumb a,
 .workspaceFooter a,
 .rowLinks a,
 .relatedList a,
@@ -89,6 +90,8 @@
 }
 
 .researchHeader,
+.breadcrumb,
+.researchContextBar,
 .summaryStrip,
 .activeEvidence,
 .comparisonSection,
@@ -106,6 +109,70 @@
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
   gap: 28px;
   padding: 44px 0 34px;
+}
+
+.breadcrumb {
+  padding-top: 14px;
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb li {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  color: #555;
+}
+
+.breadcrumb a {
+  overflow-wrap: anywhere;
+}
+
+.breadcrumb a[aria-current="page"] {
+  font-weight: 700;
+}
+
+.researchContextBar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border: 1px dashed #555;
+  background: #eeeeeb;
+  padding: 12px;
+}
+
+.researchContextBar div {
+  min-width: 0;
+  border-top: 1px solid #111;
+  padding-top: 8px;
+}
+
+.researchContextBar span {
+  display: block;
+  color: #555;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.researchContextBar strong {
+  display: block;
+  min-width: 0;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
 }
 
 .headerCopy {
@@ -190,6 +257,12 @@
   display: inline-flex;
   align-items: center;
   min-height: 42px;
+}
+
+.headerCtas a:first-of-type {
+  border-width: 2px;
+  background: #ffffff;
+  font-weight: 700;
 }
 
 .summaryStrip,
@@ -452,6 +525,7 @@
 }
 
 .globalHeader a:focus-visible,
+.breadcrumb a:focus-visible,
 .headerActions button:focus-visible,
 .headerCtas a:focus-visible,
 .headerCtas button:focus-visible,
@@ -541,6 +615,8 @@
 @media (max-width: 768px) {
   .globalHeader,
   .researchHeader,
+  .breadcrumb,
+  .researchContextBar,
   .summaryStrip,
   .activeEvidence,
   .comparisonSection,
@@ -565,6 +641,7 @@
   .summaryGrid,
   .questionList,
   .notesGrid,
+  .researchContextBar,
   .interpretationBody dl {
     grid-template-columns: 1fr;
   }
@@ -615,6 +692,8 @@
 @media (max-width: 340px) {
   .globalHeader,
   .researchHeader,
+  .breadcrumb,
+  .researchContextBar,
   .summaryStrip,
   .activeEvidence,
   .comparisonSection,

@@ -130,7 +130,7 @@ type EvidenceDetail = {
 
 const navigationItems = [
   { label: "Home", href: "/", enabled: true },
-  { label: "Discover", href: null, enabled: false },
+  { label: "Discover", href: "/discover", enabled: true },
   { label: "Research", href: "/research", enabled: true },
   { label: "Monitoring", href: null, enabled: false },
   { label: "Journal", href: null, enabled: false },
@@ -608,6 +608,14 @@ export default function EvidenceDetailPage() {
       <main className={styles.evidenceShell}>
         <GlobalHeader />
         <section className={styles.unknownState} aria-labelledby="unknown-evidence-title">
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <ol>
+              <li><Link href="/">Home</Link></li>
+              <li><Link href="/discover">Discovery</Link></li>
+              <li><Link href="/entity/005930">Entity</Link></li>
+              <li><Link aria-current="page" href={`/evidence/${routeEvidenceId || "unknown-evidence"}`}>Evidence</Link></li>
+            </ol>
+          </nav>
           <span className={styles.kicker}>Evidence Unknown · Wireframe State</span>
           <h1 id="unknown-evidence-title">확인되지 않은 Evidence입니다.</h1>
           <p>
@@ -634,6 +642,30 @@ export default function EvidenceDetailPage() {
           <Link href={evidence.relatedContext.find((context) => context.href)?.href ?? "/entity/005930"}>Entity</Link>
           <Link href="/research">Research</Link>
         </nav>
+
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <ol>
+            <li><Link href="/">Home</Link></li>
+            <li><Link href="/discover">Discovery</Link></li>
+            <li><Link href={evidence.relatedContext.find((context) => context.href)?.href ?? "/entity/005930"}>Entity</Link></li>
+            <li><Link aria-current="page" href={`/evidence/${evidence.id}`}>Evidence</Link></li>
+          </ol>
+        </nav>
+
+        <aside className={styles.evidenceContextBar} aria-label="Evidence Context Bar">
+          <div>
+            <span>Current Entity</span>
+            <strong>{evidence.relatedContext.find((context) => context.href)?.detail ?? "Samsung Electronics"}</strong>
+          </div>
+          <div>
+            <span>Lead Evidence</span>
+            <strong>{evidence.id}</strong>
+          </div>
+          <div>
+            <span>Theme</span>
+            <strong>{evidence.relatedContext.find((context) => context.type === "Theme")?.label ?? "Semiconductor"}</strong>
+          </div>
+        </aside>
 
         <section className={styles.hero} aria-labelledby="evidence-title">
           <div className={styles.identityBlock}>
@@ -944,15 +976,19 @@ export default function EvidenceDetailPage() {
         </section>
 
         <section className={styles.mainActionSection} aria-label="Evidence main actions">
+          <Link href="/research">Analyze in Research</Link>
           <Link href="#source-title">Original Source 확인</Link>
           <Link href={evidence.relatedContext.find((context) => context.href)?.href ?? "/entity/005930"}>Related Entity 이동</Link>
           <Link href={`/evidence/${evidence.relatedEvidence[0]?.id ?? evidence.id}`}>Related Evidence 이동</Link>
-          <Link href="/research">Research로 이어가기</Link>
         </section>
       </div>
       <footer className={styles.footer}>
         <span>DATE Evidence Detail Wireframe</span>
-        <span>Mock / Prototype data only</span>
+        <nav aria-label="Footer Navigation">
+          <Link href={evidence.relatedContext.find((context) => context.href)?.href ?? "/entity/005930"}>Back to Entity</Link>
+          <Link href="/discover">Discovery</Link>
+          <Link href="/research">Analyze in Research</Link>
+        </nav>
       </footer>
     </main>
   );

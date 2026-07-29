@@ -104,7 +104,7 @@ type EntityDetail = {
 
 const navigationItems = [
   { label: "Home", href: "/", enabled: true },
-  { label: "Discover", href: null, enabled: false },
+  { label: "Discover", href: "/discover", enabled: true },
   { label: "Research", href: "/research", enabled: true },
   { label: "Monitoring", href: null, enabled: false },
   { label: "Journal", href: null, enabled: false },
@@ -347,6 +347,13 @@ export default function EntityDetailPage() {
       <main className={styles.entityShell}>
         <GlobalHeader />
         <section className={styles.unknownState} aria-labelledby="unknown-title">
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <ol>
+              <li><Link href="/">Home</Link></li>
+              <li><Link href="/discover">Discovery</Link></li>
+              <li><Link aria-current="page" href={`/entity/${symbol || "unknown-symbol"}`}>Entity</Link></li>
+            </ol>
+          </nav>
           <span className={styles.kicker}>Entity Unknown · Wireframe State</span>
           <h1 id="unknown-title">확인되지 않은 Entity입니다.</h1>
           <p>
@@ -355,6 +362,7 @@ export default function EntityDetailPage() {
           </p>
           <div className={styles.unknownActions}>
             <Link href="/">Home으로 돌아가기</Link>
+            <Link href="/discover">Discovery로 돌아가기</Link>
             <Link href="/entity/005930">005930 보기</Link>
             <Link href="/entity/AAPL">AAPL 보기</Link>
           </div>
@@ -368,6 +376,20 @@ export default function EntityDetailPage() {
       <GlobalHeader />
 
       <div className={styles.entityFrame}>
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <ol>
+            <li><Link href="/">Home</Link></li>
+            <li><Link href="/discover">Discovery</Link></li>
+            <li><Link aria-current="page" href={`/entity/${entity.security.symbol}`}>Entity</Link></li>
+          </ol>
+        </nav>
+
+        <aside className={styles.backContext} aria-label="Back Context">
+          <span>Back Context</span>
+          <strong>From Discovery candidate set</strong>
+          <small>Selected Entity: {entity.company.name} / Lead Evidence: {entity.evidence.lead.id}</small>
+        </aside>
+
         <section className={styles.entityHero} aria-labelledby="entity-title">
           <div className={styles.identityColumn}>
             <span className={styles.kicker}>Security Identity · Prototype</span>
@@ -409,10 +431,11 @@ export default function EntityDetailPage() {
           </div>
 
           <div className={styles.actionColumn} aria-label="Entity actions">
-            <span className={styles.kicker}>Action Placeholder</span>
-            <button type="button">Watchlist</button>
-            <button type="button">Monitoring</button>
-            <button type="button">Share</button>
+            <span className={styles.kicker}>Primary / Secondary Action</span>
+            <Link className={styles.primaryAction} href={`/evidence/${entity.evidence.lead.id}`}>Inspect Evidence</Link>
+            <button type="button">Watchlist Placeholder</button>
+            <button type="button">Monitoring Placeholder</button>
+            <button type="button">Share Placeholder</button>
             <Link href="/">Global Search Entry</Link>
           </div>
         </section>
@@ -575,7 +598,11 @@ export default function EntityDetailPage() {
 
       <footer className={styles.footer}>
         <span>DATE Entity Detail Wireframe</span>
-        <span>Mock / Prototype data only</span>
+        <nav aria-label="Footer Navigation">
+          <Link href="/discover">Back to Discovery</Link>
+          <Link href={`/evidence/${entity.evidence.lead.id}`}>Inspect Evidence</Link>
+          <Link href="/research">Research</Link>
+        </nav>
       </footer>
 
       {selectedEvidence ? <EvidenceDrawer evidence={selectedEvidence} onClose={() => setSelectedEvidence(null)} /> : null}

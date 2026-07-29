@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
 import { useState } from "react";
 import styles from "./page.module.scss";
 
@@ -93,14 +95,40 @@ const timelineItems = [
 ];
 
 const interestedEntities = [
-  { symbol: "BRK", name: "브릭 에너지", cue: "Evidence 연결 후보", state: "Mock watch" },
-  { symbol: "ALP", name: "알파 시스템즈", cue: "성장주 민감도", state: "Mock focus" },
+  { symbol: "005930", name: "Samsung Electronics", cue: "국내 Security Entity", state: "Mock route", href: "/entity/005930" },
+  { symbol: "AAPL", name: "Apple", cue: "미국 Security Entity", state: "Mock route", href: "/entity/AAPL" },
+  { symbol: "BRK", name: "브릭 에너지", cue: "Evidence 연결 후보", state: "Mock watch", href: null },
+  { symbol: "ALP", name: "알파 시스템즈", cue: "성장주 민감도", state: "Mock focus", href: null },
   { symbol: "CRN", name: "크론 마켓", cue: "시장 폭 확인", state: "Mock calm" },
   { symbol: "USD/KRW", name: "달러/원", cue: "Macro link", state: "Mock active" }
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [selectedEvidence, setSelectedEvidence] = useState<EvidenceItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalizedQuery = searchQuery.trim().toUpperCase();
+
+    if (!normalizedQuery) {
+      return;
+    }
+
+    if (normalizedQuery === "005930") {
+      router.push("/entity/005930");
+      return;
+    }
+
+    if (normalizedQuery === "AAPL") {
+      router.push("/entity/AAPL");
+      return;
+    }
+
+    router.push("/entity/unknown-symbol");
+  };
 
   return (
     <main className={styles.homeShell}>
@@ -150,13 +178,22 @@ export default function Home() {
               </div>
             </div>
 
-            <form className={styles.searchPanel} role="search" aria-label="Global Search">
+            <form className={styles.searchPanel} onSubmit={handleSearchSubmit} role="search" aria-label="Global Search">
               <label htmlFor="home-search">종목명, ETF, 테마, 뉴스, Evidence 검색</label>
               <div>
-                <input id="home-search" placeholder="예: KOSPI, 반도체, 환율, EV-117" type="search" />
-                <button disabled type="button">Prototype 검색</button>
+                <input
+                  aria-describedby="home-search-help"
+                  id="home-search"
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="예: 005930, AAPL"
+                  type="search"
+                  value={searchQuery}
+                />
+                <button aria-label="Entity Prototype 검색" disabled={searchQuery.trim().length === 0} type="submit">
+                  Prototype 검색
+                </button>
               </div>
-              <small>Search는 target type을 확인한 뒤 Research 또는 Evidence로 연결되는 Entry입니다.</small>
+              <small id="home-search-help">지원 Mock Entity: 005930, AAPL. 그 외 입력은 unknown Entity 상태로 이동합니다.</small>
             </form>
           </section>
 
@@ -264,6 +301,7 @@ export default function Home() {
                   <strong>{item.name}</strong>
                   <small>{item.cue}</small>
                   <em>{item.state}</em>
+                  {item.href ? <Link href={item.href}>Entity 보기</Link> : null}
                 </article>
               ))}
             </div>

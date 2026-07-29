@@ -25,6 +25,8 @@
 .activeNavLink,
 .heroActions a,
 .heroActions a:visited,
+.entityStrip a,
+.entityStrip a:visited,
 .evidenceDrawer a,
 .evidenceDrawer a:visited {
   color: inherit;
@@ -242,6 +244,11 @@
 }
 
 .searchPanel button {
+  cursor: pointer;
+}
+
+.searchPanel button:disabled {
+  color: #626262;
   cursor: not-allowed;
 }
 
@@ -450,10 +457,20 @@
   padding: 12px 0 0;
 }
 
+.entityStrip a {
+  width: max-content;
+  max-width: 100%;
+  border: 1px solid #151515;
+  padding: 7px 9px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
 .entityStrip span,
 .entityStrip strong,
 .entityStrip small,
-.entityStrip em {
+.entityStrip em,
+.entityStrip a {
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -547,6 +564,8 @@
 .guestHeaderActions button:focus-visible,
 .heroActions a:focus-visible,
 .searchPanel input:focus-visible,
+.searchPanel button:focus-visible,
+.entityStrip a:focus-visible,
 .drawerHeader button:focus-visible,
 .evidenceDrawer a:focus-visible {
   outline: 2px solid #151515;

@@ -18,7 +18,7 @@ type EvidenceItem = {
 
 const navigationItems = [
   { label: "Home", href: "/", enabled: true },
-  { label: "Discover", href: null, enabled: false },
+  { label: "Discover", href: "/discover", enabled: true },
   { label: "Research", href: "/research", enabled: true },
   { label: "Monitoring", href: null, enabled: false },
   { label: "Journal", href: null, enabled: false },

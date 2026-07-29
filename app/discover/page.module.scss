@@ -1,0 +1,586 @@
+.discoveryShell {
+  min-width: 0;
+  min-height: 100vh;
+  background: #f6f6f4;
+  color: #141414;
+}
+
+.globalHeader {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid #151515;
+  background: #f6f6f4;
+  padding: 14px 28px;
+}
+
+.logo,
+.navLink,
+.activeNavLink,
+.heroActions a,
+.heroActions a:visited,
+.discoveryCard a,
+.discoveryCard a:visited,
+.feedRow a,
+.feedRow a:visited,
+.candidateSet a,
+.candidateSet a:visited,
+.entityGrid a,
+.entityGrid a:visited,
+.interpretationSection a,
+.interpretationSection a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.globalNavigation,
+.guestActions {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.globalNavigation::-webkit-scrollbar,
+.guestActions::-webkit-scrollbar {
+  display: none;
+}
+
+.navLink,
+.activeNavLink,
+.disabledNavLink,
+.guestActions button,
+.resolverSearch button,
+.heroActions a,
+.discoveryCard a,
+.discoveryCard button,
+.feedRow a,
+.candidateSet a,
+.entityGrid a,
+.categoryButton,
+.selectedCategory,
+.interpretationSection a,
+.themeCard,
+.selectedTheme {
+  display: inline-flex;
+  min-height: 36px;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  background: #f6f6f4;
+  color: inherit;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.activeNavLink {
+  border-width: 2px;
+}
+
+.disabledNavLink,
+.resolverSearch button:disabled {
+  color: #626262;
+  cursor: not-allowed;
+}
+
+.guestActions button,
+.resolverSearch button,
+.discoveryCard button,
+.categoryButton,
+.selectedCategory,
+.themeCard,
+.selectedTheme {
+  cursor: pointer;
+}
+
+.discoveryFrame {
+  display: grid;
+  width: min(100%, 1680px);
+  margin: 0 auto;
+  gap: 52px;
+  padding: 28px 28px 48px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.55fr);
+  gap: 28px;
+  align-items: start;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 30px;
+}
+
+.heroCopy,
+.resolverSearch,
+.sectionLead,
+.discoveryCard,
+.leadEvidence,
+.feedRow,
+.candidateSet,
+.entityGrid article,
+.interpretationSection,
+.signalList article {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  align-content: start;
+}
+
+.kicker,
+.heroMetrics span,
+.resolverSearch small,
+.resolverExamples span,
+.discoveryCard dt,
+.cardHeader span,
+.leadEvidence span,
+.leadEvidence dt,
+.feedRow span,
+.feedRow small,
+.themeCard small,
+.selectedTheme small,
+.themeCard em,
+.selectedTheme em,
+.entityGrid span,
+.entityGrid small,
+.marketGrid span,
+.marketGrid small,
+.signalList span,
+.signalList small,
+.signalList em,
+.footer {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.hero h1,
+.sectionLead h2,
+.discoveryCard h3 {
+  margin: 0;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.hero h1 {
+  font-size: 40px;
+  line-height: 1.08;
+}
+
+.activeDiscovery {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.sectionLead h2 {
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.hero p,
+.whyBlock p,
+.sectionLead p,
+.resolverExamples p,
+.discoveryCard dd,
+.feedRow strong,
+.feedRow small,
+.feedRow em,
+.entityGrid p,
+.interpretationSection p,
+.marketGrid small {
+  margin: 0;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.heroMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.heroMetrics span,
+.whyBlock {
+  border: 1px dashed #555;
+  padding: 10px;
+}
+
+.whyBlock {
+  display: grid;
+  gap: 8px;
+}
+
+.heroActions,
+.cardActions,
+.categoryControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.resolverSearch {
+  border-left: 1px solid #151515;
+  padding-left: 24px;
+}
+
+.resolverSearch label {
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.resolverSearch div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.resolverSearch input {
+  min-width: 0;
+  border: 1px solid #151515;
+  background: #ffffff;
+  color: #141414;
+  padding: 12px;
+}
+
+.resolverSection,
+.discoverySection,
+.leadEvidenceSection,
+.feedSection,
+.themeSection,
+.entitySection,
+.categorySection,
+.interpretationSection,
+.marketContextSection,
+.signalSection {
+  display: grid;
+  gap: 18px;
+}
+
+.resolverExamples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.resolverExamples article,
+.marketGrid article {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  border-top: 2px solid #151515;
+  padding-top: 10px;
+}
+
+.discoveryList {
+  display: grid;
+  gap: 18px;
+}
+
+.discoveryCard {
+  grid-template-columns: 1fr;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 20px;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.discoveryCard h3 {
+  font-size: 22px;
+  line-height: 1.28;
+}
+
+.discoveryCard dl,
+.leadEvidence dl,
+.interpretationSection dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.discoveryCard dl div,
+.leadEvidence dl div,
+.interpretationSection dl div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  border-top: 1px solid #c8c8c5;
+  padding-top: 8px;
+}
+
+.discoveryCard dd,
+.leadEvidence dd,
+.interpretationSection dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.leadEvidence {
+  max-width: 1100px;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 22px;
+}
+
+.leadEvidence strong {
+  font-size: 24px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.leadEvidence a {
+  width: max-content;
+  max-width: 100%;
+}
+
+.feedList {
+  display: grid;
+  gap: 12px;
+}
+
+.feedRow {
+  grid-template-columns: minmax(120px, 0.18fr) minmax(0, 0.35fr) minmax(0, 0.47fr) auto;
+  align-items: start;
+  border-bottom: 1px solid #151515;
+  padding: 12px 0;
+}
+
+.feedRow em {
+  font-style: normal;
+}
+
+.themeGrid,
+.entityGrid,
+.marketGrid,
+.signalList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.themeCard,
+.selectedTheme {
+  display: grid;
+  justify-items: start;
+  text-align: left;
+}
+
+.selectedTheme,
+.selectedCategory {
+  border-width: 2px;
+}
+
+.candidateSet {
+  max-width: 980px;
+  border: 1px dashed #555;
+  background: #eeeeeb;
+  padding: 16px;
+}
+
+.candidateSet a {
+  justify-content: flex-start;
+}
+
+.entityGrid article {
+  border-top: 2px solid #151515;
+  padding-top: 12px;
+}
+
+.entityGrid strong,
+.marketGrid strong,
+.signalList strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.interpretationSection {
+  border: 1px dashed #555;
+  background: #eeeeeb;
+  padding: 20px;
+}
+
+.marketContextSection {
+  border-top: 1px solid #151515;
+  padding-top: 22px;
+}
+
+.signalList article {
+  border-top: 2px solid #151515;
+  padding-top: 10px;
+}
+
+.signalList em {
+  font-style: normal;
+}
+
+.refinementState {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  border-top: 1px solid #151515;
+  padding: 18px 28px;
+}
+
+.navLink:focus-visible,
+.activeNavLink:focus-visible,
+.disabledNavLink:focus-visible,
+.guestActions button:focus-visible,
+.resolverSearch input:focus-visible,
+.resolverSearch button:focus-visible,
+.heroActions a:focus-visible,
+.discoveryCard a:focus-visible,
+.discoveryCard button:focus-visible,
+.feedRow a:focus-visible,
+.themeCard:focus-visible,
+.selectedTheme:focus-visible,
+.candidateSet a:focus-visible,
+.entityGrid a:focus-visible,
+.categoryButton:focus-visible,
+.selectedCategory:focus-visible,
+.interpretationSection a:focus-visible {
+  outline: 2px solid #151515;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1440px) {
+  .discoveryFrame {
+    max-width: 1240px;
+  }
+
+  .discoveryCard dl,
+  .leadEvidence dl,
+  .interpretationSection dl,
+  .themeGrid,
+  .entityGrid,
+  .marketGrid,
+  .signalList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .globalHeader,
+  .hero,
+  .resolverExamples,
+  .feedRow {
+    grid-template-columns: 1fr;
+  }
+
+  .resolverSearch {
+    border-top: 1px solid #151515;
+    border-left: 0;
+    padding-top: 20px;
+    padding-left: 0;
+  }
+
+  .discoveryCard dl,
+  .leadEvidence dl,
+  .interpretationSection dl,
+  .themeGrid,
+  .entityGrid,
+  .marketGrid,
+  .signalList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .globalHeader,
+  .discoveryFrame,
+  .footer {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .hero,
+  .discoveryCard,
+  .leadEvidence,
+  .interpretationSection {
+    padding: 20px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+  }
+
+  .activeDiscovery {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 520px) {
+  .globalHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .discoveryFrame {
+    gap: 38px;
+    padding-top: 18px;
+    padding-bottom: 34px;
+  }
+
+  .resolverSearch div,
+  .discoveryCard dl,
+  .leadEvidence dl,
+  .interpretationSection dl,
+  .themeGrid,
+  .entityGrid,
+  .marketGrid,
+  .signalList {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+
+  .sectionLead h2,
+  .discoveryCard h3,
+  .leadEvidence strong {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 340px) {
+  .globalHeader,
+  .discoveryFrame,
+  .hero,
+  .discoveryCard,
+  .leadEvidence,
+  .interpretationSection,
+  .footer {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}

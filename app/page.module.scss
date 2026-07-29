@@ -1,0 +1,495 @@
+.shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 360px;
+  width: min(100%, 1720px);
+  min-height: 100vh;
+  margin: 0 auto;
+  border-right: 1px solid #111;
+  border-left: 1px solid #111;
+  background: #f7f7f7;
+}
+
+.workspaceNavigation,
+.dashboardScreen,
+.returnContext {
+  min-width: 0;
+}
+
+.workspaceNavigation,
+.returnContext {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.workspaceNavigation {
+  border-right: 1px solid #111;
+}
+
+.returnContext {
+  border-left: 1px solid #111;
+}
+
+.dashboardScreen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.navHeader,
+.navFooter,
+.navList,
+.evidenceList,
+.monitoringList,
+.entityList,
+.returnContextRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.navHeader,
+.navFooter {
+  gap: 8px;
+}
+
+.navList,
+.evidenceList,
+.monitoringList,
+.entityList,
+.returnContextRows {
+  gap: 10px;
+}
+
+.screenHeader,
+.overviewSection,
+.monitoringSection {
+  border: 1px solid #111;
+  padding: 16px;
+}
+
+.screenHeader {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.screenHeader h1,
+.sectionHeader h2,
+.blockHeader h3 {
+  margin: 0;
+}
+
+.screenHeader h1 {
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.sectionHeader,
+.blockHeader {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.sectionHeader {
+  margin-bottom: 14px;
+}
+
+.sectionHeader h2 {
+  font-size: 18px;
+}
+
+.blockHeader h3 {
+  font-size: 15px;
+}
+
+.sectionHeader span,
+.blockHeader span,
+.kicker,
+.navFooter,
+.viewNavigation > span,
+.snapshotItem small,
+.summaryItem small,
+.evidenceItem small,
+.selectedEvidenceItem small,
+.monitoringItem small,
+.selectedMonitoringItem small,
+.entityItem small,
+.selectedEntityItem small,
+.returnContextRows dt,
+.returnContextPrimary span,
+.returnContextPrimary small {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.viewNavigation {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.viewNavigation div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.control,
+.selectedControl,
+.evidenceItem,
+.selectedEvidenceItem,
+.monitoringItem,
+.selectedMonitoringItem,
+.entityItem,
+.selectedEntityItem,
+.returnContextBlock button {
+  border: 1px solid #111;
+  background: #f7f7f7;
+  color: #111;
+  cursor: pointer;
+  text-align: left;
+}
+
+.control,
+.selectedControl {
+  padding: 10px 12px;
+}
+
+.selectedControl,
+.selectedEvidenceItem,
+.selectedMonitoringItem,
+.selectedEntityItem {
+  border-width: 2px;
+}
+
+.control:focus-visible,
+.selectedControl:focus-visible,
+.evidenceItem:focus-visible,
+.selectedEvidenceItem:focus-visible,
+.monitoringItem:focus-visible,
+.selectedMonitoringItem:focus-visible,
+.entityItem:focus-visible,
+.selectedEntityItem:focus-visible,
+.returnContextBlock button:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
+.marketSnapshotBlock,
+.marketInterpretationBlock {
+  min-width: 0;
+}
+
+.marketSnapshotBlock {
+  border: 1px solid #111;
+  padding: 14px;
+}
+
+.marketInterpretationBlock {
+  margin-top: 16px;
+}
+
+.marketSnapshotGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.snapshotItem {
+  display: grid;
+  min-width: 0;
+  min-height: 118px;
+  gap: 7px;
+  align-content: start;
+  border: 1px dashed #555;
+  padding: 10px;
+}
+
+.snapshotItem span,
+.snapshotItem strong,
+.snapshotItem small,
+.snapshotItem em {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.snapshotItem strong {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.snapshotItem em {
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.marketStateGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summaryItem {
+  display: grid;
+  min-height: 118px;
+  gap: 14px;
+  align-content: start;
+  border: 1px dashed #555;
+  padding: 12px;
+}
+
+.summaryItem strong {
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.overviewGrid,
+.monitoringGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.blockGroup {
+  min-width: 0;
+  border: 1px solid #111;
+  padding: 14px;
+}
+
+.evidenceItem,
+.selectedEvidenceItem,
+.monitoringItem,
+.selectedMonitoringItem {
+  display: grid;
+  width: 100%;
+  min-height: 142px;
+  gap: 7px;
+  padding: 12px;
+}
+
+.evidenceItem em,
+.selectedEvidenceItem em,
+.entityItem em,
+.selectedEntityItem em {
+  font-style: normal;
+}
+
+.eventFlowList {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.eventFlowList li {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px;
+  border-bottom: 1px solid #555;
+  padding: 0 0 12px;
+}
+
+.eventFlowList li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.eventFlowList small {
+  display: block;
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+.selectedMonitoringItem {
+  border-style: double;
+}
+
+.entityItem,
+.selectedEntityItem {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 6px 10px;
+  width: 100%;
+  min-height: 98px;
+  padding: 12px;
+}
+
+.entityItem small,
+.selectedEntityItem small,
+.entityItem em,
+.selectedEntityItem em {
+  grid-column: 2;
+}
+
+.returnContextPrimary,
+.returnContextBlock {
+  border: 1px dashed #555;
+  padding: 12px;
+}
+
+.returnContextPrimary {
+  display: grid;
+  gap: 10px;
+}
+
+.returnContextRows {
+  margin: 0;
+}
+
+.returnContextRows div {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  border-bottom: 1px solid #555;
+  padding: 10px 0;
+}
+
+.returnContextRows dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.returnContextBlock p {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
+.returnContextBlock button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1440px) {
+  .marketSnapshotGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1280px) {
+  .shell {
+    grid-template-columns: 216px minmax(0, 1fr) 340px;
+    width: 100%;
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .marketStateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .shell {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+
+  .returnContext {
+    grid-column: 1 / -1;
+    border-top: 1px solid #111;
+    border-left: 0;
+  }
+
+  .overviewGrid,
+  .monitoringGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .workspaceNavigation {
+    border-right: 0;
+    border-bottom: 1px solid #111;
+  }
+
+  .navList {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .screenHeader {
+    flex-direction: column;
+  }
+
+  .viewNavigation {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .viewNavigation div {
+    justify-content: flex-start;
+  }
+
+  .marketSnapshotGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .workspaceNavigation,
+  .dashboardScreen,
+  .returnContext {
+    padding: 16px;
+  }
+
+  .navList,
+  .marketStateGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHeader,
+  .blockHeader {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .viewNavigation div {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 340px) {
+  .workspaceNavigation,
+  .dashboardScreen,
+  .returnContext {
+    padding: 12px;
+  }
+
+  .screenHeader,
+  .overviewSection,
+  .monitoringSection,
+  .blockGroup {
+    padding: 12px;
+  }
+
+  .entityItem,
+  .selectedEntityItem,
+  .returnContextRows div {
+    grid-template-columns: 1fr;
+  }
+
+  .entityItem small,
+  .selectedEntityItem small,
+  .entityItem em,
+  .selectedEntityItem em {
+    grid-column: auto;
+  }
+}

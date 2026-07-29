@@ -1,413 +1,574 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import styles from "./page.module.scss";
+
+type EvidenceStatus = "Needs Review" | "In Review" | "Boundary Strong";
+type WorkspaceStatus = "Draft" | "In Review" | "Completed";
 
 type EvidenceItem = {
   id: string;
   title: string;
-  sources: string[];
+  claim: string;
+  source: string;
+  freshness: string;
+  boundary: string;
+  validation: EvidenceStatus;
+  supportingCount: number;
+  contradictingCount: number;
+  hasOpenQuestion: boolean;
+  relatedEntity: {
+    label: string;
+    href: string;
+  };
+  relatedTheme: string;
+  role: "Lead Evidence" | "Supporting Evidence" | "Contradicting Evidence";
+};
+
+type ResearchFlowItem = {
+  step: "Observation" | "Evidence Added" | "Interpretation Updated" | "Open Question" | "Research Status";
+  time: string;
+  title: string;
+  evidence: string;
   status: string;
-  relatedContext: string;
-  openQuestion: string | null;
 };
 
-type MonitoringItem = {
-  id: string;
-  rule: string;
-  signal: string;
-  status: "확인 필요" | "정상 범위";
-  owner: string;
-  scope: string;
-};
-
-type InterestedEntity = {
-  symbol: string;
+type RelatedEntity = {
   name: string;
-  reason: string;
-  state: string;
+  symbol: string;
+  type: "Security" | "Company";
+  relatedEvidence: string;
+  exposure: string;
+  href: string;
 };
 
-const workspaceNavigation = ["대시보드", "탐색", "리서치", "모니터", "저널"];
-const workspaceViews = ["개요", "근거", "타임라인", "모니터링"];
+type RelatedTheme = {
+  name: string;
+  evidenceCount: string;
+  entityCount: string;
+  freshness: string;
+  status: string;
+};
 
-const marketSnapshotItems = [
-  {
-    name: "KOSPI",
-    value: "Mock Prototype 2,7xx.xx",
-    change: "Mock +0.00%",
-    status: "Prototype market open",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "KOSDAQ",
-    value: "Mock Prototype 8xx.xx",
-    change: "Mock -0.00%",
-    status: "Prototype market open",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "NASDAQ",
-    value: "Mock Prototype 1x,xxx.xx",
-    change: "Mock +0.00%",
-    status: "Prototype delayed status",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "S&P 500",
-    value: "Mock Prototype 5,xxx.xx",
-    change: "Mock -0.00%",
-    status: "Prototype delayed status",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "USD/KRW",
-    value: "Mock Prototype 1,xxx.xx",
-    change: "Mock +0.00%",
-    status: "Prototype FX status",
-    updated: "Updated: Mock time placeholder"
-  },
-  {
-    name: "BTC",
-    value: "Mock Prototype xx,xxx USD",
-    change: "Mock -0.00%",
-    status: "Prototype crypto status",
-    updated: "Updated: Mock time placeholder"
-  }
-];
+type OpenQuestion = {
+  question: string;
+  priority: "High" | "Medium" | "Low";
+  blocking: "Blocking" | "Not Blocking";
+  missingEvidence: string;
+  requiredSource: string;
+  currentStatus: string;
+};
 
-const marketBlocks = [
-  { label: "시장 상태", value: "Mock: 방향 검토", state: "보조 상태: 판단 전" },
-  { label: "시장 폭", value: "Mock: 분산 확인", state: "보조 상태: 근거 필요" },
-  { label: "변동성", value: "Mock: 구간 관찰", state: "보조 상태: 이벤트 대기" },
-  { label: "거시 신호", value: "Mock: 영향 범위 확인", state: "보조 상태: 출처 검토" }
-];
+const workspace = {
+  title: "Semiconductor Export Scope Research",
+  focus: "Active Focus: Semiconductor supply chain / Samsung Electronics",
+  status: "In Review" as WorkspaceStatus,
+  target: "Security + Theme comparison",
+  lastUpdated: "Mock updated time placeholder",
+  relatedEntityCount: "3",
+  evidenceCount: "3",
+  openQuestionCount: "2"
+};
 
 const evidenceItems: EvidenceItem[] = [
   {
-    id: "EV-104",
-    title: "짧은 제목",
-    sources: ["제공처 A"],
-    status: "출처 확인 필요",
-    relatedContext: "시장 상태 / 매출 전망",
-    openQuestion: "동일 업종에도 같은 신호가 반복되는가?"
+    id: "EV-117",
+    title: "Policy scope change may affect semiconductor supply chain exposure",
+    claim: "Export control scope could expand beyond direct chip shipments.",
+    source: "Mock source set: policy memo + provider note",
+    freshness: "Fresh / retrieved mock same-day",
+    boundary: "Does not confirm enforcement date or company-level revenue effect.",
+    validation: "In Review",
+    supportingCount: 2,
+    contradictingCount: 0,
+    hasOpenQuestion: true,
+    relatedEntity: { label: "Samsung Electronics", href: "/entity/005930" },
+    relatedTheme: "Semiconductor",
+    role: "Lead Evidence"
   },
   {
-    id: "EV-117",
-    title: "정책 금리 변화와 환율 민감도가 동시에 반영되는 긴 제목의 근거 항목",
-    sources: ["제공처 B", "리서치 메모 C"],
-    status: "타임라인 연결됨",
-    relatedContext: "이벤트 흐름 / 거시 신호",
-    openQuestion: null
+    id: "EV-104",
+    title: "AI infrastructure capital expenditure signal remains source-limited",
+    claim: "Capital spending language suggests continued infrastructure demand.",
+    source: "Mock source: provider A excerpt placeholder",
+    freshness: "Fresh / last verified mock",
+    boundary: "Single-source cue; does not validate supplier allocation.",
+    validation: "Needs Review",
+    supportingCount: 1,
+    contradictingCount: 1,
+    hasOpenQuestion: true,
+    relatedEntity: { label: "Apple", href: "/entity/AAPL" },
+    relatedTheme: "AI",
+    role: "Supporting Evidence"
   },
   {
     id: "EV-122",
-    title: "섹터 폭 차이",
-    sources: ["제공처 D"],
-    status: "비교 대기",
-    relatedContext: "시장 폭 / 관심 대상",
-    openQuestion: "현재 관찰 목록과 연결할 기준이 충분한가?"
+    title: "Long-duration rate reaction conflicts with the simple risk-on interpretation",
+    claim: "Macro reaction may be inconsistent with a broad growth-positive reading.",
+    source: "Mock source set: market note + dated source cue",
+    freshness: "Stale risk / revalidation needed",
+    boundary: "Market reaction is context, not proof of causal policy impact.",
+    validation: "Boundary Strong",
+    supportingCount: 0,
+    contradictingCount: 2,
+    hasOpenQuestion: false,
+    relatedEntity: { label: "NVIDIA", href: "/entity/NVDA" },
+    relatedTheme: "Infrastructure",
+    role: "Contradicting Evidence"
   }
 ];
 
-const eventFlowItems = [
-  { time: "09:30", label: "시장 맥락 열림", detail: "Overview에서 방향 검토가 시작된 상태" },
-  { time: "10:15", label: "근거가 관심 목록에 연결됨", detail: "선택 근거와 관심 대상의 관계 확인 필요" },
-  { time: "11:20", label: "모니터링 규칙 변경됨", detail: "알림 기준 변경 후 소유 범위 재확인" },
-  { time: "13:00", label: "판단 맥락 대기", detail: "Return Context에 복귀 단서 보존" }
+const workspaceSummary = [
+  ["Evidence", "3"],
+  ["Sources", "5 Mock"],
+  ["Entities", "3"],
+  ["Themes", "3"],
+  ["Research Flow", "5"],
+  ["Interpretations", "1 Mock"]
 ];
 
-const monitoringItems: MonitoringItem[] = [
+const researchFlow: ResearchFlowItem[] = [
   {
-    id: "MN-01",
-    rule: "매출 전망 조정이 관심 대상과 같은 방향으로 2회 이상 반복될 때",
-    signal: "브릭 에너지 관련 근거가 오전 이벤트 흐름과 연결됨",
-    status: "확인 필요",
-    owner: "Dashboard Workspace",
-    scope: "관심 목록 / 에너지"
+    step: "Observation",
+    time: "Mock T-04",
+    title: "Policy language changed from product to supply-chain exposure.",
+    evidence: "EV-117",
+    status: "Observed"
   },
   {
-    id: "MN-02",
-    rule: "변동성 구간이 확대되더라도 출처가 단일 제공처에 머물 때",
-    signal: "추가 출처 없음, 기존 관찰 범위 유지",
-    status: "정상 범위",
-    owner: "Monitor Workspace",
-    scope: "시장 상태 / 변동성"
+    step: "Evidence Added",
+    time: "Mock T-03",
+    title: "Provider note added source-limited AI infrastructure cue.",
+    evidence: "EV-104",
+    status: "Needs review"
+  },
+  {
+    step: "Interpretation Updated",
+    time: "Mock T-02",
+    title: "Interpretation boundary narrowed to exposure mapping only.",
+    evidence: "EV-117 / EV-122",
+    status: "Generated mock"
+  },
+  {
+    step: "Open Question",
+    time: "Mock T-01",
+    title: "Company-level revenue exposure remains unverified.",
+    evidence: "EV-117",
+    status: "Blocking"
+  },
+  {
+    step: "Research Status",
+    time: "Mock now",
+    title: "Workspace remains in review until source scope is validated.",
+    evidence: "Workspace",
+    status: workspace.status
   }
 ];
 
-const interestedEntities: InterestedEntity[] = [
+const relatedEntities: RelatedEntity[] = [
   {
-    symbol: "BRK",
-    name: "브릭 에너지",
-    reason: "선택 근거와 모니터링 알림이 같은 맥락을 공유",
-    state: "확인 필요"
+    name: "Samsung Electronics",
+    symbol: "005930",
+    type: "Security",
+    relatedEvidence: "EV-117, EV-104",
+    exposure: "Mock exposure: HBM and semiconductor supply-chain mapping",
+    href: "/entity/005930"
   },
   {
-    symbol: "ALP",
-    name: "알파 시스템즈",
-    reason: "시장 폭 차이와 연결 가능성이 있으나 열린 질문 없음",
-    state: "관찰"
+    name: "Apple",
+    symbol: "AAPL",
+    type: "Security",
+    relatedEvidence: "EV-104",
+    exposure: "Mock exposure: device AI supply-chain dependency",
+    href: "/entity/AAPL"
   },
   {
-    symbol: "CRN",
-    name: "크론 마켓",
-    reason: "현재 신호는 정상 범위에 머물러 복귀 우선순위 낮음",
-    state: "대기"
+    name: "NVIDIA",
+    symbol: "NVDA",
+    type: "Company",
+    relatedEvidence: "EV-122",
+    exposure: "Mock exposure: infrastructure demand and policy boundary",
+    href: "/entity/NVDA"
   }
 ];
 
-export default function Home() {
-  const [activeWorkspace, setActiveWorkspace] = useState(workspaceNavigation[0]);
-  const [activeView, setActiveView] = useState(workspaceViews[0]);
-  const [selectedEvidence, setSelectedEvidence] = useState(evidenceItems[0]);
-  const [selectedEntity, setSelectedEntity] = useState(interestedEntities[0]);
-  const [selectedMonitoring, setSelectedMonitoring] = useState(monitoringItems[0]);
+const relatedThemes: RelatedTheme[] = [
+  {
+    name: "AI",
+    evidenceCount: "2 Evidence",
+    entityCount: "2 Entities",
+    freshness: "Fresh",
+    status: "Candidate set active"
+  },
+  {
+    name: "Semiconductor",
+    evidenceCount: "3 Evidence",
+    entityCount: "3 Entities",
+    freshness: "Mixed freshness",
+    status: "Primary research theme"
+  },
+  {
+    name: "Infrastructure",
+    evidenceCount: "1 Evidence",
+    entityCount: "2 Entities",
+    freshness: "Stale risk",
+    status: "Boundary review"
+  }
+];
 
-  const returnContextRows = useMemo(
-    () => [
-      ["선택 근거", selectedEvidence.id],
-      ["현재 맥락", activeView],
-      ["관련 대상", selectedEntity.symbol],
-      ["출처", selectedEvidence.sources.join(" / ")],
-      ["상태", selectedEvidence.status],
-      ["열린 질문", selectedEvidence.openQuestion ?? "없음"]
-    ],
-    [activeView, selectedEntity.symbol, selectedEvidence]
-  );
+const openQuestions: OpenQuestion[] = [
+  {
+    question: "Does the policy scope apply to indirect supply-chain exposure?",
+    priority: "High",
+    blocking: "Blocking",
+    missingEvidence: "Company-specific exposure mapping",
+    requiredSource: "Policy scope source or provider method note",
+    currentStatus: "Open / blocks Completed state"
+  },
+  {
+    question: "Is the AI infrastructure cue supported by more than one provider?",
+    priority: "Medium",
+    blocking: "Not Blocking",
+    missingEvidence: "Second source with comparable timeframe",
+    requiredSource: "Publisher-labeled research or source availability cue",
+    currentStatus: "Needs review"
+  }
+];
+
+const notes = [
+  ["Observation", "Policy and infrastructure signals overlap, but source confidence differs by Evidence."],
+  ["Hypothesis", "The useful research path is exposure mapping, not price reaction attribution."],
+  ["Remaining Questions", "Policy timing and company-specific supplier impact remain unresolved."],
+  ["Next Step", "Check original source placeholder and compare EV-117 against EV-122 before moving to decision context."]
+];
+
+export default function ResearchWorkspacePage() {
+  const [workspaceStatus, setWorkspaceStatus] = useState<WorkspaceStatus>(workspace.status);
+  const [activeTheme, setActiveTheme] = useState("Semiconductor");
 
   return (
-    <main className={styles.shell}>
-      <aside className={styles.workspaceNavigation} aria-label="작업공간 전환">
-        <div className={styles.navHeader}>
-          <span className={styles.kicker}>Phase 17.1</span>
-          <strong>DATE</strong>
-          <small>작업공간 전환</small>
-        </div>
-        <div className={styles.navList}>
-          {workspaceNavigation.map((item) => (
-            <button
-              className={item === activeWorkspace ? styles.selectedControl : styles.control}
-              key={item}
-              onClick={() => setActiveWorkspace(item)}
-              type="button"
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <div className={styles.navFooter}>
-          <span>Entry Navigation</span>
-          <span>Workspace boundary</span>
-        </div>
-      </aside>
-
-      <section className={styles.dashboardScreen} aria-label="대시보드 화면">
-        <header className={styles.screenHeader}>
-          <div>
-            <span className={styles.kicker}>Dashboard Workspace</span>
-            <h1>대시보드 구조 와이어프레임</h1>
-          </div>
-          <nav className={styles.viewNavigation} aria-label="현재 작업공간 보기 전환">
-            <span>Workspace View</span>
-            <div>
-              {workspaceViews.map((view) => (
-                <button
-                  className={view === activeView ? styles.selectedControl : styles.control}
-                  key={view}
-                  onClick={() => setActiveView(view)}
-                  type="button"
-                >
-                  {view}
-                </button>
-              ))}
-            </div>
-          </nav>
-        </header>
-
-        <section className={styles.overviewSection} aria-labelledby="overview-title">
-          <div className={styles.sectionHeader}>
-            <div>
-              <span className={styles.kicker}>Official Section</span>
-              <h2 id="overview-title">Overview</h2>
-            </div>
-            <span>Market Snapshot / Market Interpretation / Attention Evidence Preview / Event Flow Cue</span>
-          </div>
-
-          <div className={styles.marketSnapshotBlock} aria-label="Market Snapshot">
-            <div className={styles.blockHeader}>
-              <h3>Market Snapshot</h3>
-              <span>대표 지수와 주요 자산의 현재 상태를 빠르게 확인</span>
-            </div>
-            <div className={styles.marketSnapshotGrid}>
-              {marketSnapshotItems.map((item) => (
-                <article className={styles.snapshotItem} key={item.name}>
-                  <span>{item.name}</span>
-                  <strong>{item.value}</strong>
-                  <small>{item.change}</small>
-                  <em>{item.status}</em>
-                  <small>{item.updated}</small>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.marketInterpretationBlock} aria-label="Market Interpretation">
-            <div className={styles.blockHeader}>
-              <h3>Market Interpretation</h3>
-              <span>시장 상태, 시장 폭, 변동성, 거시 신호를 해석하는 요약</span>
-            </div>
-            <div className={styles.marketStateGrid}>
-              {marketBlocks.map((block) => (
-                <article className={styles.summaryItem} key={block.label}>
-                  <span>{block.label}</span>
-                  <strong>{block.value}</strong>
-                  <small>{block.state}</small>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.overviewGrid}>
-            <div className={styles.blockGroup} aria-label="Attention Evidence Preview">
-              <div className={styles.blockHeader}>
-                <h3>Attention Evidence Preview</h3>
-                <span>선택/비선택, 출처 수, 열린 질문 검증</span>
-              </div>
-              <div className={styles.evidenceList}>
-                {evidenceItems.map((item) => (
-                  <button
-                    className={item.id === selectedEvidence.id ? styles.selectedEvidenceItem : styles.evidenceItem}
-                    key={item.id}
-                    onClick={() => setSelectedEvidence(item)}
-                    type="button"
-                  >
-                    <span>{item.id}</span>
-                    <strong>{item.title}</strong>
-                    <small>Source: {item.sources.join(" / ")}</small>
-                    <small>Status: {item.status}</small>
-                    <small>Related: {item.relatedContext}</small>
-                    <em>Open Question: {item.openQuestion ?? "없음"}</em>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.blockGroup} aria-label="Event Flow Cue">
-              <div className={styles.blockHeader}>
-                <h3>Event Flow Cue</h3>
-                <span>시간 순서와 근거 연결 단서</span>
-              </div>
-              <ol className={styles.eventFlowList}>
-                {eventFlowItems.map((item) => (
-                  <li key={`${item.time}-${item.label}`}>
-                    <span>{item.time}</span>
-                    <div>
-                      <strong>{item.label}</strong>
-                      <small>{item.detail}</small>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.monitoringSection} aria-labelledby="monitoring-title">
-          <div className={styles.sectionHeader}>
-            <div>
-              <span className={styles.kicker}>Official Section</span>
-              <h2 id="monitoring-title">Monitoring Preview</h2>
-            </div>
-            <span>Monitoring Alerts / Interested Entity Preview</span>
-          </div>
-
-          <div className={styles.monitoringGrid}>
-            <div className={styles.blockGroup} aria-label="Monitoring Alerts">
-              <div className={styles.blockHeader}>
-                <h3>Monitoring Alerts</h3>
-                <span>알림 발생 상태와 정상 상태 구분</span>
-              </div>
-              <div className={styles.monitoringList}>
-                {monitoringItems.map((item) => (
-                  <button
-                    className={item.id === selectedMonitoring.id ? styles.selectedMonitoringItem : styles.monitoringItem}
-                    key={item.id}
-                    onClick={() => setSelectedMonitoring(item)}
-                    type="button"
-                  >
-                    <span>{item.id}</span>
-                    <strong>{item.rule}</strong>
-                    <small>Signal: {item.signal}</small>
-                    <small>Status: {item.status}</small>
-                    <small>Owner: {item.owner}</small>
-                    <small>Scope: {item.scope}</small>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.blockGroup} aria-label="Interested Entity Preview">
-              <div className={styles.blockHeader}>
-                <h3>Interested Entity Preview</h3>
-                <span>관심 대상 복귀 가능성</span>
-              </div>
-              <div className={styles.entityList}>
-                {interestedEntities.map((item) => (
-                  <button
-                    className={item.symbol === selectedEntity.symbol ? styles.selectedEntityItem : styles.entityItem}
-                    key={item.symbol}
-                    onClick={() => setSelectedEntity(item)}
-                    type="button"
-                  >
-                    <span>{item.symbol}</span>
-                    <strong>{item.name}</strong>
-                    <small>{item.reason}</small>
-                    <em>{item.state}</em>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </section>
-
-      <aside className={styles.returnContext} aria-label="Return Context">
-        <div className={styles.sectionHeader}>
-          <div>
-            <span className={styles.kicker}>Official Section</span>
-            <h2>Return Context</h2>
-          </div>
-          <span>Selected Context Panel</span>
-        </div>
-
-        <div className={styles.returnContextPrimary}>
-          <span>Selected Entity 또는 Evidence</span>
-          <strong>{selectedEvidence.title}</strong>
-          <small>{selectedEntity.name} / {selectedMonitoring.status}</small>
-        </div>
-
-        <dl className={styles.returnContextRows}>
-          {returnContextRows.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <div className={styles.returnContextBlock}>
-          <strong>Related Evidence</strong>
-          <p>{selectedEvidence.relatedContext}</p>
-        </div>
-
-        <div className={styles.returnContextBlock}>
-          <strong>Available Action</strong>
-          <button disabled type="button">
-            Prototype action disabled
+    <main className={styles.pageShell}>
+      <header className={styles.globalHeader}>
+        <Link className={styles.brand} href="/" aria-label="DATE Home">
+          DATE
+        </Link>
+        <nav className={styles.globalNav} aria-label="Global navigation">
+          <Link href="/">Home</Link>
+          <Link href="/discover">Discover</Link>
+          <Link aria-current="page" href="/research">Research</Link>
+          <span aria-disabled="true">Monitoring</span>
+          <span aria-disabled="true">Journal</span>
+          <span aria-disabled="true">Community</span>
+        </nav>
+        <div className={styles.headerActions} aria-label="Guest actions">
+          <Link href="/discover">Search</Link>
+          <button type="button" disabled>
+            Theme
+          </button>
+          <button type="button" disabled>
+            Alerts
+          </button>
+          <button type="button" disabled>
+            Login
           </button>
         </div>
-      </aside>
+      </header>
+
+      <section className={styles.researchHeader} aria-labelledby="research-title">
+        <div className={styles.headerCopy}>
+          <span className={styles.kicker}>Research Workspace / Mock Prototype</span>
+          <h1 id="research-title">{workspace.title}</h1>
+          <p>
+            Evidence를 비교하고 Source, Freshness, Boundary를 보존하면서 분석 판단을 구성하는
+            읽기와 분석 전용 workspace입니다.
+          </p>
+        </div>
+        <aside className={styles.workspaceState} aria-label="Workspace state">
+          <div>
+            <span>Workspace Status</span>
+            <select
+              aria-label="Workspace Status mock selector"
+              value={workspaceStatus}
+              onChange={(event) => setWorkspaceStatus(event.target.value as WorkspaceStatus)}
+            >
+              <option>Draft</option>
+              <option>In Review</option>
+              <option>Completed</option>
+            </select>
+          </div>
+          <div>
+            <span>Active Focus</span>
+            <strong>{workspace.focus}</strong>
+          </div>
+          <dl>
+            <div>
+              <dt>Related Entity</dt>
+              <dd>{workspace.relatedEntityCount}</dd>
+            </div>
+            <div>
+              <dt>Evidence</dt>
+              <dd>{workspace.evidenceCount}</dd>
+            </div>
+            <div>
+              <dt>Open Question</dt>
+              <dd>{workspace.openQuestionCount}</dd>
+            </div>
+            <div>
+              <dt>Last Updated</dt>
+              <dd>{workspace.lastUpdated}</dd>
+            </div>
+          </dl>
+        </aside>
+        <div className={styles.headerCtas} aria-label="Research actions">
+          <button type="button" disabled>
+            Add Evidence Placeholder
+          </button>
+          <a href="#comparison">Compare Evidence</a>
+          <Link href="/evidence/EV-117">Return to Evidence</Link>
+        </div>
+      </section>
+
+      <section className={styles.summaryStrip} aria-labelledby="summary-title">
+        <div>
+          <span className={styles.kicker}>Workspace Summary</span>
+          <h2 id="summary-title">현재 분석 구성</h2>
+        </div>
+        <div className={styles.summaryGrid}>
+          {workspaceSummary.map(([label, value]) => (
+            <article key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.activeEvidence} aria-labelledby="active-evidence-title">
+        <div className={styles.sectionHeading}>
+          <span className={styles.kicker}>Active Evidence</span>
+          <h2 id="active-evidence-title">검토 중인 Evidence</h2>
+          <p>Lead Evidence를 먼저 두고 Supporting / Contradicting Evidence를 같은 경계로 비교합니다.</p>
+        </div>
+        <div className={styles.evidenceList}>
+          {evidenceItems.map((item) => (
+            <article className={styles.evidenceRow} key={item.id}>
+              <div>
+                <span>{item.role}</span>
+                <h3>{item.id}</h3>
+              </div>
+              <div>
+                <strong>{item.title}</strong>
+                <p>{item.boundary}</p>
+              </div>
+              <dl>
+                <div>
+                  <dt>Source</dt>
+                  <dd>{item.source}</dd>
+                </div>
+                <div>
+                  <dt>Freshness</dt>
+                  <dd>{item.freshness}</dd>
+                </div>
+                <div>
+                  <dt>Validation</dt>
+                  <dd>{item.validation}</dd>
+                </div>
+              </dl>
+              <div className={styles.rowLinks}>
+                <Link href={item.relatedEntity.href}>{item.relatedEntity.label}</Link>
+                <Link href={`/evidence/${item.id}`}>Evidence Detail</Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.comparisonSection} id="comparison" aria-labelledby="comparison-title">
+        <div className={styles.sectionHeading}>
+          <span className={styles.kicker}>Evidence Comparison</span>
+          <h2 id="comparison-title">차이를 드러내는 비교 Matrix</h2>
+          <p>Desktop에서는 Matrix, Tablet과 Mobile에서는 Evidence별 Stack으로 전환됩니다.</p>
+        </div>
+        <div className={styles.comparisonMatrix} role="table" aria-label="Evidence comparison matrix">
+          <div className={styles.matrixHeader} role="row">
+            <span role="columnheader">Evidence</span>
+            <span role="columnheader">Claim</span>
+            <span role="columnheader">Source</span>
+            <span role="columnheader">Freshness</span>
+            <span role="columnheader">Boundary</span>
+            <span role="columnheader">Validation</span>
+            <span role="columnheader">Support</span>
+            <span role="columnheader">Contradict</span>
+            <span role="columnheader">Open Q</span>
+          </div>
+          {evidenceItems.map((item) => (
+            <div className={styles.matrixRow} role="row" key={item.id}>
+              <span role="cell" data-label="Evidence">
+                <Link href={`/evidence/${item.id}`}>{item.id}</Link>
+              </span>
+              <span role="cell" data-label="Claim">{item.claim}</span>
+              <span role="cell" data-label="Source">{item.source}</span>
+              <span role="cell" data-label="Freshness">{item.freshness}</span>
+              <span role="cell" data-label="Boundary">{item.boundary}</span>
+              <span role="cell" data-label="Validation">{item.validation}</span>
+              <span role="cell" data-label="Supporting Evidence">{item.supportingCount}</span>
+              <span role="cell" data-label="Contradicting Evidence">{item.contradictingCount}</span>
+              <span role="cell" data-label="Open Question">{item.hasOpenQuestion ? "Yes" : "No"}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.flowSection} aria-labelledby="flow-title">
+        <div className={styles.sectionHeading}>
+          <span className={styles.kicker}>Research Flow</span>
+          <h2 id="flow-title">Event가 아니라 분석 진행 순서</h2>
+          <p>Observation에서 Research Status까지 Evidence와 Interpretation의 변경 흐름만 표시합니다.</p>
+        </div>
+        <ol className={styles.flowList}>
+          {researchFlow.map((item) => (
+            <li key={`${item.step}-${item.time}`}>
+              <span>{item.step}</span>
+              <div>
+                <strong>{item.title}</strong>
+                <small>{item.time} / Linked: {item.evidence} / Status: {item.status}</small>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <div className={styles.relatedGrid}>
+        <section className={styles.relatedSection} aria-labelledby="entity-title">
+          <div className={styles.sectionHeading}>
+            <span className={styles.kicker}>Related Entity</span>
+            <h2 id="entity-title">Entity 비교</h2>
+          </div>
+          <div className={styles.relatedList}>
+            {relatedEntities.map((entity) => (
+              <article key={entity.symbol}>
+                <span>{entity.type}</span>
+                <h3>{entity.name}</h3>
+                <p>{entity.exposure}</p>
+                <small>Related Evidence: {entity.relatedEvidence}</small>
+                <Link href={entity.href}>{entity.symbol} Entity Detail</Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.relatedSection} aria-labelledby="theme-title">
+          <div className={styles.sectionHeading}>
+            <span className={styles.kicker}>Related Theme</span>
+            <h2 id="theme-title">Theme candidate</h2>
+          </div>
+          <div className={styles.themeList}>
+            {relatedThemes.map((theme) => (
+              <button
+                aria-pressed={activeTheme === theme.name}
+                className={activeTheme === theme.name ? styles.selectedTheme : styles.themeButton}
+                key={theme.name}
+                onClick={() => setActiveTheme(theme.name)}
+                type="button"
+              >
+                <strong>{theme.name}</strong>
+                <span>{theme.evidenceCount} / {theme.entityCount}</span>
+                <small>{theme.freshness} / {theme.status}</small>
+              </button>
+            ))}
+          </div>
+          <Link className={styles.discoveryLink} href={`/discover?theme=${encodeURIComponent(activeTheme)}`}>
+            Discovery candidate: {activeTheme}
+          </Link>
+        </section>
+      </div>
+
+      <section className={styles.interpretationSection} aria-labelledby="interpretation-title">
+        <div className={styles.sectionHeading}>
+          <span className={styles.kicker}>Generated Mock / Interpretation Review</span>
+          <h2 id="interpretation-title">AI Summary가 아닌 검토 대상 Interpretation</h2>
+          <p>
+            Linked Evidence: EV-117, EV-122. Confidence placeholder는 판단 보조일 뿐이며
+            Source와 Evidence Boundary를 대체하지 않습니다.
+          </p>
+        </div>
+        <div className={styles.interpretationBody}>
+          <strong>Interpretation</strong>
+          <p>
+            현재 workspace는 정책 범위 확대 가능성과 시장 반응을 분리해서 읽어야 합니다.
+            가격 반응은 context이며, policy scope와 company exposure는 별도 Evidence가 필요합니다.
+          </p>
+          <dl>
+            <div>
+              <dt>Confidence Placeholder</dt>
+              <dd>Mock medium / requires review</dd>
+            </div>
+            <div>
+              <dt>Boundary</dt>
+              <dd>Does not decide investment action or confirm enforcement timing.</dd>
+            </div>
+            <div>
+              <dt>Review Status</dt>
+              <dd>Needs Review</dd>
+            </div>
+          </dl>
+          <Link href="/research#comparison">Research Review</Link>
+        </div>
+      </section>
+
+      <section className={styles.questionsSection} aria-labelledby="questions-title">
+        <div className={styles.sectionHeading}>
+          <span className={styles.kicker}>Open Questions</span>
+          <h2 id="questions-title">Research 진행 상태를 막는 질문</h2>
+        </div>
+        <div className={styles.questionList}>
+          {openQuestions.map((item) => (
+            <article key={item.question}>
+              <div>
+                <span>{item.priority} Priority</span>
+                <strong>{item.blocking}</strong>
+              </div>
+              <h3>{item.question}</h3>
+              <dl>
+                <div>
+                  <dt>Missing Evidence</dt>
+                  <dd>{item.missingEvidence}</dd>
+                </div>
+                <div>
+                  <dt>Required Source</dt>
+                  <dd>{item.requiredSource}</dd>
+                </div>
+                <div>
+                  <dt>Current Status</dt>
+                  <dd>{item.currentStatus}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.notesSection} aria-labelledby="notes-title">
+        <div className={styles.sectionHeading}>
+          <span className={styles.kicker}>Research Notes Placeholder</span>
+          <h2 id="notes-title">자유 메모가 아닌 분석 구조</h2>
+        </div>
+        <div className={styles.notesGrid}>
+          {notes.map(([label, value]) => (
+            <article key={label}>
+              <span>{label}</span>
+              <p>{value}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <footer className={styles.workspaceFooter}>
+        <span>Workspace Footer / Mock Prototype</span>
+        <Link href="/evidence/EV-117">Return to Evidence</Link>
+        <Link href="/discover">Continue Discovery</Link>
+      </footer>
     </main>
   );
 }

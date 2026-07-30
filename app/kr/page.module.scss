@@ -1,0 +1,698 @@
+.shell {
+  min-width: 0;
+  min-height: 100vh;
+  background: #f6f6f4;
+  color: #151515;
+  padding-bottom: 0;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid #1d1d1d;
+  background: #f6f6f4;
+  padding: 14px clamp(18px, 4vw, 48px);
+}
+
+.logo,
+.topNav a,
+.headerActions button,
+.heroActions a,
+.focusList a,
+.stockRows a,
+.leadEvidence,
+.evidenceRows a,
+.twoColumnBottom a,
+.footer a,
+.bottomNav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo {
+  flex: 0 0 auto;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.topNav {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.topNav::-webkit-scrollbar {
+  display: none;
+}
+
+.topNav a,
+.headerActions button {
+  display: inline-flex;
+  min-height: 36px;
+  flex: 0 0 auto;
+  align-items: center;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.topNav a[aria-current="page"] {
+  border-color: #151515;
+  font-weight: 700;
+}
+
+.headerActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.headerActions button {
+  border-color: #c7c7c2;
+  cursor: default;
+}
+
+.hero,
+.marketStrip,
+.todayFocus,
+.twoColumn,
+.reasonSection,
+.evidenceSection,
+.needConfirm,
+.watchlistSection,
+.twoColumnBottom,
+.footer {
+  width: min(100% - 56px, 1180px);
+  margin: 0 auto;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.6fr);
+  gap: 32px;
+  align-items: stretch;
+  border-bottom: 1px solid #151515;
+  padding: 42px 0 34px;
+}
+
+.heroCopy {
+  display: grid;
+  min-width: 0;
+  gap: 18px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #5d5d5a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.hero h1 {
+  max-width: 860px;
+  margin: 0;
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.heroLead,
+.sectionHeader p,
+.needConfirm p,
+.twoColumnBottom p {
+  margin: 0;
+  color: #343434;
+  line-height: 1.65;
+}
+
+.trustList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: 1px solid #c7c7c2;
+  background: #c7c7c2;
+}
+
+.trustList div {
+  min-width: 0;
+  background: #fbfbfa;
+  padding: 12px;
+}
+
+.trustList dt {
+  margin-bottom: 4px;
+  color: #666;
+  font-size: 12px;
+}
+
+.trustList dd {
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.heroActions a,
+.focusList a,
+.twoColumnBottom a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.heroActions .primaryAction {
+  border-width: 2px;
+  background: #ffffff;
+}
+
+.searchBox {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+  padding: 20px;
+}
+
+.searchBox h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.searchBox p {
+  margin: 0;
+  color: #5d5d5a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.searchPlaceholder {
+  border: 1px solid #151515;
+  background: #fff;
+  color: #5d5d5a;
+  padding: 13px;
+}
+
+.marketStrip,
+.todayFocus,
+.reasonSection,
+.evidenceSection,
+.needConfirm,
+.watchlistSection,
+.twoColumnBottom {
+  margin-top: 42px;
+}
+
+.sectionHeader {
+  display: grid;
+  max-width: 780px;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.sectionHeader h2,
+.needConfirm h2,
+.twoColumnBottom h2 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.24;
+}
+
+.marketItems {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid #c7c7c2;
+  background: #c7c7c2;
+}
+
+.marketItems article {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  background: #fbfbfa;
+  padding: 12px;
+}
+
+.marketItems strong,
+.marketItems span,
+.marketItems em {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.marketItems em,
+.marketItems small,
+.simpleList em,
+.stockRows em,
+.leadEvidence em,
+.evidenceRows em {
+  color: #5d5d5a;
+  font-style: normal;
+}
+
+.marketItems small {
+  min-width: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.focusList {
+  display: grid;
+  gap: 0;
+  border-top: 2px solid #151515;
+}
+
+.focusList article {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 18px 0;
+}
+
+.focusList span {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.focusList h3 {
+  margin: 0 0 7px;
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+.focusList p {
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+
+.focusList small {
+  color: #5d5d5a;
+}
+
+.twoColumn {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 28px;
+  margin-top: 46px;
+}
+
+.themeFlow,
+.stockList {
+  min-width: 0;
+}
+
+.themeTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.themeTabs button {
+  min-height: 36px;
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+  padding: 8px 12px;
+}
+
+.themeTabs button[aria-pressed="true"] {
+  border-color: #151515;
+  font-weight: 700;
+}
+
+.simpleList,
+.stockRows,
+.evidenceRows {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.simpleList li,
+.stockRows a,
+.evidenceRows a {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 13px 0;
+}
+
+.simpleList li {
+  grid-template-columns: minmax(96px, 0.35fr) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.stockRows a {
+  grid-template-columns: minmax(90px, 0.26fr) minmax(70px, 0.18fr) minmax(80px, 0.18fr) minmax(0, 0.38fr);
+  align-items: baseline;
+  gap: 10px;
+}
+
+.stockRows small {
+  min-width: 0;
+  color: #4a4a48;
+  overflow-wrap: anywhere;
+}
+
+.reasonSection {
+  display: grid;
+  gap: 18px;
+  border-top: 1px solid #151515;
+  padding-top: 30px;
+}
+
+.reasonFlow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: #c7c7c2;
+  border: 1px solid #c7c7c2;
+  list-style-position: inside;
+}
+
+.reasonFlow li {
+  min-width: 0;
+  background: #fbfbfa;
+  padding: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.evidenceLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: 20px;
+}
+
+.leadEvidence {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  border: 2px solid #151515;
+  background: #fbfbfa;
+  padding: 22px;
+}
+
+.leadEvidence strong {
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.evidenceRows a {
+  border-bottom-color: #151515;
+}
+
+.evidenceRows strong {
+  line-height: 1.35;
+}
+
+.needConfirm {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(280px, 0.55fr);
+  gap: 24px;
+  align-items: start;
+  border: 1px dashed #151515;
+  background: #eeeeeb;
+  padding: 22px;
+}
+
+.needConfirm details {
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+  padding: 14px;
+}
+
+.needConfirm summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.needConfirm ul {
+  margin-bottom: 0;
+  padding-left: 20px;
+}
+
+.twoColumnBottom {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.twoColumnBottom article {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  border-top: 2px solid #151515;
+  padding-top: 18px;
+}
+
+.twoColumnBottom a {
+  width: max-content;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 56px;
+  border-top: 1px solid #151515;
+  padding: 22px 0 34px;
+  color: #4a4a48;
+  font-size: 13px;
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bottomNav {
+  display: none;
+}
+
+.topNav a:focus-visible,
+.headerActions button:focus-visible,
+.heroActions a:focus-visible,
+.focusList a:focus-visible,
+.themeTabs button:focus-visible,
+.stockRows a:focus-visible,
+.leadEvidence:focus-visible,
+.evidenceRows a:focus-visible,
+.twoColumnBottom a:focus-visible,
+.footer a:focus-visible,
+.bottomNav a:focus-visible {
+  outline: 2px solid #151515;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1024px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .topNav,
+  .headerActions {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .hero,
+  .twoColumn,
+  .evidenceLayout,
+  .needConfirm,
+  .twoColumnBottom {
+    grid-template-columns: 1fr;
+  }
+
+  .trustList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .marketItems {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reasonFlow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    padding-bottom: 72px;
+  }
+
+  .header {
+    padding: 12px 16px;
+  }
+
+  .topNav {
+    display: none;
+  }
+
+  .headerActions button:nth-child(2),
+  .headerActions button:nth-child(3) {
+    display: none;
+  }
+
+  .hero,
+  .marketStrip,
+  .todayFocus,
+  .twoColumn,
+  .reasonSection,
+  .evidenceSection,
+  .needConfirm,
+  .watchlistSection,
+  .twoColumnBottom,
+  .footer {
+    width: min(100% - 32px, 1180px);
+  }
+
+  .hero {
+    gap: 22px;
+    padding-top: 28px;
+  }
+
+  .hero h1 {
+    font-size: 31px;
+  }
+
+  .trustList,
+  .marketItems,
+  .focusList article,
+  .simpleList li,
+  .stockRows a {
+    grid-template-columns: 1fr;
+  }
+
+  .heroActions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .marketItems {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .marketItems::-webkit-scrollbar {
+    display: none;
+  }
+
+  .marketItems article {
+    flex: 0 0 136px;
+  }
+
+  .focusList article {
+    align-items: start;
+  }
+
+  .focusList a {
+    width: 100%;
+  }
+
+  .sectionHeader h2,
+  .needConfirm h2,
+  .twoColumnBottom h2 {
+    font-size: 23px;
+  }
+
+  .leadEvidence strong {
+    font-size: 21px;
+  }
+
+  .footer {
+    padding-bottom: 18px;
+  }
+
+  .bottomNav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border-top: 1px solid #151515;
+    background: #fbfbfa;
+  }
+
+  .bottomNav a {
+    display: grid;
+    min-width: 0;
+    min-height: 58px;
+    place-items: center;
+    gap: 2px;
+    padding: 7px 3px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .bottomNav a[aria-current="page"] {
+    background: #eeeeeb;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 340px) {
+  .hero,
+  .marketStrip,
+  .todayFocus,
+  .twoColumn,
+  .reasonSection,
+  .evidenceSection,
+  .needConfirm,
+  .watchlistSection,
+  .twoColumnBottom,
+  .footer {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  .searchBox,
+  .leadEvidence,
+  .needConfirm {
+    padding: 16px;
+  }
+}

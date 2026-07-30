@@ -28,11 +28,16 @@ function evidenceHref(symbol: string) {
   return symbol === "000660" ? "/kr/evidence?id=ir-semiconductor-001" : "/kr/evidence?id=dart-samsung-001";
 }
 
+function analysisHref(symbol: string) {
+  return symbol === "000660" ? "/kr/analysis?id=hynix-hbm-001" : "/kr/analysis?id=samsung-semiconductor-001";
+}
+
 export default async function KoreanStockPage({ params }: KoreanStockPageProps) {
   const { symbol } = await params;
   const stock = getStockMock(symbol);
   const isUnknown = stock.confidence === "미확인";
   const leadEvidenceHref = evidenceHref(stock.symbol);
+  const stockAnalysisHref = analysisHref(stock.symbol);
 
   return (
     <main className={styles.page}>
@@ -63,7 +68,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
         <KRCTAGroup
           actions={[
             { href: leadEvidenceHref, label: "공식 근거 확인하기", variant: "primary" },
-            { href: "/kr/analysis", label: "내 분석에 담기" },
+            { href: stockAnalysisHref, label: "내 분석에 담기" },
             { href: "#related-entities", label: "관련 기업 보기" }
           ]}
           className={styles.heroActions}
@@ -230,7 +235,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
         </div>
         <KRCTAGroup
           actions={[
-            { href: "/kr/analysis", label: "대표 근거를 내 분석에 담기", variant: "primary" },
+            { href: stockAnalysisHref, label: "대표 근거를 내 분석에 담기", variant: "primary" },
             { href: "#related-entities", label: "관련 기업 비교하기" },
             { href: "/kr/theme", label: "관련 테마 확인하기" }
           ]}

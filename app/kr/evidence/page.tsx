@@ -25,10 +25,16 @@ function badgeClass(state: string) {
   return state === "미확인" ? styles.unconfirmedBadge : styles.confidenceBadge;
 }
 
+function analysisHref(id?: string | string[]) {
+  const value = Array.isArray(id) ? id[0] : id;
+  return value === "ir-semiconductor-001" ? "/kr/analysis?id=hynix-hbm-001" : "/kr/analysis?id=samsung-semiconductor-001";
+}
+
 export default async function KoreanEvidencePage({ searchParams }: KoreanEvidencePageProps) {
   const { id } = await searchParams;
   const evidence = getEvidenceMock(id);
   const isUnknown = evidence.confidence === "미확인" && evidence.officialFacts.length === 0;
+  const linkedAnalysisHref = analysisHref(id);
 
   return (
     <main className={styles.page}>
@@ -61,7 +67,7 @@ export default async function KoreanEvidencePage({ searchParams }: KoreanEvidenc
         <KRCTAGroup
           actions={[
             { href: "#source-detail", label: "원문 확인하기", variant: "primary" },
-            { href: "/kr/analysis", label: "내 분석에 담기" },
+            { href: linkedAnalysisHref, label: "내 분석에 담기" },
             { href: "#related-entities", label: "관련 종목 보기" }
           ]}
           className={styles.heroActions}
@@ -333,7 +339,7 @@ export default async function KoreanEvidencePage({ searchParams }: KoreanEvidenc
         </div>
         <KRCTAGroup
           actions={[
-            { href: "/kr/analysis", label: "이 근거를 내 분석에 담기", variant: "primary" },
+            { href: linkedAnalysisHref, label: "이 근거를 내 분석에 담기", variant: "primary" },
             { href: "#related-entities", label: "관련 종목 비교하기" },
             { href: "#timeline-title", label: "관련 흐름 확인하기" }
           ]}

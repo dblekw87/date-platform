@@ -317,7 +317,7 @@ export default function KoreanHome() {
         <article>
           <KRSectionHeader className={styles.sectionHeader} eyebrow="이어서 분석" eyebrowClassName={styles.eyebrow} title="반도체 공급망 분석을 이어서 볼 수 있습니다." />
           <p>비교 중인 근거: EV-117 · EV-104</p>
-          <Link href="/kr/analysis">분석 열기</Link>
+          <Link href="/kr/analysis?id=samsung-semiconductor-001">분석 열기</Link>
         </article>
         <article>
           <KRSectionHeader className={styles.sectionHeader} eyebrow="최근 판단 기록" eyebrowClassName={styles.eyebrow} title="이전 판단에서 달라진 근거가 있습니다." />

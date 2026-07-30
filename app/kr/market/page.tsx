@@ -333,7 +333,7 @@ export default function KoreanMarketPage() {
         <KRCTAGroup
           actions={[
             { href: "/kr/evidence", label: "공식 근거 보기", variant: "primary" },
-            { href: "/kr/analysis", label: "분석에 추가하기" }
+            { href: "/kr/analysis?id=samsung-semiconductor-001", label: "분석에 추가하기" }
           ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}

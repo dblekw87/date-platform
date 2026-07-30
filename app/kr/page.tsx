@@ -311,6 +311,11 @@ export default function KoreanHome() {
             </li>
           ))}
         </ul>
+        <KRCTAGroup
+          actions={[{ href: "/kr/changes?view=latest", label: "달라진 내용 확인하기", variant: "primary" }]}
+          className={styles.heroActions}
+          primaryClassName={styles.primaryAction}
+        />
       </section>
 
       <section className={styles.twoColumnBottom} aria-label="이어서 분석과 최근 판단 기록">

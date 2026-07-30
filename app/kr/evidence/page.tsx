@@ -341,7 +341,8 @@ export default async function KoreanEvidencePage({ searchParams }: KoreanEvidenc
           actions={[
             { href: linkedAnalysisHref, label: "이 근거를 내 분석에 담기", variant: "primary" },
             { href: "#related-entities", label: "관련 종목 비교하기" },
-            { href: "#timeline-title", label: "관련 흐름 확인하기" }
+            { href: "#timeline-title", label: "관련 흐름 확인하기" },
+            { href: "/kr/changes?view=latest", label: "정정 또는 추가 발표 보기" }
           ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}

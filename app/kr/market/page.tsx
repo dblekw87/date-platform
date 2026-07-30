@@ -144,7 +144,8 @@ export default function KoreanMarketPage() {
         <KRCTAGroup
           actions={[
             { href: "#priority-engine", label: "가장 먼저 볼 변화 확인", variant: "primary" },
-            { href: "/kr/evidence", label: "공식 근거 확인하기" }
+            { href: "/kr/evidence", label: "공식 근거 확인하기" },
+            { href: "/kr/changes?view=latest", label: "마지막 확인 이후 변화 보기" }
           ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}

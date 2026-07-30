@@ -287,6 +287,11 @@ function ChangesSection({ analysis }: { analysis: AnalysisMock }) {
       ) : (
         <KREmptyState className={styles.inlineEmpty} description="새 공식 정보가 확인되면 이 영역에서 다시 볼 이유를 알려줍니다." eyebrow="새 변화 없음" title="기존 분석 이후 새로 달라진 내용은 없습니다." titleId="changes-empty" />
       )}
+      <KRCTAGroup
+        actions={[{ href: "/kr/changes?view=analysis", label: "변화 화면에서 비교하기", variant: "primary" }]}
+        className={styles.heroActions}
+        primaryClassName={styles.primaryAction}
+      />
     </section>
   );
 }

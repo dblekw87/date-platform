@@ -1,0 +1,114 @@
+.hero,
+.sectionHeader,
+.emptyState {
+  min-width: 0;
+}
+
+.hero {
+  display: grid;
+  gap: 16px;
+}
+
+.heroCopy,
+.sectionHeader {
+  display: grid;
+  gap: 8px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #5d5d5a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.badge {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.muted {
+  color: #4d4d49;
+}
+
+.unconfirmed {
+  border-style: dashed;
+  color: #4d4d49;
+}
+
+.ctaGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.emptyState {
+  display: grid;
+  gap: 16px;
+}
+
+.evidenceCard,
+.relatedEntityRow {
+  display: grid;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.evidenceCard {
+  gap: 12px;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 18px;
+}
+
+.evidenceCard dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.evidenceCard dt {
+  color: #666;
+  font-size: 12px;
+}
+
+.evidenceCard dd {
+  margin: 0;
+}
+
+.metaLine {
+  color: #5d5d5a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.relatedEntityRow {
+  grid-template-columns: minmax(110px, 0.24fr) minmax(90px, 0.18fr) minmax(0, 1fr) minmax(80px, 0.16fr);
+  gap: 10px;
+  align-items: baseline;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 13px 0;
+}
+
+.relatedEntityRow small,
+.relatedEntityRow em {
+  color: #5d5d5a;
+  font-style: normal;
+}
+
+@media (max-width: 640px) {
+  .relatedEntityRow {
+    grid-template-columns: 1fr;
+  }
+}

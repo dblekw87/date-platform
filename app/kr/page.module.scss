@@ -269,9 +269,15 @@
 .simpleList em,
 .stockRows em,
 .leadEvidence em,
-.evidenceRows em {
+.evidenceRows em,
+.inlineStatus {
   color: #5d5d5a;
   font-style: normal;
+}
+
+.inlineStatus {
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .marketItems small {

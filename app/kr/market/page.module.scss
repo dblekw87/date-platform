@@ -244,6 +244,7 @@
 }
 
 .boardGrid span,
+.boardGroup,
 .boardGrid small,
 .boardGrid em,
 .listRows small,
@@ -253,6 +254,13 @@
   color: #5d5d5a;
   font-style: normal;
   line-height: 1.45;
+}
+
+.boardGroup {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  font-size: 13px;
 }
 
 .boardGrid strong {

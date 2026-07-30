@@ -24,10 +24,15 @@ function badgeTone(status: string) {
   return status === "미확인" ? styles.unconfirmedBadge : styles.confidenceBadge;
 }
 
+function evidenceHref(symbol: string) {
+  return symbol === "000660" ? "/kr/evidence?id=ir-semiconductor-001" : "/kr/evidence?id=dart-samsung-001";
+}
+
 export default async function KoreanStockPage({ params }: KoreanStockPageProps) {
   const { symbol } = await params;
   const stock = getStockMock(symbol);
   const isUnknown = stock.confidence === "미확인";
+  const leadEvidenceHref = evidenceHref(stock.symbol);
 
   return (
     <main className={styles.page}>
@@ -57,7 +62,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
         </div>
         <KRCTAGroup
           actions={[
-            { href: "/kr/evidence", label: "공식 근거 확인하기", variant: "primary" },
+            { href: leadEvidenceHref, label: "공식 근거 확인하기", variant: "primary" },
             { href: "/kr/analysis", label: "내 분석에 담기" },
             { href: "#related-entities", label: "관련 기업 보기" }
           ]}
@@ -114,7 +119,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
           <KREvidenceCard
             className={styles.leadEvidence}
             confidence={<KRConfidenceBadge className={badgeTone(stock.leadEvidence.confidence)}>{stock.leadEvidence.confidence}</KRConfidenceBadge>}
-            href="/kr/evidence"
+            href={leadEvidenceHref}
             limitation={stock.leadEvidence.limitation}
             publishedAt={stock.leadEvidence.publishedAt}
             source={stock.leadEvidence.source}
@@ -129,7 +134,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
               <KREvidenceCard
                 className={styles.compactEvidence}
                 confidence={<KRConfidenceBadge className={badgeTone(item.confidence)}>{item.confidence}</KRConfidenceBadge>}
-                href="/kr/evidence"
+                href={leadEvidenceHref}
                 key={item.title}
                 limitation={item.limitation}
                 publishedAt={item.publishedAt}

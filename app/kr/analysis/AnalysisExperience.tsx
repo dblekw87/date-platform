@@ -243,7 +243,8 @@ function AnalysisHero({ analysis, isUnknown, editable }: { analysis: AnalysisMoc
             : [
                 { href: primaryHref, label: primaryLabel, variant: "primary" },
                 { href: "#linked-evidence-title", label: "근거 추가하기" },
-                { href: "#related-heading", label: "관련 종목 보기" }
+                { href: "#related-heading", label: "관련 종목 보기" },
+                { href: "/kr/watchlist?view=default", label: "관심 종목 상태 보기" }
               ]
         }
         className={styles.heroActions}
@@ -901,6 +902,7 @@ function ActionsSection({ analysis }: { analysis: AnalysisMock }) {
         <nav className={styles.secondaryLinks} aria-label="보조 분석 행동">
           <Link href="#condition-title">판단 변경 조건 추가하기</Link>
           <Link href="#next-title">다음 확인 시점 설정하기</Link>
+          <Link href="/kr/watchlist?view=default">관심 종목에서 보기</Link>
           <Link href="/kr/journal">기록으로 남기기</Link>
         </nav>
       </div>

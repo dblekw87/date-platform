@@ -70,11 +70,17 @@
   line-height: 1.2;
 }
 
-.quotePanel button {
+.quotePanel a {
+  display: inline-flex;
   min-height: 40px;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #151515;
   background: #ffffff;
   color: inherit;
+  padding: 9px 12px;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .infoBadge,
@@ -350,7 +356,7 @@
 .leadEvidence:focus-visible,
 .compactEvidence:focus-visible,
 .relatedRow:focus-visible,
-.quotePanel button:focus-visible {
+.quotePanel a:focus-visible {
   outline: 2px solid #151515;
   outline-offset: 3px;
 }

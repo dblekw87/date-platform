@@ -312,7 +312,10 @@ export default function KoreanHome() {
           ))}
         </ul>
         <KRCTAGroup
-          actions={[{ href: "/kr/changes?view=latest", label: "달라진 내용 확인하기", variant: "primary" }]}
+          actions={[
+            { href: "/kr/changes?view=latest", label: "달라진 내용 확인하기", variant: "primary" },
+            { href: "/kr/watchlist?view=default", label: "관심 대상 확인하기" }
+          ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}
         />

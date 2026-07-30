@@ -48,7 +48,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
             <strong>{stock.price}</strong>
             <span>{stock.change}</span>
             <small>{stock.sessionState} · {stock.updatedAt}</small>
-            <button type="button">관심 종목 추가</button>
+            <a href={`/kr/watchlist?view=default#add-flow-title`}>관심 종목 추가</a>
           </aside>
         }
         className={styles.hero}
@@ -238,6 +238,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
             { href: stockAnalysisHref, label: "대표 근거를 내 분석에 담기", variant: "primary" },
             { href: "#related-entities", label: "관련 기업 비교하기" },
             { href: "/kr/theme", label: "관련 테마 확인하기" },
+            { href: "/kr/watchlist?view=default", label: "관심 상태 보기" },
             { href: "/kr/changes?view=analysis", label: "공식 정보 업데이트 보기" }
           ]}
           className={styles.heroActions}

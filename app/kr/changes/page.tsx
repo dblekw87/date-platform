@@ -72,7 +72,7 @@ function ChangesHero({ changes }: { changes: ReturnType<typeof getChangesMock> }
         actions={[
           { href: primaryHref, label: changes.primaryAction, variant: "primary" },
           { href: "#applied-title", label: "반영 완료 항목 보기" },
-          { href: "#watchlist-title", label: "관심 종목 변화 보기" }
+          { href: "/kr/watchlist?view=review", label: "Watchlist로 돌아가기" }
         ]}
         className={styles.heroActions}
         primaryClassName={styles.primaryAction}

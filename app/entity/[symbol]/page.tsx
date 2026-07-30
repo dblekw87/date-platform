@@ -106,8 +106,8 @@ const navigationItems = [
   { label: "Home", href: "/", enabled: true },
   { label: "Discover", href: "/discover", enabled: true },
   { label: "Research", href: "/research", enabled: true },
-  { label: "Monitoring", href: null, enabled: false },
-  { label: "Journal", href: null, enabled: false },
+  { label: "Monitoring", href: "/monitoring", enabled: true },
+  { label: "Journal", href: "/journal", enabled: true },
   { label: "Community", href: null, enabled: false },
   { label: "Search", href: null, enabled: false },
   { label: "Profile", href: null, enabled: false }
@@ -602,6 +602,7 @@ export default function EntityDetailPage() {
           <Link href="/discover">Back to Discovery</Link>
           <Link href={`/evidence/${entity.evidence.lead.id}`}>Inspect Evidence</Link>
           <Link href="/research">Research</Link>
+          <Link href="/monitoring">Monitoring</Link>
         </nav>
       </footer>
 

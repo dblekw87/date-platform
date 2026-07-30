@@ -132,8 +132,8 @@ const navigationItems = [
   { label: "Home", href: "/", enabled: true },
   { label: "Discover", href: "/discover", enabled: true },
   { label: "Research", href: "/research", enabled: true },
-  { label: "Monitoring", href: null, enabled: false },
-  { label: "Journal", href: null, enabled: false },
+  { label: "Monitoring", href: "/monitoring", enabled: true },
+  { label: "Journal", href: "/journal", enabled: true },
   { label: "Community", href: null, enabled: false },
   { label: "Search", href: null, enabled: false },
   { label: "Profile", href: null, enabled: false }
@@ -988,6 +988,7 @@ export default function EvidenceDetailPage() {
           <Link href={evidence.relatedContext.find((context) => context.href)?.href ?? "/entity/005930"}>Back to Entity</Link>
           <Link href="/discover">Discovery</Link>
           <Link href="/research">Analyze in Research</Link>
+          <Link href="/monitoring">Monitoring</Link>
         </nav>
       </footer>
     </main>

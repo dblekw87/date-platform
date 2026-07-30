@@ -41,7 +41,7 @@ const navigationItems = [
   { label: "Discover", href: "/discover" },
   { label: "Research", href: "/research" },
   { label: "Monitoring", href: "/monitoring" },
-  { label: "Journal", href: null },
+  { label: "Journal", href: "/journal" },
   { label: "Community", href: null }
 ];
 
@@ -229,6 +229,7 @@ export default function MonitoringPage() {
           <div className={styles.headerActionsRow}>
             <a href="#review-queue">Review Changes</a>
             <Link href="/research">Return to Research</Link>
+            <Link href="/journal">Open Journal</Link>
           </div>
         </section>
 
@@ -380,6 +381,7 @@ export default function MonitoringPage() {
           <Link href="/research">Return to Research</Link>
           <Link href="/evidence/EV-117">Lead Evidence</Link>
           <Link href="/entity/005930">Current Entity</Link>
+          <Link href="/journal">Decision History</Link>
         </nav>
       </footer>
     </main>

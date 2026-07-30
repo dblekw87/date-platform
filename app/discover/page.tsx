@@ -46,8 +46,8 @@ const navigationItems = [
   { label: "Home", href: "/", enabled: true },
   { label: "Discover", href: "/discover", enabled: true },
   { label: "Research", href: "/research", enabled: true },
-  { label: "Monitoring", href: null, enabled: false },
-  { label: "Journal", href: null, enabled: false },
+  { label: "Monitoring", href: "/monitoring", enabled: true },
+  { label: "Journal", href: "/journal", enabled: true },
   { label: "Community", href: null, enabled: false },
   { label: "Search", href: null, enabled: false },
   { label: "Profile", href: null, enabled: false }
@@ -476,6 +476,7 @@ export default function DiscoverPage() {
           <Link href="/entity/005930">Entity</Link>
           <Link href="/evidence/EV-117">View Evidence</Link>
           <Link href="/research">Research</Link>
+          <Link href="/monitoring">Monitoring</Link>
         </nav>
       </footer>
     </main>

@@ -257,8 +257,8 @@ export default function ResearchWorkspacePage() {
           <Link href="/">Home</Link>
           <Link href="/discover">Discover</Link>
           <Link aria-current="page" href="/research">Research</Link>
-          <span aria-disabled="true">Monitoring</span>
-          <span aria-disabled="true">Journal</span>
+          <Link href="/monitoring">Monitoring</Link>
+          <Link href="/journal">Journal</Link>
           <span aria-disabled="true">Community</span>
         </nav>
         <div className={styles.headerActions} aria-label="Guest actions">
@@ -352,6 +352,7 @@ export default function ResearchWorkspacePage() {
         <div className={styles.headerCtas} aria-label="Research actions">
           <Link href="/evidence/EV-117">Return to Evidence</Link>
           <a href="#comparison">Compare Evidence</a>
+          <Link href="/monitoring">Open Monitoring</Link>
           <button type="button" disabled>
             Add Evidence Placeholder
           </button>
@@ -598,6 +599,7 @@ export default function ResearchWorkspacePage() {
         <Link href="/evidence/EV-117">Return to Evidence</Link>
         <Link href="/discover">Continue Discovery</Link>
         <Link href="/entity/005930">Current Entity</Link>
+        <Link href="/monitoring">Open Monitoring</Link>
       </footer>
     </main>
   );

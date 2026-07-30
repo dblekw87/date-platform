@@ -1,7 +1,10 @@
 .page {
   display: grid;
+  width: calc(100% - 96px);
+  max-width: 1440px;
   gap: 56px;
   min-width: 0;
+  margin: 0 auto;
 }
 
 .hero {
@@ -189,6 +192,37 @@
   display: grid;
   gap: 8px;
   margin-bottom: 18px;
+}
+
+.editableHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.editableHeader .sectionHeader {
+  margin-bottom: 0;
+}
+
+.editableHeader button,
+.editActions button,
+.listEditor button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  background: transparent;
+  color: #151515;
+  padding: 8px 12px;
+  font: inherit;
+}
+
+.editableHeader button:disabled {
+  border-style: dashed;
+  color: #666;
 }
 
 .eyebrow {
@@ -503,6 +537,98 @@
   padding: 24px;
 }
 
+.modeNotice,
+.appliedNotice {
+  margin: 0;
+  border-left: 3px solid #151515;
+  background: #f8f8f5;
+  color: #333;
+  padding: 12px 14px;
+  line-height: 1.6;
+}
+
+.appliedSection {
+  display: grid;
+  gap: 12px;
+}
+
+.editPanel {
+  display: grid;
+  gap: 16px;
+  border: 2px solid #151515;
+  background: #fff;
+  padding: 18px;
+}
+
+.editNotice {
+  display: grid;
+  gap: 4px;
+  border-bottom: 1px solid #c7c7c2;
+  padding-bottom: 12px;
+}
+
+.editNotice span,
+.fieldLabel + small,
+.fieldError {
+  color: #5d5d5a;
+  line-height: 1.5;
+}
+
+.fieldLabel {
+  display: block;
+  margin: 12px 0 6px;
+  color: #151515;
+  font-weight: 700;
+}
+
+.editPanel textarea,
+.editPanel input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  color: #151515;
+  padding: 10px;
+  font: inherit;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.editPanel input {
+  min-height: 40px;
+}
+
+.fieldError {
+  border-left: 3px solid #151515;
+  margin: 0;
+  padding-left: 10px;
+  font-weight: 700;
+}
+
+.editActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.listEditor {
+  display: grid;
+  gap: 14px;
+}
+
+.listEditor article {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+  padding: 14px;
+}
+
+.listEditor article > button {
+  justify-self: start;
+}
+
 .emptyFirst {
   border-width: 2px;
   padding: 34px;
@@ -551,6 +677,7 @@
 
 @media (max-width: 640px) {
   .page {
+    width: calc(100% - 32px);
     gap: 40px;
     padding-bottom: 72px;
   }
@@ -569,7 +696,7 @@
   .questionBox,
   .userBlock,
   .stackList article,
-.emptyFirst,
+  .emptyFirst,
   .nextList article,
   .unknownSection,
   .actionSection,
@@ -633,8 +760,28 @@
 
   .heroActions a,
   .questionBox button,
-  .userBlock button {
+  .userBlock button,
+  .editableHeader button,
+  .editActions button,
+  .listEditor button {
     width: 100%;
+  }
+
+  .editableHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .editPanel {
+    padding: 14px;
+  }
+
+  .editActions {
+    position: sticky;
+    bottom: 72px;
+    z-index: 2;
+    border-top: 1px solid #c7c7c2;
+    background: #fff;
+    padding-top: 10px;
   }
 
   .questionBox blockquote {

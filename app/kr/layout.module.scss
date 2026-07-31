@@ -163,6 +163,10 @@
     width: min(100% - 32px, 1180px);
   }
 
+  .routeMap {
+    display: none;
+  }
+
   .bottomNav {
     position: fixed;
     right: 0;

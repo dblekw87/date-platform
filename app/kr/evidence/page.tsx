@@ -360,7 +360,7 @@ export default async function KoreanEvidencePage({ searchParams }: KoreanEvidenc
             <div className={styles.heroActions}>
               <Link href="/kr/search">검색으로 이동</Link>
               <Link href="/kr/market">시장으로 돌아가기</Link>
-              <Link href="/kr/stock/005930">종목 예시 보기</Link>
+              <Link href="/kr/stock/005930">대표 종목 보기</Link>
             </div>
           }
         />

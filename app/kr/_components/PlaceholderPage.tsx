@@ -13,7 +13,7 @@ type PlaceholderPageProps = {
 const routeLinks = [
   { label: "홈", href: "/kr" },
   { label: "시장", href: "/kr/market" },
-  { label: "종목 예시", href: "/kr/stock/005930" },
+  { label: "대표 종목", href: "/kr/stock/005930" },
   { label: "테마", href: "/kr/theme" },
   { label: "투자 근거", href: "/kr/evidence" },
   { label: "분석", href: "/kr/analysis" },

@@ -1,0 +1,508 @@
+.page {
+  display: grid;
+  width: calc(100% - 96px);
+  max-width: 1440px;
+  min-width: 0;
+  margin: 0 auto;
+  gap: 56px;
+}
+
+.hero,
+.densityDetails,
+.section {
+  min-width: 0;
+}
+
+.densityDetails {
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+}
+
+.densityDetails summary {
+  cursor: pointer;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 16px 18px;
+  font-weight: 700;
+}
+
+.densityDetails:not([open]) summary {
+  border-bottom: 0;
+}
+
+.densityDetails > section {
+  width: calc(100% - 36px);
+  margin: 18px auto;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.34fr);
+  gap: 40px;
+  align-items: stretch;
+  border-bottom: 1px solid #151515;
+  padding: 38px 0 44px;
+}
+
+.heroCopy,
+.sectionHeader {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.hero h1,
+.sectionHeader h2,
+.exactCard h3,
+.resultRow h3,
+.analysisRow h3,
+.suggestionGroup h3 {
+  margin: 0;
+  color: #151515;
+  overflow-wrap: anywhere;
+}
+
+.hero h1 {
+  max-width: 920px;
+  font-size: 44px;
+  line-height: 1.12;
+}
+
+.hero p,
+.sectionHeader p,
+.summaryPanel span,
+.resultCopy p,
+.resultCopy small,
+.analysisRow p,
+.suggestionGroup p,
+.contextRow small,
+.notice,
+.inlineEmpty p,
+.emptyState p {
+  margin: 0;
+  color: #4d4d49;
+  line-height: 1.65;
+}
+
+.summaryPanel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  padding: 24px;
+}
+
+.summaryPanel strong {
+  font-size: 22px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.summaryPanel dl,
+.resultMeta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.summaryPanel dl div,
+.resultMeta div {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.summaryPanel dt,
+.resultMeta dt {
+  color: #666;
+  font-size: 12px;
+}
+
+.summaryPanel dd,
+.resultMeta dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.searchForm {
+  display: grid;
+  max-width: 860px;
+  gap: 8px;
+}
+
+.searchLabel,
+.eyebrow {
+  margin: 0;
+  color: #5d5d5a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.searchControl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  min-width: 0;
+}
+
+.searchControl input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #151515;
+  background: #fff;
+  color: #151515;
+  padding: 13px 14px;
+  font: inherit;
+}
+
+.searchControl button,
+.searchControl a,
+.clearButton,
+.recentTerms button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  color: #151515;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.targetGuide,
+.heroActions,
+.cardActions,
+.emptyActions,
+.nextActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.heroActions a,
+.cardActions a,
+.emptyActions a,
+.nextActions a,
+.contextRow,
+.recentTerms a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  color: #151515;
+  padding: 9px 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.primaryAction {
+  background: #151515 !important;
+  color: #fff !important;
+}
+
+.infoBadge,
+.statusBadge,
+.strongBadge,
+.unconfirmedBadge,
+.entityChip,
+.themeChip {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #151515;
+  background: #fbfbfa;
+  color: #151515;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.strongBadge {
+  border-width: 2px;
+}
+
+.unconfirmedBadge {
+  border-style: dashed;
+  color: #555;
+}
+
+.entityChip {
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  text-decoration: none;
+}
+
+.entityChip span,
+.entityChip small {
+  color: #5d5d5a;
+  font-weight: 500;
+}
+
+.themeChip {
+  cursor: default;
+}
+
+.themeChip[aria-pressed="true"] {
+  background: #eeeeeb;
+}
+
+.notice {
+  border-left: 3px solid #151515;
+  background: #f8f8f5;
+  padding: 12px 14px;
+}
+
+.sectionHeader {
+  margin-bottom: 18px;
+}
+
+.contextRows,
+.resultRows,
+.analysisRows,
+.autocompleteGrid,
+.recentTerms {
+  display: grid;
+  gap: 14px;
+}
+
+.contextRow {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.18fr) minmax(0, 0.35fr) minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  justify-content: stretch;
+  border-color: #c7c7c2;
+  padding: 16px 0;
+}
+
+.contextRow:first-child,
+.resultRow:first-child,
+.analysisRow:first-child {
+  border-top: 1px solid #151515;
+}
+
+.contextRow span {
+  color: #5d5d5a;
+  font-size: 13px;
+}
+
+.contextRow strong,
+.contextRow small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.contextRow em {
+  color: #151515;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.autocompleteGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.suggestionGroup {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  border: 1px dashed #151515;
+  background: #f8f8f5;
+  padding: 18px;
+}
+
+.suggestionGroup ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestionGroup li {
+  border: 1px solid #c7c7c2;
+  background: #fff;
+  padding: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.selectedSuggestion {
+  border-color: #151515 !important;
+  background: #eeeeeb !important;
+}
+
+.exactCard,
+.resultRow,
+.analysisRow {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 18px 0;
+}
+
+.exactCard {
+  border: 2px solid #151515;
+  background: #fbfbfa;
+  padding: 22px;
+}
+
+.resultTitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.resultCopy {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.analysisRow {
+  grid-template-columns: auto minmax(0, 0.5fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.inlineEmpty,
+.emptyState {
+  border: 1px dashed #151515;
+  background: #f8f8f5;
+  padding: 20px;
+}
+
+.emptyState {
+  border-width: 2px;
+}
+
+.recentTerms {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.recentTerms article {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+  padding: 18px;
+}
+
+.recentTerms strong,
+.recentTerms span {
+  overflow-wrap: anywhere;
+}
+
+.recentTerms span {
+  color: #5d5d5a;
+}
+
+.clearButton {
+  width: max-content;
+  margin-top: 14px;
+}
+
+.heroActions a:focus-visible,
+.cardActions a:focus-visible,
+.emptyActions a:focus-visible,
+.nextActions a:focus-visible,
+.contextRow:focus-visible,
+.recentTerms a:focus-visible,
+.searchControl input:focus-visible,
+.searchControl button:focus-visible,
+.searchControl a:focus-visible,
+.clearButton:focus-visible,
+.recentTerms button:focus-visible,
+.entityChip:focus-visible {
+  outline: 2px solid #151515;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+  .autocompleteGrid,
+  .recentTerms {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contextRow,
+  .analysisRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    width: calc(100% - 32px);
+    gap: 40px;
+    padding-bottom: 84px;
+  }
+
+  .hero {
+    gap: 22px;
+    padding: 16px 0 24px;
+  }
+
+  .hero h1 {
+    font-size: 27px;
+  }
+
+  .densityDetails > section {
+    width: calc(100% - 28px);
+  }
+
+  .summaryPanel,
+  .exactCard,
+  .suggestionGroup,
+  .inlineEmpty,
+  .emptyState,
+  .recentTerms article {
+    padding: 18px;
+  }
+
+  .searchControl,
+  .autocompleteGrid,
+  .recentTerms {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryPanel dl div,
+  .resultMeta div {
+    grid-template-columns: 1fr;
+  }
+
+  .heroActions a,
+  .cardActions a,
+  .emptyActions a,
+  .nextActions a,
+  .searchControl button,
+  .searchControl a,
+  .clearButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 340px) {
+  .hero h1 {
+    font-size: 25px;
+  }
+}

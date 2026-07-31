@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   KRConfidenceBadge,
   KRCTAGroup,
@@ -28,6 +29,15 @@ function priorityClass(priority: string) {
   if (priority === "Priority 1") return styles.priorityOne;
   if (priority === "Priority 2") return styles.priorityTwo;
   return styles.priorityDefault;
+}
+
+function DensityDetails({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details className={styles.densityDetails}>
+      <summary>{title}</summary>
+      {children}
+    </details>
+  );
 }
 
 function ChangesHero({ changes }: { changes: ReturnType<typeof getChangesMock> }) {
@@ -71,8 +81,7 @@ function ChangesHero({ changes }: { changes: ReturnType<typeof getChangesMock> }
       <KRCTAGroup
         actions={[
           { href: primaryHref, label: changes.primaryAction, variant: "primary" },
-          { href: "#applied-title", label: "반영 완료 항목 보기" },
-          { href: "/kr/watchlist?view=review", label: "Watchlist로 돌아가기" }
+          { href: "/kr/watchlist?view=review", label: "관심 대상 다시 보기" }
         ]}
         className={styles.heroActions}
         primaryClassName={styles.primaryAction}
@@ -222,6 +231,7 @@ export default async function KoreanChangesPage({ searchParams }: KoreanChangesP
       ) : null}
 
       {!changes.isEmpty ? (
+        <DensityDetails title="마지막 확인 이후 전체 변화 보기">
         <section className={styles.changedSince} aria-labelledby="since-title">
           <KRSectionHeader
             className={styles.sectionHeader}
@@ -237,6 +247,7 @@ export default async function KoreanChangesPage({ searchParams }: KoreanChangesP
             ))}
           </div>
         </section>
+        </DensityDetails>
       ) : null}
 
       <section className={styles.analysisImpact} aria-labelledby="analysis-impact-title">
@@ -283,6 +294,7 @@ export default async function KoreanChangesPage({ searchParams }: KoreanChangesP
         )}
       </section>
 
+      <DensityDetails title="새 공식 정보와 정정 정보 보기">
       <section className={styles.officialEvidence} aria-labelledby="official-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="새 공식 정보" eyebrowClassName={styles.eyebrow} id="official-title" title="뉴스 카드가 아니라 출처와 확인 범위를 먼저 봅니다." />
         {changes.officialEvidence.length > 0 ? (
@@ -345,7 +357,9 @@ export default async function KoreanChangesPage({ searchParams }: KoreanChangesP
           <KREmptyState className={styles.inlineEmpty} description="정정 공시나 수정 발표가 있으면 이 영역에서 우선 표시합니다." eyebrow="정정 없음" title="현재 정정 또는 상태 변경 정보가 없습니다." titleId="correction-empty" />
         )}
       </section>
+      </DensityDetails>
 
+      <DensityDetails title="관심 종목 변화와 미확인 내용 보기">
       <section className={styles.watchlistSection} aria-labelledby="watchlist-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="관심 종목 변화" eyebrowClassName={styles.eyebrow} id="watchlist-title" title="관심 종목 목록이 아니라 새 공식 변화만 요약합니다." />
         {changes.watchlist.length > 0 ? (
@@ -395,7 +409,9 @@ export default async function KoreanChangesPage({ searchParams }: KoreanChangesP
           <KREmptyState className={styles.inlineEmpty} description="아직 단정할 수 없는 내용이 있으면 개수와 다음 확인 조건을 항상 표시합니다." eyebrow="미확인 없음" title="현재 유지 중인 미확인 항목이 없습니다." titleId="unresolved-empty" />
         )}
       </section>
+      </DensityDetails>
 
+      <DensityDetails title="반영 완료와 다음 확인 항목 보기">
       <section className={styles.appliedSection} aria-labelledby="applied-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="반영 완료한 변화" eyebrowClassName={styles.eyebrow} id="applied-title" title="읽음과 분석 반영은 다르게 처리합니다." />
         {changes.applied.length > 0 ? (
@@ -422,6 +438,7 @@ export default async function KoreanChangesPage({ searchParams }: KoreanChangesP
           ))}
         </div>
       </section>
+      </DensityDetails>
     </main>
   );
 }

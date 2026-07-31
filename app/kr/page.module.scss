@@ -82,6 +82,8 @@
 }
 
 .hero,
+.searchBoxSection,
+.densityDetails,
 .marketStrip,
 .todayFocus,
 .twoColumn,
@@ -97,11 +99,11 @@
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.6fr);
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
   align-items: stretch;
   border-bottom: 1px solid #151515;
-  padding: 42px 0 34px;
+  padding: 32px 0 26px;
 }
 
 .heroCopy {
@@ -136,7 +138,7 @@
 
 .trustList {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   margin: 0;
   border: 1px solid #c7c7c2;
@@ -216,6 +218,8 @@
 }
 
 .marketStrip,
+.searchBoxSection,
+.densityDetails,
 .todayFocus,
 .reasonSection,
 .evidenceSection,
@@ -223,6 +227,35 @@
 .watchlistSection,
 .twoColumnBottom {
   margin-top: 42px;
+}
+
+.searchBoxSection {
+  margin-top: 24px;
+}
+
+.densityDetails {
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+}
+
+.densityDetails summary {
+  cursor: pointer;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 16px 18px;
+  font-weight: 700;
+}
+
+.densityDetails:not([open]) summary {
+  border-bottom: 0;
+}
+
+.densityDetails > section {
+  width: calc(100% - 36px);
+  margin: 18px auto 0;
+}
+
+.densityDetails > section:last-child {
+  margin-bottom: 18px;
 }
 
 .sectionHeader {
@@ -579,6 +612,8 @@
   }
 
   .hero,
+  .searchBoxSection,
+  .densityDetails,
   .marketStrip,
   .todayFocus,
   .twoColumn,
@@ -592,12 +627,16 @@
   }
 
   .hero {
-    gap: 22px;
-    padding-top: 28px;
+    gap: 16px;
+    padding-top: 22px;
   }
 
   .hero h1 {
-    font-size: 31px;
+    font-size: 28px;
+  }
+
+  .densityDetails > section {
+    width: calc(100% - 28px);
   }
 
   .trustList,
@@ -680,6 +719,8 @@
 
 @media (max-width: 340px) {
   .hero,
+  .searchBoxSection,
+  .densityDetails,
   .marketStrip,
   .todayFocus,
   .twoColumn,

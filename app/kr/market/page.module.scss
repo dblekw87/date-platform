@@ -8,6 +8,7 @@
 
 .hero,
 .priorityEngine,
+.densityDetails,
 .marketBoard,
 .timeline,
 .relation,
@@ -136,6 +137,28 @@
 .priorityMap {
   display: grid;
   gap: 12px;
+}
+
+.densityDetails {
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+}
+
+.densityDetails summary {
+  cursor: pointer;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 16px 18px;
+  font-weight: 700;
+}
+
+.densityDetails:not([open]) summary {
+  border-bottom: 0;
+}
+
+.densityDetails > section,
+.densityDetails > div {
+  width: calc(100% - 36px);
+  margin: 18px auto;
 }
 
 .priorityMap article {
@@ -500,7 +523,16 @@
   }
 
   .hero h1 {
-    font-size: 31px;
+    font-size: 28px;
+  }
+
+  .hero {
+    padding-bottom: 22px;
+  }
+
+  .densityDetails > section,
+  .densityDetails > div {
+    width: calc(100% - 28px);
   }
 
   .heroActions,

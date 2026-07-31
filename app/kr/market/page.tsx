@@ -7,6 +7,7 @@ import {
   KRSectionHeader,
   KRCTAGroup
 } from "../_components/design-language";
+import type { ReactNode } from "react";
 import styles from "./page.module.scss";
 
 const priorityItems = [
@@ -113,13 +114,24 @@ const sectionNameOptions = [
   "움직임보다 먼저 볼 근거"
 ];
 
+function DensityDetails({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details className={styles.densityDetails}>
+      <summary>{title}</summary>
+      {children}
+    </details>
+  );
+}
+
 export default function KoreanMarketPage() {
+  const [leadPriority, ...secondaryPriorities] = priorityItems;
+
   return (
     <main className={styles.page}>
       <KRHero
         aside={
           <div className={styles.statePanel} aria-label="시장 상태별 우선 정보">
-            {marketStates.map((state) => (
+            {marketStates.filter((state) => state.label === "장 중").map((state) => (
               <article className={state.label === "장 중" ? styles.activeState : undefined} key={state.label}>
                 <strong>{state.label}</strong>
                 <span>{state.headline}</span>
@@ -144,8 +156,8 @@ export default function KoreanMarketPage() {
         <KRCTAGroup
           actions={[
             { href: "#priority-engine", label: "가장 먼저 볼 변화 확인", variant: "primary" },
-            { href: "/kr/evidence", label: "공식 근거 확인하기" },
-            { href: "/kr/changes?view=latest", label: "마지막 확인 이후 변화 보기" }
+            { href: "#related-market-targets", label: "관련 종목 보기" },
+            { href: "/kr/changes?view=latest", label: "달라진 내용 보기" }
           ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}
@@ -168,7 +180,7 @@ export default function KoreanMarketPage() {
           title="오늘 확인할 시장 변화"
         />
         <div className={styles.priorityMap}>
-          {priorityItems.map((item) => (
+          {[leadPriority].map((item) => (
             <article key={item.rank}>
               <div className={styles.priorityScore}>
                 <strong>{item.rank}</strong>
@@ -209,8 +221,42 @@ export default function KoreanMarketPage() {
             </article>
           ))}
         </div>
+        <DensityDetails title="나머지 시장 변화 2개 보기">
+          <div className={styles.priorityMap}>
+            {secondaryPriorities.map((item) => (
+              <article key={item.rank}>
+                <div className={styles.priorityScore}>
+                  <strong>{item.rank}</strong>
+                  <span>{item.score}</span>
+                  <small>우선도</small>
+                </div>
+                <div className={styles.priorityBody}>
+                  <h3>{item.title}</h3>
+                  <p>{item.urgency}</p>
+                  <dl>
+                    <div>
+                      <dt>공식 정보</dt>
+                      <dd>{item.official}</dd>
+                    </div>
+                    <div>
+                      <dt>관련 시장</dt>
+                      <dd>{item.markets}</dd>
+                    </div>
+                    <div>
+                      <dt>확인 상태</dt>
+                      <dd>
+                        <KRConfidenceBadge className={styles.confidenceBadge}>{item.state}</KRConfidenceBadge>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </article>
+            ))}
+          </div>
+        </DensityDetails>
       </section>
 
+      <DensityDetails title="지수·선물·환율·유가 기준점 보기">
       <section className={styles.marketBoard} aria-labelledby="board-title">
         <KRSectionHeader
           className={styles.sectionHeader}
@@ -233,7 +279,9 @@ export default function KoreanMarketPage() {
           ))}
         </div>
       </section>
+      </DensityDetails>
 
+      <DensityDetails title="시장 흐름과 연결 경로 보기">
       <section className={styles.timeline} aria-labelledby="timeline-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="시장 흐름" eyebrowClassName={styles.eyebrow} id="timeline-title" title="시간 순서로 연결되는 변화" />
         <ol>
@@ -262,8 +310,9 @@ export default function KoreanMarketPage() {
           장기채 반응을 해석할 때 참고합니다.
         </p>
       </section>
+      </DensityDetails>
 
-      <section className={styles.twoColumn} aria-label="관련 테마와 관련 종목">
+      <section className={styles.twoColumn} id="related-market-targets" aria-label="관련 테마와 관련 종목">
         <div>
           <KRSectionHeader className={styles.sectionHeader} eyebrow="관련 테마" eyebrowClassName={styles.eyebrow} title="변화에서 파생된 테마" />
           <ul className={styles.listRows}>
@@ -294,6 +343,7 @@ export default function KoreanMarketPage() {
         </div>
       </section>
 
+      <DensityDetails title="확인 상태와 정보가 적은 날의 기준 보기">
       <section className={styles.confidence} aria-labelledby="confidence-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="확인 상태" eyebrowClassName={styles.eyebrow} id="confidence-title" title="정보를 신뢰할 수 있는 이유를 함께 표시합니다." />
         <div className={styles.confidenceScale}>
@@ -325,6 +375,7 @@ export default function KoreanMarketPage() {
         title="새 공식 정보가 없을 때도 다음 행동을 안내합니다."
         titleId="empty-title"
       />
+      </DensityDetails>
 
       <section className={styles.evidenceEntry} aria-labelledby="evidence-entry-title">
         <div>
@@ -333,7 +384,7 @@ export default function KoreanMarketPage() {
         </div>
         <KRCTAGroup
           actions={[
-            { href: "/kr/evidence", label: "공식 근거 보기", variant: "primary" },
+            { href: "/kr/evidence?id=dart-samsung-001", label: "대표 공시 보기", variant: "primary" },
             { href: "/kr/analysis?id=samsung-semiconductor-001", label: "분석에 추가하기" },
             { href: "/kr/watchlist?view=default#add-flow-title", label: "관련 종목 추적 시작" }
           ]}
@@ -342,6 +393,7 @@ export default function KoreanMarketPage() {
         />
       </section>
 
+      <DensityDetails title="섹션 명칭 검토 보기">
       <section className={styles.namingReview} aria-labelledby="naming-title">
         <KRSectionHeader
           className={styles.sectionHeader}
@@ -363,6 +415,7 @@ export default function KoreanMarketPage() {
           ))}
         </ul>
       </section>
+      </DensityDetails>
     </main>
   );
 }

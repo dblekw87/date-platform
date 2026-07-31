@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   KRCTAGroup,
   KRConfidenceBadge,
@@ -29,6 +30,15 @@ function priorityClass(priority: WatchlistItem["priority"]) {
   if (priority === 1) return styles.priorityOne;
   if (priority === 2) return styles.priorityTwo;
   return styles.priorityDefault;
+}
+
+function DensityDetails({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details className={styles.densityDetails}>
+      <summary>{title}</summary>
+      {children}
+    </details>
+  );
 }
 
 function WatchlistHero({ watchlist }: { watchlist: ReturnType<typeof getWatchlistMock> }) {
@@ -78,9 +88,8 @@ function WatchlistHero({ watchlist }: { watchlist: ReturnType<typeof getWatchlis
       <KRCTAGroup
         actions={[
           { href: primaryHref, label: watchlist.primaryAction, variant: "primary" },
-          { href: "#add-flow-title", label: "관심 종목 추가하기" },
-          { href: "#custom-lists-title", label: "사용자 목록 보기" },
-          { href: "#paused-title", label: "추적 보류 항목 보기" }
+          { href: "/kr/search", label: "검색해서 관심 대상 추가" },
+          { href: "/kr/changes?view=latest", label: "달라진 내용 보기" },
         ]}
         className={styles.heroActions}
         primaryClassName={styles.primaryAction}
@@ -142,7 +151,7 @@ function LeadItem({ item }: { item: WatchlistItem }) {
         <KRCTAGroup
           actions={[
             { href: item.changesHref, label: item.primaryAction, variant: "primary" },
-            { href: item.analysisHref, label: "Analysis 보기" },
+            { href: item.analysisHref, label: "분석 다시 보기" },
             { href: item.evidenceHref, label: "새 근거 보기" }
           ]}
           className={styles.cardActions}
@@ -263,7 +272,7 @@ function EvidenceSection({ evidence }: { evidence: WatchEvidence[] }) {
                   <dd>{item.analysisImpact}</dd>
                 </div>
               </dl>
-              <Link href={item.href}>Evidence 상세 보기</Link>
+              <Link href={item.href}>새 근거 확인하기</Link>
             </article>
           ))
         ) : (
@@ -583,16 +592,36 @@ export default async function KoreanWatchlistPage({ searchParams }: KoreanWatchl
         />
       ) : null}
 
-      {!watchlist.isEmpty ? <ReviewSection items={watchlist.reviewItems} /> : null}
-      {!watchlist.isEmpty ? <EvidenceSection evidence={watchlist.officialEvidence} /> : null}
-      {!watchlist.isEmpty ? <AnalysisSection analyses={watchlist.analysisReviews} /> : null}
-      {!watchlist.isEmpty ? <NextCheckSection nextChecks={watchlist.nextChecks} /> : null}
-      {!watchlist.isEmpty ? <StableSection items={watchlist.stableItems} /> : null}
-      {!watchlist.isEmpty ? <ListGroupsSection groups={watchlist.listGroups} /> : null}
-      {!watchlist.isEmpty ? <PausedSection items={watchlist.pausedItems} /> : null}
+      {!watchlist.isEmpty ? (
+        <DensityDetails title="확인이 필요한 대상과 새 공식 정보 보기">
+          <ReviewSection items={watchlist.reviewItems} />
+          <EvidenceSection evidence={watchlist.officialEvidence} />
+        </DensityDetails>
+      ) : null}
+      {!watchlist.isEmpty ? (
+        <DensityDetails title="Analysis 재검토와 다음 확인 시점 보기">
+          <AnalysisSection analyses={watchlist.analysisReviews} />
+          <NextCheckSection nextChecks={watchlist.nextChecks} />
+        </DensityDetails>
+      ) : null}
+      {!watchlist.isEmpty ? (
+        <DensityDetails title="현재 변화 없음과 사용자 목록 보기">
+          <StableSection items={watchlist.stableItems} />
+          <ListGroupsSection groups={watchlist.listGroups} />
+        </DensityDetails>
+      ) : null}
+      {!watchlist.isEmpty ? (
+        <DensityDetails title="추적 보류와 관심 추가 흐름 보기">
+          <PausedSection items={watchlist.pausedItems} />
+          <AddFlowSection watchlist={watchlist} />
+        </DensityDetails>
+      ) : (
+        <AddFlowSection watchlist={watchlist} />
+      )}
 
-      <AddFlowSection watchlist={watchlist} />
-      <EmptyStatesSection watchlist={watchlist} />
+      <DensityDetails title="비어 있는 상태 예시 보기">
+        <EmptyStatesSection watchlist={watchlist} />
+      </DensityDetails>
     </main>
   );
 }

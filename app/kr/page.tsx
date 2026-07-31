@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   KREntityChip,
   KRHero,
@@ -123,17 +124,19 @@ const watchlistChanges = [
   { name: "Apple", detail: "AI 기기 공급망 관련 근거가 추가됐습니다.", state: "확인됨" }
 ];
 
+function DensityDetails({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details className={styles.densityDetails}>
+      <summary>{title}</summary>
+      {children}
+    </details>
+  );
+}
+
 export default function KoreanHome() {
   return (
     <main>
       <KRHero
-        aside={
-          <aside className={styles.searchBox} aria-labelledby="kr-search-title">
-            <h2 id="kr-search-title">찾고 싶은 종목이나 근거가 있나요?</h2>
-            <div className={styles.searchPlaceholder}>종목명, 종목 코드, 테마, 투자 근거 검색</div>
-            <p>검색은 보조 진입입니다. 먼저 오늘 시장의 핵심 변화를 확인하세요.</p>
-          </aside>
-        }
         className={styles.hero}
         copyClassName={styles.heroCopy}
         description={
@@ -153,21 +156,14 @@ export default function KoreanHome() {
               <dd>확인 중</dd>
             </div>
             <div>
-              <dt>공개 시각</dt>
-              <dd>예시 09:30</dd>
-            </div>
-            <div>
-              <dt>관련 종목</dt>
-              <dd>삼성전자 · Apple</dd>
-            </div>
-            <div>
               <dt>아직 확인할 내용</dt>
               <dd>정책 범위 · 시행 시점</dd>
             </div>
           </dl>
           <KRCTAGroup
             actions={[
-              { href: "/kr/evidence", label: "공식 근거 확인하기", variant: "primary" },
+              { href: "/kr/evidence?id=dart-samsung-001", label: "대표 공시 확인하기", variant: "primary" },
+              { href: "/kr/market", label: "시장 흐름 먼저 보기" },
               { href: "/kr/stock/005930", label: "관련 종목 보기" }
             ]}
             className={styles.heroActions}
@@ -175,6 +171,15 @@ export default function KoreanHome() {
           />
       </KRHero>
 
+      <section className={styles.searchBoxSection} aria-labelledby="kr-search-title">
+        <aside className={styles.searchBox}>
+          <h2 id="kr-search-title">찾고 싶은 종목이나 근거가 있나요?</h2>
+          <div className={styles.searchPlaceholder}>종목명, 종목 코드, 테마, 투자 근거 검색</div>
+          <p>검색은 보조 진입입니다. 먼저 오늘 시장의 핵심 변화를 확인하세요.</p>
+        </aside>
+      </section>
+
+      <DensityDetails title="시장 기준점 펼치기">
       <section className={styles.marketStrip} aria-labelledby="market-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="시장 기준점" eyebrowClassName={styles.eyebrow} id="market-title" title="주요 지수·선물·환율·유가" />
         <div className={styles.marketItems}>
@@ -188,6 +193,7 @@ export default function KoreanHome() {
           ))}
         </div>
       </section>
+      </DensityDetails>
 
       <section className={styles.todayFocus} aria-labelledby="focus-title">
         <KRSectionHeader
@@ -207,12 +213,13 @@ export default function KoreanHome() {
                 <p>{item.why}</p>
                 <small>{item.state} · {item.linked}</small>
               </div>
-              <Link href={index === 0 ? "/kr/evidence" : "/kr/market"}>근거 보기</Link>
+              <Link href={index === 0 ? "/kr/evidence?id=dart-samsung-001" : "/kr/market"}>근거 보기</Link>
             </article>
           ))}
         </div>
       </section>
 
+      <DensityDetails title="관련 대상 펼치기">
       <section className={styles.twoColumn} aria-label="테마와 많이 보는 종목">
         <div className={styles.themeFlow}>
           <KRSectionHeader className={styles.sectionHeader} eyebrow="주목받는 테마" eyebrowClassName={styles.eyebrow} title="시장 변화에서 이어지는 테마" />
@@ -248,7 +255,9 @@ export default function KoreanHome() {
           </ul>
         </div>
       </section>
+      </DensityDetails>
 
+      <DensityDetails title="움직인 이유 펼치기">
       <section className={styles.reasonSection} aria-labelledby="reason-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="움직인 이유" eyebrowClassName={styles.eyebrow} id="reason-title" title="시장 변화가 종목과 어떻게 연결되는지 확인하세요." />
         <ol className={styles.reasonFlow}>
@@ -259,11 +268,13 @@ export default function KoreanHome() {
           <li>아직 단정할 수 없는 내용을 남김</li>
         </ol>
       </section>
+      </DensityDetails>
 
+      <DensityDetails title="대표 근거와 미확인 내용 펼치기">
       <section className={styles.evidenceSection} aria-labelledby="evidence-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="공식적으로 확인된 투자 근거" eyebrowClassName={styles.eyebrow} id="evidence-title" title="출처와 공개 시각을 먼저 확인합니다." />
         <div className={styles.evidenceLayout}>
-          <Link className={styles.leadEvidence} href="/kr/evidence">
+          <Link className={styles.leadEvidence} href="/kr/evidence?id=dart-samsung-001">
             <span>{evidenceItems[0].id}</span>
             <strong>{evidenceItems[0].title}</strong>
             <small>{evidenceItems[0].source} · {evidenceItems[0].time}</small>
@@ -272,7 +283,7 @@ export default function KoreanHome() {
           <ul className={styles.evidenceRows}>
             {evidenceItems.slice(1).map((item) => (
               <li key={item.id}>
-                <Link href="/kr/evidence">
+                <Link href="/kr/evidence?id=ir-semiconductor-001">
                   <span>{item.id}</span>
                   <strong>{item.title}</strong>
                   <small>{item.source} · {item.time}</small>
@@ -299,7 +310,9 @@ export default function KoreanHome() {
           </ul>
         </details>
       </section>
+      </DensityDetails>
 
+      <DensityDetails title="내가 이어서 볼 내용 펼치기">
       <section className={styles.watchlistSection} aria-labelledby="watch-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="관심 종목에서 달라진 내용" eyebrowClassName={styles.eyebrow} id="watch-title" title="새롭게 감지된 변화를 먼저 봅니다." />
         <ul className={styles.simpleList}>
@@ -333,6 +346,7 @@ export default function KoreanHome() {
           <Link href="/kr/journal">기록 보기</Link>
         </article>
       </section>
+      </DensityDetails>
     </main>
   );
 }

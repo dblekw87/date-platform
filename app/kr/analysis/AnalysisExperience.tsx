@@ -974,6 +974,8 @@ export function AnalysisExperience({ analysis, isUnknown }: { analysis: Analysis
     applyEdit,
     error
   };
+  const primarySections = sectionOrder.slice(0, 3);
+  const secondarySections = sectionOrder.slice(3);
 
   function renderSection(section: string) {
     const sections: Record<string, ReactNode> = {
@@ -1033,7 +1035,11 @@ export function AnalysisExperience({ analysis, isUnknown }: { analysis: Analysis
           {sectionLabels[editingSection]}만 편집 중입니다. 다른 섹션은 읽기 상태로 유지됩니다.
         </p>
       ) : null}
-      {sectionOrder.map(renderSection)}
+      {primarySections.map(renderSection)}
+      <details className={styles.densityDetails}>
+        <summary>나머지 분석 항목 {secondarySections.length}개 보기</summary>
+        {secondarySections.map(renderSection)}
+      </details>
     </main>
   );
 }

@@ -8,6 +8,7 @@
 }
 
 .hero,
+.densityDetails,
 .leadSection,
 .reviewSection,
 .evidenceSection,
@@ -20,6 +21,27 @@
 .emptySection,
 .emptyFirst {
   min-width: 0;
+}
+
+.densityDetails {
+  border: 1px solid #c7c7c2;
+  background: #fbfbfa;
+}
+
+.densityDetails summary {
+  cursor: pointer;
+  border-bottom: 1px solid #c7c7c2;
+  padding: 16px 18px;
+  font-weight: 700;
+}
+
+.densityDetails:not([open]) summary {
+  border-bottom: 0;
+}
+
+.densityDetails > section {
+  width: calc(100% - 36px);
+  margin: 18px auto;
 }
 
 .hero {
@@ -445,11 +467,15 @@
 
   .hero {
     gap: 22px;
-    padding: 20px 0 30px;
+    padding: 16px 0 24px;
   }
 
   .hero h1 {
-    font-size: 29px;
+    font-size: 27px;
+  }
+
+  .densityDetails > section {
+    width: calc(100% - 28px);
   }
 
   .summaryPanel,

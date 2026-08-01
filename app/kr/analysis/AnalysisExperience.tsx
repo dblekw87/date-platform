@@ -916,6 +916,7 @@ export function AnalysisExperience({ analysis, isUnknown }: { analysis: Analysis
   const [draft, setDraft] = useState<DraftState | null>(null);
   const [error, setError] = useState<string | undefined>();
   const [appliedSection, setAppliedSection] = useState<EditableSection | null>(null);
+  const editTriggerRef = useRef<HTMLElement | null>(null);
   const sectionOrder = useMemo(() => getSectionOrder(analysis), [analysis]);
 
   const dirty = isDirty(editingSection, draft, editable);
@@ -926,10 +927,17 @@ export function AnalysisExperience({ analysis, isUnknown }: { analysis: Analysis
       if (!discard) return;
     }
 
+    editTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setError(undefined);
     setAppliedSection(null);
     setEditingSection(section);
     setDraft(createDraft(editable));
+  }
+
+  function restoreEditTriggerFocus() {
+    window.setTimeout(() => {
+      editTriggerRef.current?.focus();
+    }, 0);
   }
 
   function cancelEdit() {
@@ -941,6 +949,7 @@ export function AnalysisExperience({ analysis, isUnknown }: { analysis: Analysis
     setEditingSection(null);
     setDraft(null);
     setError(undefined);
+    restoreEditTriggerFocus();
   }
 
   function applyEdit() {
@@ -965,6 +974,7 @@ export function AnalysisExperience({ analysis, isUnknown }: { analysis: Analysis
     setEditingSection(null);
     setDraft(null);
     setError(undefined);
+    restoreEditTriggerFocus();
   }
 
   const editProps: EditControlProps = {
@@ -1037,7 +1047,7 @@ export function AnalysisExperience({ analysis, isUnknown }: { analysis: Analysis
       ) : null}
       {primarySections.map(renderSection)}
       <details className={styles.densityDetails}>
-        <summary>나머지 분석 항목 {secondarySections.length}개 보기</summary>
+        <summary>판단 변경 조건·다음 확인을 포함한 나머지 분석 항목 {secondarySections.length}개 보기</summary>
         {secondarySections.map(renderSection)}
       </details>
     </main>

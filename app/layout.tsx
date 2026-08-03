@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.scss";
 
 export const metadata: Metadata = {
-  title: "DATE Phase17 와이어프레임",
-  description: "정보 구조 검증을 위한 그레이 박스 대시보드 와이어프레임 프로토타입."
+  title: "DATE 시장 확인 보드",
+  description: "미국장 시황, 국내 뉴스, 일정, 속보, 수급과 차트를 빠르게 확인하는 시장 보드."
 };
 
 export default function RootLayout({

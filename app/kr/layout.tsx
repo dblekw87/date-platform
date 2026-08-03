@@ -24,7 +24,7 @@ const secondaryRoutes = [
   { label: "테마", href: "/kr/theme" },
   { label: "투자 근거", href: "/kr/evidence" },
   { label: "관심 종목", href: "/kr/watchlist" },
-  { label: "참고 보드", href: "/kr/reference-board" },
+  // { label: "참고 보드", href: "/kr/reference-board" },
   { label: "설정", href: "/kr/settings" }
 ];
 
@@ -38,37 +38,45 @@ function isActive(pathname: string, href: string) {
 
 export default function KoreanPrototypeLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
+  const isHome = pathname === "/kr";
 
   return (
-    <div className={styles.shell}>
-      <header className={styles.header}>
+    <div className={`${styles.shell} ${isHome ? styles.homeShell : ""}`}>
+      <header className={`${styles.header} ${isHome ? styles.homeHeader : ""}`}>
         <Link className={styles.logo} href="/kr" aria-label="DATE 한국형 홈">
           DATE
         </Link>
-        <nav className={styles.desktopNav} aria-label="주요 메뉴">
-          {desktopNavigation.map((item) => (
+        {isHome ? <span className={styles.homeMeta}>시장 확인 보드 · Prototype</span> : null}
+        {!isHome ? (
+          <>
+            <nav className={styles.desktopNav} aria-label="주요 메뉴">
+              {desktopNavigation.map((item) => (
+                <Link aria-current={isActive(pathname, item.href) ? "page" : undefined} href={item.href} key={item.href}>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className={styles.headerActions}>
+              <Link href="/kr/search">종목·근거 검색</Link>
+              <Link href="/kr/settings">내 정보</Link>
+            </div>
+          </>
+        ) : null}
+      </header>
+
+      {!isHome ? (
+        <nav className={styles.routeMap} aria-label="보조 이동">
+          {secondaryRoutes.map((item) => (
             <Link aria-current={isActive(pathname, item.href) ? "page" : undefined} href={item.href} key={item.href}>
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className={styles.headerActions}>
-          <Link href="/kr/search">종목·근거 검색</Link>
-          <Link href="/kr/settings">내 정보</Link>
-        </div>
-      </header>
-
-      <nav className={styles.routeMap} aria-label="보조 이동">
-        {secondaryRoutes.map((item) => (
-          <Link aria-current={isActive(pathname, item.href) ? "page" : undefined} href={item.href} key={item.href}>
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      ) : null}
 
       {children}
 
-      <footer className={styles.footer}>
+      {!isHome ? <footer className={styles.footer}>
         <span>DATE 한국형 경험 Prototype</span>
         <nav aria-label="하단 이동">
           {[...desktopNavigation, ...secondaryRoutes].map((item) => (
@@ -77,16 +85,16 @@ export default function KoreanPrototypeLayout({ children }: Readonly<{ children:
             </Link>
           ))}
         </nav>
-      </footer>
+      </footer> : null}
 
-      <nav className={styles.bottomNav} aria-label="모바일 하단 메뉴">
+      {!isHome ? <nav className={styles.bottomNav} aria-label="모바일 하단 메뉴">
         {mobileNavigation.map((item) => (
           <Link aria-current={isActive(pathname, item.href) ? "page" : undefined} href={item.href} key={item.href}>
             <span aria-hidden="true">□</span>
             {item.label}
           </Link>
         ))}
-      </nav>
+      </nav> : null}
     </div>
   );
 }

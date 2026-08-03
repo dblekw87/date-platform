@@ -24,6 +24,7 @@ const secondaryRoutes = [
   { label: "테마", href: "/kr/theme" },
   { label: "투자 근거", href: "/kr/evidence" },
   { label: "관심 종목", href: "/kr/watchlist" },
+  { label: "참고 보드", href: "/kr/reference-board" },
   { label: "설정", href: "/kr/settings" }
 ];
 

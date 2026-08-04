@@ -5,9 +5,6 @@ import type { MarketBoardProviderPayload } from "./types";
 import type { MarketSnapshotDto, Tone } from "../types";
 
 const requiredEnv = ["FINNHUB_API_KEY"];
-const kisBaseUrl = "https://openapi.koreainvestment.com:9443";
-
-let kisTokenCache: { accessToken: string; expiresAt: number } | undefined;
 
 type FinnhubQuote = {
   c?: number;
@@ -27,24 +24,6 @@ type CoingeckoSimplePrice = {
   };
 };
 
-type KisTokenResponse = {
-  access_token?: string;
-  expires_in?: number;
-};
-
-type KisIndexPriceResponse = {
-  rt_cd?: string;
-  msg_cd?: string;
-  msg1?: string;
-  output?: {
-    bstp_nmix_prpr?: string;
-    bstp_nmix_prdy_vrss?: string;
-    bstp_nmix_prdy_ctrt?: string;
-    acml_vol?: string;
-    acml_tr_pbmn?: string;
-  };
-};
-
 type MarketQuoteConfig = {
   id: string;
   label: string;
@@ -54,14 +33,6 @@ type MarketQuoteConfig = {
   finnhubSymbol: string;
   note: string;
   precision?: number;
-};
-
-type KisIndexConfig = {
-  id: string;
-  label: string;
-  symbol: string;
-  kisCode: string;
-  note: string;
 };
 
 const finnhubMacroQuotes: MarketQuoteConfig[] = [
@@ -112,30 +83,6 @@ const finnhubMacroQuotes: MarketQuoteConfig[] = [
   }
 ];
 
-const kisIndexQuotes: KisIndexConfig[] = [
-  {
-    id: "kospi-day-future",
-    label: "KOSPI",
-    symbol: "KOSPI",
-    kisCode: "0001",
-    note: "KIS 국내업종 현재지수"
-  },
-  {
-    id: "kosdaq-night-future",
-    label: "KOSDAQ",
-    symbol: "KOSDAQ",
-    kisCode: "1001",
-    note: "KIS 국내업종 현재지수"
-  },
-  {
-    id: "kospi-night-future",
-    label: "KOSPI200",
-    symbol: "K200",
-    kisCode: "2001",
-    note: "KIS 국내업종 현재지수"
-  }
-];
-
 function toneFromChange(change?: number): Tone {
   if (!change) return "flat";
 
@@ -159,42 +106,8 @@ function formatChangeRate(value?: number) {
 
 function getFinnhubCredentials() {
   return {
-    apiKey: process.env.FINNHUB_API_KEY,
-    kisAppKey: process.env.KIS_APP_KEY,
-    kisAppSecret: process.env.KIS_APP_SECRET
+    apiKey: process.env.FINNHUB_API_KEY
   };
-}
-
-async function getKisAccessToken(credentials: ReturnType<typeof getFinnhubCredentials>) {
-  const now = Date.now();
-
-  if (kisTokenCache && kisTokenCache.expiresAt > now + 60_000) {
-    return kisTokenCache.accessToken;
-  }
-
-  const response = await fetchJson<KisTokenResponse>(`${kisBaseUrl}/oauth2/tokenP`, {
-    method: "POST",
-    timeoutMs: 5000,
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8"
-    },
-    body: JSON.stringify({
-      grant_type: "client_credentials",
-      appkey: credentials.kisAppKey,
-      appsecret: credentials.kisAppSecret
-    })
-  });
-
-  if (!response.access_token) {
-    throw new Error("KIS token missing");
-  }
-
-  kisTokenCache = {
-    accessToken: response.access_token,
-    expiresAt: now + Math.max((response.expires_in ?? 86_400) - 300, 60) * 1000
-  };
-
-  return kisTokenCache.accessToken;
 }
 
 async function loadFinnhubQuote(config: MarketQuoteConfig, apiKey: string): Promise<MarketSnapshotDto | null> {
@@ -221,58 +134,6 @@ async function loadFinnhubQuote(config: MarketQuoteConfig, apiKey: string): Prom
     note: config.note,
     timestamp,
     source: "market"
-  };
-}
-
-function parseNumeric(value?: string) {
-  const numeric = Number(value?.replace(/,/g, "").trim() ?? "");
-
-  return Number.isFinite(numeric) ? numeric : undefined;
-}
-
-async function loadKisIndexQuote(config: KisIndexConfig, credentials: ReturnType<typeof getFinnhubCredentials>, token: string): Promise<MarketSnapshotDto | null> {
-  if (!credentials.kisAppKey || !credentials.kisAppSecret) return null;
-
-  const url = new URL("/uapi/domestic-stock/v1/quotations/inquire-index-price", kisBaseUrl);
-  url.searchParams.set("FID_COND_MRKT_DIV_CODE", "U");
-  url.searchParams.set("FID_INPUT_ISCD", config.kisCode);
-
-  const response = await fetchJson<KisIndexPriceResponse>(url.toString(), {
-    timeoutMs: 3500,
-    headers: {
-      authorization: `Bearer ${token}`,
-      appkey: credentials.kisAppKey,
-      appsecret: credentials.kisAppSecret,
-      tr_id: "FHPUP02100000",
-      custtype: "P",
-      "Content-Type": "application/json; charset=UTF-8"
-    }
-  });
-
-  if (response.rt_cd && response.rt_cd !== "0") {
-    throw new Error(`KIS index ${response.msg_cd ?? "error"}`);
-  }
-
-  const current = parseNumeric(response.output?.bstp_nmix_prpr);
-
-  if (!current) return null;
-
-  const change = parseNumeric(response.output?.bstp_nmix_prdy_vrss);
-  const changeRate = parseNumeric(response.output?.bstp_nmix_prdy_ctrt);
-
-  return {
-    id: config.id,
-    label: config.label,
-    market: "KR",
-    instrumentType: "index",
-    symbol: config.symbol,
-    value: formatValue(current, 2),
-    change: typeof change === "number" ? formatValue(change, 2) : undefined,
-    changeRate: formatChangeRate(changeRate),
-    tone: toneFromChange(changeRate),
-    note: config.note,
-    timestamp: new Date().toISOString(),
-    source: "kis"
   };
 }
 
@@ -309,12 +170,6 @@ async function loadMarketSnapshot(): Promise<MarketBoardProviderPayload> {
 
     if (credentials.apiKey) {
       loaders.push(...finnhubMacroQuotes.map((config) => loadFinnhubQuote(config, credentials.apiKey as string)));
-    }
-
-    if (credentials.kisAppKey && credentials.kisAppSecret) {
-      const token = await getKisAccessToken(credentials);
-
-      loaders.push(...kisIndexQuotes.map((config) => loadKisIndexQuote(config, credentials, token)));
     }
 
     const results = await Promise.allSettled(loaders);

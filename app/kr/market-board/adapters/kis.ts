@@ -2,7 +2,7 @@ import { marketBoardCacheTtl, readThroughCache } from "./cache";
 import { fetchJson } from "./http";
 import { createMockFallbackAdapter } from "./types";
 import type { MarketBoardProviderPayload } from "./types";
-import type { FlowItemDto, LeadingStockDto } from "../types";
+import type { FlowItemDto, LeadingStockDto, MarketSnapshotDto, Tone } from "../types";
 
 const requiredEnv = ["KIS_APP_KEY", "KIS_APP_SECRET"];
 const kisBaseUrl = "https://openapi.koreainvestment.com:9443";
@@ -61,6 +61,49 @@ type KisMinuteChartResponse = {
   msg1?: string;
   output2?: KisMinuteChartItem[];
 };
+
+type KisIndexPriceResponse = {
+  rt_cd?: string;
+  msg_cd?: string;
+  msg1?: string;
+  output?: {
+    bstp_nmix_prpr?: string;
+    bstp_nmix_prdy_vrss?: string;
+    bstp_nmix_prdy_ctrt?: string;
+  };
+};
+
+type KisIndexConfig = {
+  id: string;
+  label: string;
+  symbol: string;
+  kisCode: string;
+  note: string;
+};
+
+const kisIndexQuotes: KisIndexConfig[] = [
+  {
+    id: "kospi-day-future",
+    label: "KOSPI",
+    symbol: "KOSPI",
+    kisCode: "0001",
+    note: "KIS 국내업종 현재지수"
+  },
+  {
+    id: "kosdaq-night-future",
+    label: "KOSDAQ",
+    symbol: "KOSDAQ",
+    kisCode: "1001",
+    note: "KIS 국내업종 현재지수"
+  },
+  {
+    id: "kospi-night-future",
+    label: "KOSPI200",
+    symbol: "K200",
+    kisCode: "2001",
+    note: "KIS 국내업종 현재지수"
+  }
+];
 
 async function getKisAccessToken(credentials: ReturnType<typeof getKisCredentials>) {
   const now = Date.now();
@@ -130,6 +173,27 @@ function formatTurnover(value?: string) {
   if (eok >= 100) return `${Math.round(eok).toLocaleString("ko-KR")}억`;
 
   return `${eok.toFixed(1)}억`;
+}
+
+function formatValue(value?: number, precision = 2) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "확인 중";
+
+  return value.toLocaleString("ko-KR", {
+    maximumFractionDigits: precision,
+    minimumFractionDigits: precision
+  });
+}
+
+function formatChangeRate(value?: number) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+
+  return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+function toneFromChange(change?: number): Tone {
+  if (!change) return "flat";
+
+  return change > 0 ? "up" : "down";
 }
 
 function minuteRequestTime() {
@@ -269,6 +333,58 @@ async function loadKisVolumeRank(credentials: ReturnType<typeof getKisCredential
   return { items: response.output ?? [], token };
 }
 
+async function loadKisIndexQuote(config: KisIndexConfig, credentials: ReturnType<typeof getKisCredentials>, token: string): Promise<MarketSnapshotDto | null> {
+  const response = await fetchJson<KisIndexPriceResponse>(
+    buildKisUrl("/uapi/domestic-stock/v1/quotations/inquire-index-price", {
+      FID_COND_MRKT_DIV_CODE: "U",
+      FID_INPUT_ISCD: config.kisCode
+    }),
+    {
+      timeoutMs: 3500,
+      headers: {
+        authorization: `Bearer ${token}`,
+        appkey: credentials.appKey ?? "",
+        appsecret: credentials.appSecret ?? "",
+        tr_id: "FHPUP02100000",
+        custtype: "P",
+        "Content-Type": "application/json; charset=UTF-8"
+      }
+    }
+  );
+
+  if (response.rt_cd && response.rt_cd !== "0") {
+    throw new Error(`KIS index ${response.msg_cd ?? "error"}`);
+  }
+
+  const current = parseNumeric(response.output?.bstp_nmix_prpr);
+
+  if (!current) return null;
+
+  const change = parseNumeric(response.output?.bstp_nmix_prdy_vrss);
+  const changeRate = parseNumeric(response.output?.bstp_nmix_prdy_ctrt);
+
+  return {
+    id: config.id,
+    label: config.label,
+    market: "KR",
+    instrumentType: "index",
+    symbol: config.symbol,
+    value: formatValue(current, 2),
+    change: typeof change === "number" ? formatValue(change, 2) : undefined,
+    changeRate: formatChangeRate(changeRate),
+    tone: toneFromChange(changeRate),
+    note: config.note,
+    timestamp: new Date().toISOString(),
+    source: "kis"
+  };
+}
+
+async function loadKisIndexSnapshots(credentials: ReturnType<typeof getKisCredentials>, token: string) {
+  const results = await Promise.allSettled(kisIndexQuotes.map((config) => loadKisIndexQuote(config, credentials, token)));
+
+  return results.flatMap((result) => result.status === "fulfilled" && result.value ? [result.value] : []);
+}
+
 async function attachMinutePositions(leaders: LeadingStockDto[], credentials: ReturnType<typeof getKisCredentials>, token: string) {
   if (!credentials.enableMinuteCharts) {
     return leaders;
@@ -363,15 +479,19 @@ async function loadKisMarketData(): Promise<MarketBoardProviderPayload> {
     }
 
     const volumeRank = await loadKisVolumeRank(credentials);
+    const macroSnapshot = await loadKisIndexSnapshots(credentials, volumeRank.token);
     const krLeadingStocks = await attachMinutePositions(volumeRank.items
       .map(toLeadingStock)
       .filter((item): item is LeadingStockDto => Boolean(item))
       .slice(0, 10), credentials, volumeRank.token);
 
-    return krLeadingStocks.length > 0 ? {
-      krLeadingStocks,
-      flowItems: buildKisFlowItems(krLeadingStocks)
-    } : {};
+    return {
+      ...(krLeadingStocks.length > 0 ? {
+        krLeadingStocks,
+        flowItems: buildKisFlowItems(krLeadingStocks)
+      } : {}),
+      ...(macroSnapshot.length > 0 ? { macroSnapshot } : {})
+    };
   });
 }
 

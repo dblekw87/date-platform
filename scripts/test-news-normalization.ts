@@ -31,6 +31,12 @@ const fixture = {
     {
       title: "반도체 장비 수출 관련 뉴스",
       pubDate: "Tue, 04 Aug 2026 09:10:00 +0900",
+      originallink: "https://example.com/naver-chip?utm_source=naver",
+      provider: "NAVER"
+    },
+    {
+      title: "반도체 장비 수출 관련 뉴스",
+      pubDate: "Tue, 04 Aug 2026 09:08:00 +0900",
       originallink: "https://example.com/naver-chip",
       provider: "NAVER"
     },

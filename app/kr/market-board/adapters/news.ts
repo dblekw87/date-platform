@@ -6,9 +6,9 @@ import { createMockFallbackAdapter } from "./types";
 import type { MarketBoardProviderPayload } from "./types";
 
 const requiredEnv = ["MARKET_BOARD_NEWS_FEED_URL", "NAVER_API_HUB_KEY", "NEWSAPI_KEY", "FINNHUB_API_KEY", "BENZINGA_API_KEY"];
-const naverNewsQueries = ["반도체", "AI 인프라", "전력설비", "금리", "환율"];
-const koreanNewsQueries = ["반도체", "AI 인프라", "전력설비", "금리", "환율"];
-const globalNewsQueries = ["semiconductor", "AI infrastructure", "interest rates", "market futures"];
+const naverNewsQueries = ["국내 증시", "코스피 코스닥", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산", "로봇 원전", "자동차 은행", "인수합병 공시"];
+const koreanNewsQueries = ["국내 증시", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산"];
+const globalNewsQueries = ["stock market", "earnings", "interest rates", "semiconductor stocks", "energy oil", "banks", "biotech stocks", "small cap stocks", "merger acquisition"];
 
 function getNewsCredentials() {
   return {
@@ -51,7 +51,7 @@ function loadNaverNewsFeed(query: string, credentials: ReturnType<typeof getNews
 
     const url = buildQueryUrl("https://naverapihub.apigw.ntruss.com/search/v1/news", {
       query,
-      display: 20,
+      display: 10,
       start: 1,
       sort: "date",
       format: "json"
@@ -86,7 +86,7 @@ function loadNewsApiFeed(query: string, credentials: ReturnType<typeof getNewsCr
       q: query,
       language: options.language,
       sortBy: "publishedAt",
-      pageSize: 20,
+      pageSize: 12,
       apiKey: credentials.newsApiKey
     }), { timeoutMs: 1800 });
 
@@ -143,6 +143,13 @@ function shouldTranslateHeadline(item: { region: string; text: string }) {
   return item.region === "US" && !/[가-힣]/.test(item.text);
 }
 
+function isMarketRelevantHeadline(item: { label: string; region: string; source: string; text: string }) {
+  const signalLabels = new Set(["매크로", "실적", "2차전지", "반도체", "AI 인프라", "바이오", "조선·방산", "로봇·원전", "자동차", "금융", "에너지", "암호화폐", "M&A", "정책"]);
+  const text = `${signalLabels.has(item.label) ? item.label : ""} ${item.text}`;
+
+  return /주식|증시|시장|코스피|코스닥|환율|금리|국채|선물|외국인|기관|거래량|거래대금|반도체|2차전지|배터리|바이오|제약|조선|방산|로봇|원전|자동차|은행|금융|증권|에너지|유가|가상자산|비트코인|전력|AI|데이터센터|인수|합병|매각|공시|실적|가이던스|정책|규제|stock|stocks|market|shares|nasdaq|nyse|dow|s&p|russell|futures|etf|fed|fomc|cpi|ppi|yield|treasury|rate|rates|inflation|dollar|currency|oil|crude|fuel|gold|energy|earnings|guidance|merger|acquisition|m&a|sale|sec|fda|semiconductor|chip|chips|battery|biotech|pharma|bank|banks|brokerage|defense|shipbuilding|robot|nuclear|crypto|bitcoin|ai|data center|tariff|regulation/i.test(text);
+}
+
 async function translateHeadline(text: string, credentials: ReturnType<typeof getNewsCredentials>) {
   if (!credentials.papagoClientId || !credentials.papagoClientSecret) return undefined;
 
@@ -188,6 +195,22 @@ function balanceHeadlinesByRegion<T extends Array<{ region: string; publishedAt:
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)) as T;
 }
 
+function limitDominantLabels<T extends Array<{ label: string; region: string; publishedAt: string }>>(items: T) {
+  const sorted = [...items].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  const counts = new Map<string, number>();
+
+  return sorted.filter((item) => {
+    const key = `${item.region}:${item.label}`;
+    const nextCount = (counts.get(key) ?? 0) + 1;
+    const limit = item.label === "헤드라인" || item.label === "general" ? 8 : 12;
+
+    if (nextCount > limit) return false;
+
+    counts.set(key, nextCount);
+    return true;
+  }) as T;
+}
+
 async function loadNewsHeadlines(): Promise<MarketBoardProviderPayload> {
   return readThroughCache("market-board:news:headlines", marketBoardCacheTtl.news, async () => {
     const credentials = getNewsCredentials();
@@ -209,7 +232,9 @@ async function loadNewsHeadlines(): Promise<MarketBoardProviderPayload> {
     loaders.push(loadFinnhubFeed("forex", credentials));
     loaders.push(loadBenzingaFeed(credentials));
 
-    const headlineFlow = await translateUsHeadlines(balanceHeadlinesByRegion(dedupeNews(await settleFeeds(loaders))), credentials);
+    const rawHeadlines = await settleFeeds(loaders);
+    const marketHeadlines = rawHeadlines.filter(isMarketRelevantHeadline);
+    const headlineFlow = await translateUsHeadlines(balanceHeadlinesByRegion(limitDominantLabels(dedupeNews(marketHeadlines))), credentials);
     const newHeadlineIds = await recordNewsHeadlines(headlineFlow.map((item) => item.id));
     const detectedAt = new Date().toISOString();
     const headlineFlowWithState = headlineFlow.map((item) => ({

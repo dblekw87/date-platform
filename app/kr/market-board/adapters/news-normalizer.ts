@@ -72,8 +72,17 @@ function labelFromRaw(item: RawNewsItem) {
   const text = `${item.category ?? ""} ${item.label ?? ""} ${item.title ?? ""} ${item.headline ?? ""}`.toLowerCase();
 
   if (/rate|yield|fed|fomc|cpi|ppi|금리|환율|달러|물가/.test(text)) return "매크로";
-  if (/semiconductor|chip|hbm|반도체/.test(text)) return "반도체";
-  if (/ai|data center|데이터센터|전력/.test(text)) return "AI 인프라";
+  if (/earnings|guidance|실적|가이던스|컨센서스/.test(text)) return "실적";
+  if (/battery|secondary battery|2차전지|배터리/.test(text)) return "2차전지";
+  if (/semiconductor|\bchips?\b|hbm|반도체/.test(text)) return "반도체";
+  if (/\bai\b|artificial intelligence|data center|데이터센터|전력/.test(text)) return "AI 인프라";
+  if (/bio|biotech|pharma|fda|바이오|제약|임상|승인/.test(text)) return "바이오";
+  if (/shipbuilding|shipyard|defense|aerospace|조선|방산|항공|우주/.test(text)) return "조선·방산";
+  if (/robot|automation|nuclear|uranium|로봇|자동화|원전|원자력/.test(text)) return "로봇·원전";
+  if (/energy|oil|crude|fuel|gas|wti|lng|에너지|유가|가스/.test(text)) return "에너지";
+  if (/\bauto\b|vehicle|vehicles|ev\b|자동차|전기차/.test(text)) return "자동차";
+  if (/bank|banks|brokerage|은행|금융|증권/.test(text)) return "금융";
+  if (/crypto|bitcoin|btc|가상자산|비트코인/.test(text)) return "암호화폐";
   if (/merger|acquisition|m&a|인수|합병/.test(text)) return "M&A";
   if (/policy|정책|규제/.test(text)) return "정책";
 
@@ -100,6 +109,49 @@ function hashString(value: string) {
   }
 
   return Math.abs(hash).toString(36);
+}
+
+function canonicalUrl(value: string) {
+  if (!value || value === "#") return "";
+
+  try {
+    const url = new URL(value);
+    const removableParams = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "fbclid",
+      "gclid",
+      "cmpid"
+    ];
+
+    removableParams.forEach((param) => url.searchParams.delete(param));
+    url.hash = "";
+
+    return url.toString().replace(/\/$/, "").toLowerCase();
+  } catch {
+    return value.split("#")[0].replace(/\/$/, "").toLowerCase();
+  }
+}
+
+function normalizeHeadlineKey(value: string) {
+  return stripHtml(value)
+    .toLowerCase()
+    .replace(/\[[^\]]+\]|\([^)]*(속보|종합|단독|update|updated|exclusive)[^)]*\)/gi, " ")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function headlineFingerprint(item: NewsHeadlineDto) {
+  const normalized = normalizeHeadlineKey(item.text);
+  const words = normalized.split(" ").filter(Boolean);
+  const compact = words.length > 0 ? words.slice(0, 16).join(" ") : normalized;
+
+  return `${item.region}|${compact}`.slice(0, 220);
 }
 
 export function normalizeNewsItem(item: RawNewsItem, index: number): NewsHeadlineDto | null {
@@ -136,16 +188,23 @@ function stripHtml(value: string) {
 }
 
 export function dedupeNews(items: NewsHeadlineDto[]) {
-  const seen = new Set<string>();
+  const seenUrls = new Set<string>();
+  const seenHeadlines = new Set<string>();
 
-  return items.filter((item) => {
-    const key = `${item.originalUrl}|${item.text}`.toLowerCase().replace(/\s+/g, " ").slice(0, 240);
+  return [...items]
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
+    .filter((item) => {
+      const urlKey = canonicalUrl(item.originalUrl);
+      const headlineKey = headlineFingerprint(item);
 
-    if (seen.has(key)) return false;
-    seen.add(key);
+      if (urlKey && seenUrls.has(urlKey)) return false;
+      if (headlineKey && seenHeadlines.has(headlineKey)) return false;
 
-    return true;
-  });
+      if (urlKey) seenUrls.add(urlKey);
+      if (headlineKey) seenHeadlines.add(headlineKey);
+
+      return true;
+    });
 }
 
 export function normalizeNewsFeed(feed: RawNewsFeed) {

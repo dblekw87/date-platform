@@ -12,6 +12,8 @@ export type RawNewsItem = {
   label?: string;
   publishedAt?: string;
   pubDate?: string;
+  created?: string;
+  updated?: string;
   datetime?: number;
   url?: string;
   link?: string;
@@ -40,9 +42,10 @@ function sourceName(source: RawNewsItem["source"], fallback?: string) {
 }
 
 function publishedAtFromRaw(item: RawNewsItem) {
-  if (item.publishedAt) return item.publishedAt;
-  if (item.pubDate) {
-    const date = new Date(item.pubDate);
+  const dateText = item.publishedAt || item.pubDate || item.created || item.updated;
+
+  if (dateText) {
+    const date = new Date(dateText);
 
     if (!Number.isNaN(date.getTime())) return date.toISOString();
   }
@@ -87,7 +90,7 @@ function hashString(value: string) {
 }
 
 export function normalizeNewsItem(item: RawNewsItem, index: number): NewsHeadlineDto | null {
-  const title = item.headline?.trim() || item.title?.trim() || item.text?.trim();
+  const title = stripHtml(item.headline?.trim() || item.title?.trim() || item.text?.trim() || "");
   const originalUrl = item.originalUrl || item.originallink || item.url || item.link || "#";
 
   if (!title) return null;
@@ -105,6 +108,17 @@ export function normalizeNewsItem(item: RawNewsItem, index: number): NewsHeadlin
     text: title,
     provider: "news"
   };
+}
+
+function stripHtml(value: string) {
+  return value
+    .replace(/<[^>]*>/g, "")
+    .replace(/&quot;/g, "\"")
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .trim();
 }
 
 export function dedupeNews(items: NewsHeadlineDto[]) {

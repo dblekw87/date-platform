@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   KRConfidenceBadge,
   KRCTAGroup,
@@ -25,11 +26,13 @@ function badgeTone(status: string) {
 }
 
 function evidenceHref(symbol: string) {
-  return symbol === "000660" ? "/kr/evidence?id=ir-semiconductor-001" : "/kr/evidence?id=dart-samsung-001";
+  void symbol;
+  return "/";
 }
 
 function analysisHref(symbol: string) {
-  return symbol === "000660" ? "/kr/analysis?id=hynix-hbm-001" : "/kr/analysis?id=samsung-semiconductor-001";
+  void symbol;
+  return "/";
 }
 
 export default async function KoreanStockPage({ params }: KoreanStockPageProps) {
@@ -48,7 +51,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
             <strong>{stock.price}</strong>
             <span>{stock.change}</span>
             <small>{stock.sessionState} · {stock.updatedAt}</small>
-            <a href={`/kr/watchlist?view=default#add-flow-title`}>관심 종목 추가</a>
+            <Link href="/">시장 보드 보기</Link>
           </aside>
         }
         className={styles.hero}
@@ -238,8 +241,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
             { href: stockAnalysisHref, label: "대표 근거를 내 분석에 담기", variant: "primary" },
             { href: "#related-entities", label: "관련 기업 비교하기" },
             { href: "/kr/theme", label: "관련 테마 확인하기" },
-            { href: "/kr/watchlist?view=default", label: "관심 상태 보기" },
-            { href: "/kr/changes?view=analysis", label: "공식 정보 업데이트 보기" }
+            { href: "/", label: "시장 보드 보기" }
           ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}
@@ -255,8 +257,8 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
           titleId="unknown-title"
           actions={
             <div className={styles.heroActions}>
-              <a href="/kr/search">검색으로 이동</a>
-              <a href="/kr/market">시장으로 돌아가기</a>
+              <Link href="/">시장 보드로 이동</Link>
+              <Link href="/kr/market">시장으로 돌아가기</Link>
             </div>
           }
         />

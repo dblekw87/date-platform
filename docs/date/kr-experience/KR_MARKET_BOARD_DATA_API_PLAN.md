@@ -522,6 +522,7 @@ leaderScore =
 7. 원문 URL / 발행 시각 / 출처 표시
 8. 뉴스 전문 저장 금지 정책 적용
 9. Benzinga 계약 시 Newswire adapter 추가
+10. headline id 기반 새 뉴스 감지 상태를 DB/KV로 이전
 
 ### Phase 5. SEC / DART 공시 연결
 
@@ -589,6 +590,7 @@ KRX_API_KEY=
 DART_API_KEY=
 NAVER_API_HUB_KEY_ID=
 NAVER_API_HUB_KEY=
+MARKET_BOARD_NEWS_FEED_URL=
 NEWSAPI_KEY=
 FINNHUB_API_KEY=
 BENZINGA_API_KEY=

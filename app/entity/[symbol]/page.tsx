@@ -284,7 +284,7 @@ const entities: Record<string, EntityDetail> = {
           source: "Mock Source: Prototype monitoring note",
           freshness: "Freshness: Mock time",
           boundary: "Boundary: Monitoring setup cue",
-          relatedContext: "Related Context: Watchlist / Monitoring",
+          relatedContext: "Related Context: Monitoring",
           openQuestion: null
         }
       ]
@@ -433,7 +433,7 @@ export default function EntityDetailPage() {
           <div className={styles.actionColumn} aria-label="Entity actions">
             <span className={styles.kicker}>Primary / Secondary Action</span>
             <Link className={styles.primaryAction} href={`/evidence/${entity.evidence.lead.id}`}>Inspect Evidence</Link>
-            <button type="button">Watchlist Placeholder</button>
+            <button type="button">Monitoring Placeholder</button>
             <button type="button">Monitoring Placeholder</button>
             <button type="button">Share Placeholder</button>
             <Link href="/">Global Search Entry</Link>

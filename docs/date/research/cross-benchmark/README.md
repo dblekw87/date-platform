@@ -131,15 +131,13 @@ Pattern Inventory는 Benchmark 이름이나 Feature 이름이 아니라 여러 P
 - [60-screen-zone-definition.md](60-screen-zone-definition.md): Screen Zone role and responsibility.
 - [61-screen-flow-definition.md](61-screen-flow-definition.md): Workspace-based Screen Flow and dependency.
 - [62-screen-quality-review.md](62-screen-quality-review.md): Screen System quality, risk, and readiness review.
-- [63-wireframe-screen-definition.md](63-wireframe-screen-definition.md): Low Fidelity Wireframe Screen contract.
 - [64-layout-patterns.md](64-layout-patterns.md): Gray Box Layout Pattern responsibility.
-- [65-wireframe-hierarchy.md](65-wireframe-hierarchy.md): Workspace to Zone hierarchy.
 - [66-screen-section-definition.md](66-screen-section-definition.md): Screen Section responsibility definition.
 - [67-layout-grid-definition.md](67-layout-grid-definition.md): Abstract grid responsibility for Low Fidelity Wireframe.
 
 ## 현재 Phase
 
-Phase 16 — DATE Low Fidelity Wireframe Architecture.
+Phase 16 — DATE Layout Architecture.
 
 Registry는 수정하지 않는다. 신규 Candidate Principle은 만들지 않는다. Cross Validation Status는 모두 `Pending`이다.
 

@@ -7,24 +7,17 @@ import styles from "./layout.module.scss";
 const desktopNavigation = [
   { label: "홈", href: "/kr" },
   { label: "시장", href: "/kr/market" },
-  { label: "분석", href: "/kr/analysis" },
-  { label: "변화", href: "/kr/changes" },
   { label: "기록", href: "/kr/journal" }
 ];
 
 const mobileNavigation = [
   { label: "홈", href: "/kr" },
   { label: "시장", href: "/kr/market" },
-  { label: "분석", href: "/kr/analysis" },
-  { label: "변화", href: "/kr/changes" },
   { label: "기록", href: "/kr/journal" }
 ];
 
 const secondaryRoutes = [
   { label: "테마", href: "/kr/theme" },
-  { label: "투자 근거", href: "/kr/evidence" },
-  { label: "관심 종목", href: "/kr/watchlist" },
-  // { label: "참고 보드", href: "/kr/reference-board" },
   { label: "설정", href: "/kr/settings" }
 ];
 
@@ -57,7 +50,7 @@ export default function KoreanPrototypeLayout({ children }: Readonly<{ children:
               ))}
             </nav>
             <div className={styles.headerActions}>
-              <Link href="/kr/search">종목·근거 검색</Link>
+              <Link href="/">시장 보드</Link>
               <Link href="/kr/settings">내 정보</Link>
             </div>
           </>

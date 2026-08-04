@@ -354,7 +354,7 @@ Home과 Market에서 공통 사용. Stock Detail에서는 축소형으로 사용
 ### 사용 위치
 
 - Market
-- Watchlist
+- Market Board
 - Changes
 - Analysis
 - Journal
@@ -654,7 +654,7 @@ Stock Detail에서 우선 구현하고 Evidence와 Analysis로 확장한다.
 - Market Board
 - Evidence Card
 - Search
-- Watchlist
+- Market Board
 - Changes
 
 ### Desktop

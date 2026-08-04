@@ -157,7 +157,7 @@ export default function KoreanMarketPage() {
           actions={[
             { href: "#priority-engine", label: "가장 먼저 볼 변화 확인", variant: "primary" },
             { href: "#related-market-targets", label: "관련 종목 보기" },
-            { href: "/kr/changes?view=latest", label: "달라진 내용 보기" }
+            { href: "/", label: "시장 보드 보기" }
           ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}
@@ -384,9 +384,9 @@ export default function KoreanMarketPage() {
         </div>
         <KRCTAGroup
           actions={[
-            { href: "/kr/evidence?id=dart-samsung-001", label: "대표 공시 보기", variant: "primary" },
-            { href: "/kr/analysis?id=samsung-semiconductor-001", label: "분석에 추가하기" },
-            { href: "/kr/watchlist?view=default#add-flow-title", label: "관련 종목 추적 시작" }
+            { href: "/", label: "시장 보드 보기", variant: "primary" },
+            { href: "/kr/market", label: "시장 화면 유지" },
+            { href: "/kr/theme", label: "테마 보기" }
           ]}
           className={styles.heroActions}
           primaryClassName={styles.primaryAction}

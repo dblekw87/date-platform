@@ -1,5 +1,5 @@
 import { marketBoardCacheTtl, readThroughCache } from "./cache";
-import { fetchJson } from "./http";
+import { fetchJson, fetchText } from "./http";
 import { createMockFallbackAdapter } from "./types";
 import type { MarketBoardProviderPayload } from "./types";
 import type { MarketSnapshotDto, Tone } from "../types";
@@ -21,6 +21,15 @@ type CoingeckoSimplePrice = {
   bitcoin?: {
     usd?: number;
     usd_24h_change?: number;
+  };
+};
+
+type FrankfurterRateResponse = {
+  amount?: number;
+  base?: string;
+  date?: string;
+  rates?: {
+    KRW?: number;
   };
 };
 
@@ -163,10 +172,74 @@ async function loadBitcoinSnapshot(): Promise<MarketSnapshotDto | null> {
   };
 }
 
+async function loadUsdKrwSnapshot(): Promise<MarketSnapshotDto | null> {
+  const response = await fetchJson<FrankfurterRateResponse>("https://api.frankfurter.app/latest?from=USD&to=KRW", { timeoutMs: 2200 });
+  const rate = response.rates?.KRW;
+
+  if (!rate) return null;
+
+  return {
+    id: "usd-krw",
+    label: "원/달러 환율",
+    market: "KR",
+    instrumentType: "fx",
+    symbol: "USD/KRW",
+    value: formatValue(rate, 2),
+    tone: "flat",
+    note: `Frankfurter ${response.date ?? "latest"} 기준`,
+    timestamp: response.date ? `${response.date}T00:00:00+00:00` : new Date().toISOString(),
+    source: "market"
+  };
+}
+
+function treasuryField(entry: string, field: string) {
+  const match = entry.match(new RegExp(`<d:${field}[^>]*>([^<]+)<\\/d:${field}>`));
+
+  return match?.[1];
+}
+
+async function loadUs10ySnapshot(): Promise<MarketSnapshotDto | null> {
+  const year = new Date().getUTCFullYear();
+  const xml = await fetchText(`https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${year}`, { timeoutMs: 3500 });
+  const entries = [...xml.matchAll(/<entry>[\s\S]*?<\/entry>/g)].map((match) => match[0]);
+  const parsed = entries
+    .map((entry) => {
+      const date = treasuryField(entry, "NEW_DATE");
+      const value = Number(treasuryField(entry, "BC_10YEAR"));
+
+      return date && Number.isFinite(value) ? { date, value } : null;
+    })
+    .filter((item): item is { date: string; value: number } => Boolean(item));
+  const latest = parsed.at(-1);
+  const previous = parsed.at(-2);
+
+  if (!latest) return null;
+
+  const change = previous ? latest.value - previous.value : undefined;
+
+  return {
+    id: "us10y",
+    label: "10Y 금리",
+    market: "US",
+    instrumentType: "rate",
+    symbol: "US10Y",
+    value: `${latest.value.toFixed(2)}%`,
+    change: typeof change === "number" ? `${change > 0 ? "+" : ""}${change.toFixed(2)}%p` : undefined,
+    tone: toneFromChange(change),
+    note: "U.S. Treasury Daily Yield Curve",
+    timestamp: latest.date.replace("T00:00:00", "T21:00:00+00:00"),
+    source: "market"
+  };
+}
+
 async function loadMarketSnapshot(): Promise<MarketBoardProviderPayload> {
   return readThroughCache("market-board:market:macro", marketBoardCacheTtl.market, async () => {
     const credentials = getFinnhubCredentials();
-    const loaders: Array<Promise<MarketSnapshotDto | null>> = [loadBitcoinSnapshot()];
+    const loaders: Array<Promise<MarketSnapshotDto | null>> = [
+      loadBitcoinSnapshot(),
+      loadUsdKrwSnapshot(),
+      loadUs10ySnapshot()
+    ];
 
     if (credentials.apiKey) {
       loaders.push(...finnhubMacroQuotes.map((config) => loadFinnhubQuote(config, credentials.apiKey as string)));

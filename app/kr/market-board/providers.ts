@@ -44,7 +44,7 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
     adSlots: payload.adSlots ?? base.adSlots,
     providerStatuses: payload.providerStatuses ?? base.providerStatuses,
     macroSnapshot: mergeById(base.macroSnapshot, payload.macroSnapshot),
-    marketBrief: payload.marketBrief ?? base.marketBrief,
+    marketBrief: mergeById(base.marketBrief, payload.marketBrief),
     headlineFlow: payload.headlineFlow ?? base.headlineFlow,
     calendarItems: payload.calendarItems ?? base.calendarItems,
     usDisclosures: payload.usDisclosures ?? base.usDisclosures,

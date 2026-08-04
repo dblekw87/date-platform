@@ -48,9 +48,7 @@ export const mockMarketBoardData: MarketBoardData = {
   ],
   marketBrief: [
     { id: "us-macro", region: "미국 매크로", title: "금리 부담은 줄었지만 CPI 전까지 방향성은 제한적입니다.", points: ["10Y 금리는 전일 고점 아래", "달러 강세는 둔화", "CPI 전 포지션 조정 가능성"], source: "mock", timestamp },
-    { id: "us-news", region: "미국 뉴스", title: "AI 인프라, 전력, 반도체 헤드라인이 같은 흐름으로 묶입니다.", points: ["대형 기술주 반등과 함께 관찰", "전력 설비 테마 동반", "개별 종목 원인 단정은 보류"], source: "mock", timestamp },
-    { id: "kr-market", region: "국내 시황", title: "국내 개장은 미국장 기술주와 환율 반응을 먼저 확인합니다.", points: ["야간선물 방향 확인", "외국인 선물 수급 대기", "반도체 대형주 갭 출발 여부"], source: "mock", timestamp },
-    { id: "kr-news", region: "국내 뉴스", title: "정책, 공시, 테마 뉴스는 소형주 반응 구간만 따로 봅니다.", points: ["테마주 뉴스 반응 감지", "공시 원문 여부 확인", "거래대금 동반 여부 확인"], source: "mock", timestamp }
+    { id: "kr-market", region: "국내 시황", title: "국내 개장은 미국장 기술주와 환율 반응을 먼저 확인합니다.", points: ["야간선물 방향 확인", "외국인 선물 수급 대기", "반도체 대형주 갭 출발 여부"], source: "mock", timestamp }
   ],
   headlineFlow: [
     { id: "hf-power", time: "09:18", source: "테마", region: "KR", publishedAt: "2026-08-04T09:18:00+09:00", originalUrl: "#", label: "전력설비", text: "AI 전력 수요 뉴스 이후 일부 테마주 거래대금이 증가했습니다.", provider: "mock", isNew: true },

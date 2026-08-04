@@ -2,7 +2,7 @@ import { marketBoardCacheTtl, readThroughCache } from "./cache";
 import { fetchJson } from "./http";
 import { createMockFallbackAdapter } from "./types";
 import type { MarketBoardProviderPayload } from "./types";
-import type { FlowItemDto, LeadingStockDto, MarketSnapshotDto, Tone } from "../types";
+import type { FlowItemDto, LeadingStockDto, MarketBriefDto, MarketSnapshotDto, Tone } from "../types";
 
 const requiredEnv = ["KIS_APP_KEY", "KIS_APP_SECRET"];
 const kisBaseUrl = "https://openapi.koreainvestment.com:9443";
@@ -385,6 +385,33 @@ async function loadKisIndexSnapshots(credentials: ReturnType<typeof getKisCreden
   return results.flatMap((result) => result.status === "fulfilled" && result.value ? [result.value] : []);
 }
 
+function indexSnapshotById(items: MarketSnapshotDto[], id: string) {
+  return items.find((item) => item.id === id);
+}
+
+function buildKisMarketBrief(macroSnapshot: MarketSnapshotDto[]): MarketBriefDto[] {
+  const kospi = indexSnapshotById(macroSnapshot, "kospi-day-future");
+  const kosdaq = indexSnapshotById(macroSnapshot, "kosdaq-night-future");
+  const kospi200 = indexSnapshotById(macroSnapshot, "kospi-night-future");
+
+  if (!kospi && !kosdaq && !kospi200) return [];
+
+  return [
+    {
+      id: "kr-market",
+      region: "국내 시황",
+      title: `${kospi ? `KOSPI ${kospi.changeRate ?? kospi.value}` : "KOSPI 확인 중"}, ${kosdaq ? `KOSDAQ ${kosdaq.changeRate ?? kosdaq.value}` : "KOSDAQ 확인 중"} 흐름입니다.`,
+      points: [
+        kospi ? `KOSPI ${kospi.value}${kospi.changeRate ? ` · ${kospi.changeRate}` : ""}` : "KOSPI 확인 대기",
+        kospi200 ? `KOSPI200 ${kospi200.value}${kospi200.changeRate ? ` · ${kospi200.changeRate}` : ""}` : "KOSPI200 확인 대기",
+        kosdaq ? `KOSDAQ ${kosdaq.value}${kosdaq.changeRate ? ` · ${kosdaq.changeRate}` : ""}` : "KOSDAQ 확인 대기"
+      ],
+      source: "kis",
+      timestamp: new Date().toISOString()
+    }
+  ];
+}
+
 async function attachMinutePositions(leaders: LeadingStockDto[], credentials: ReturnType<typeof getKisCredentials>, token: string) {
   if (!credentials.enableMinuteCharts) {
     return leaders;
@@ -490,7 +517,10 @@ async function loadKisMarketData(): Promise<MarketBoardProviderPayload> {
         krLeadingStocks,
         flowItems: buildKisFlowItems(krLeadingStocks)
       } : {}),
-      ...(macroSnapshot.length > 0 ? { macroSnapshot } : {})
+      ...(macroSnapshot.length > 0 ? {
+        macroSnapshot,
+        marketBrief: buildKisMarketBrief(macroSnapshot)
+      } : {})
     };
   });
 }

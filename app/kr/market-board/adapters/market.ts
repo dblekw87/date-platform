@@ -2,7 +2,7 @@ import { marketBoardCacheTtl, readThroughCache } from "./cache";
 import { fetchJson, fetchText } from "./http";
 import { createMockFallbackAdapter } from "./types";
 import type { MarketBoardProviderPayload } from "./types";
-import type { MarketSnapshotDto, Tone } from "../types";
+import type { MarketBriefDto, MarketSnapshotDto, Tone } from "../types";
 
 const requiredEnv = ["FINNHUB_API_KEY"];
 
@@ -232,6 +232,53 @@ async function loadUs10ySnapshot(): Promise<MarketSnapshotDto | null> {
   };
 }
 
+function snapshotById(items: MarketSnapshotDto[], id: string) {
+  return items.find((item) => item.id === id);
+}
+
+function buildMarketBriefs(macroSnapshot: MarketSnapshotDto[]): MarketBriefDto[] {
+  const qqq = snapshotById(macroSnapshot, "nasdaq-future");
+  const spy = snapshotById(macroSnapshot, "sp500-future");
+  const soxx = snapshotById(macroSnapshot, "phlx-sox");
+  const us10y = snapshotById(macroSnapshot, "us10y");
+  const usdKrw = snapshotById(macroSnapshot, "usd-krw");
+  const btc = snapshotById(macroSnapshot, "btc");
+  const timestamp = new Date().toISOString();
+  const briefs: MarketBriefDto[] = [];
+
+  if (qqq || spy || soxx || us10y) {
+    briefs.push({
+      id: "us-macro",
+      region: "미국 시황",
+      title: `${qqq?.label ?? "NASDAQ"} ${qqq?.changeRate ?? "확인 중"}, ${spy?.label ?? "S&P"} ${spy?.changeRate ?? "확인 중"} 흐름입니다.`,
+      points: [
+        soxx ? `반도체 기준 ${soxx.symbol} ${soxx.changeRate ?? soxx.value}` : "반도체 ETF 확인 대기",
+        us10y ? `10년물 ${us10y.value}${us10y.change ? ` · ${us10y.change}` : ""}` : "10년물 금리 확인 대기",
+        "선물 원본이 아닌 ETF/공식 금리 기준으로 참고합니다."
+      ],
+      source: "market",
+      timestamp
+    });
+  }
+
+  if (usdKrw || btc) {
+    briefs.push({
+      id: "fx-risk",
+      region: "환율 시황",
+      title: `${usdKrw ? `원/달러 ${usdKrw.value}` : "원/달러 확인 중"}, ${btc ? `BTC ${btc.changeRate ?? btc.value}` : "BTC 확인 중"} 기준입니다.`,
+      points: [
+        usdKrw ? `${usdKrw.note}` : "환율 데이터 확인 대기",
+        btc ? `${btc.note}` : "BTC 데이터 확인 대기",
+        "국내 개장 전 수출주와 위험선호 참고값으로만 봅니다."
+      ],
+      source: "market",
+      timestamp
+    });
+  }
+
+  return briefs;
+}
+
 async function loadMarketSnapshot(): Promise<MarketBoardProviderPayload> {
   return readThroughCache("market-board:market:macro", marketBoardCacheTtl.market, async () => {
     const credentials = getFinnhubCredentials();
@@ -249,7 +296,10 @@ async function loadMarketSnapshot(): Promise<MarketBoardProviderPayload> {
     const macroSnapshot = results
       .flatMap((result) => result.status === "fulfilled" && result.value ? [result.value] : []);
 
-    return macroSnapshot.length > 0 ? { macroSnapshot } : {};
+    return macroSnapshot.length > 0 ? {
+      macroSnapshot,
+      marketBrief: buildMarketBriefs(macroSnapshot)
+    } : {};
   });
 }
 

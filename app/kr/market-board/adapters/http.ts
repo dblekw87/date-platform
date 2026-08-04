@@ -1,5 +1,7 @@
 export type JsonRequestOptions = {
   headers?: HeadersInit;
+  method?: "GET" | "POST";
+  body?: BodyInit;
   timeoutMs?: number;
 };
 
@@ -10,7 +12,9 @@ export async function fetchJson<T>(url: string, options?: JsonRequestOptions): P
   try {
     const response = await fetch(url, {
       cache: "no-store",
+      method: options?.method ?? "GET",
       headers: options?.headers,
+      body: options?.body,
       signal: controller.signal
     });
 

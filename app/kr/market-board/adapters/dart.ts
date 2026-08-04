@@ -89,7 +89,7 @@ async function loadDartDisclosures(): Promise<MarketBoardProviderPayload> {
     url.searchParams.set("sort", "date");
     url.searchParams.set("sort_mth", "desc");
 
-    const response = await fetchJson<DartListResponse>(url.toString(), { timeoutMs: 1800 });
+    const response = await fetchJson<DartListResponse>(url.toString(), { timeoutMs: 5000 });
 
     if (response.status !== "000" || !response.list) {
       return {};
@@ -108,7 +108,7 @@ export const dartMarketBoardAdapter = createMockFallbackAdapter(
   "dart",
   "DART Open API",
   requiredEnv,
-  { timeoutMs: 1800 }
+  { timeoutMs: 5500 }
 );
 
 dartMarketBoardAdapter.load = loadDartDisclosures;

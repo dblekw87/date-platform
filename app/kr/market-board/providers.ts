@@ -89,14 +89,16 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
             checkedAt
           } satisfies ProviderStatusDto
         };
-      } catch {
+      } catch (error) {
+        const reason = error instanceof Error && error.message ? ` · ${error.message}` : "";
+
         return {
           payload: {},
           status: {
             id: adapter.id,
             label: adapter.label,
             status: "error",
-            message: "adapter 오류 · mock fallback",
+            message: `adapter 오류${reason} · mock fallback`,
             checkedAt
           } satisfies ProviderStatusDto
         };

@@ -791,7 +791,15 @@
 }
 
 .realtimeNews li > span {
+  display: grid;
+  gap: 3px;
   line-height: 1.5;
+}
+
+.realtimeNews li > span small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .calendarList,

@@ -40,10 +40,12 @@ export type NewsHeadlineDto = {
   id: string;
   time: string;
   source: string;
+  region: "US" | "KR" | "GLOBAL";
   publishedAt: string;
   originalUrl: string;
   label: string;
   text: string;
+  originalText?: string;
   provider: SourceProvider;
   isNew?: boolean;
 };

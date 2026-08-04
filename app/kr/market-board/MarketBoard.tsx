@@ -29,8 +29,8 @@ const leaderFilters: Array<{ id: LeaderFilterId; label: string }> = [
 
 const newsFilters: Array<{ id: NewsFilterId; label: string }> = [
   { id: "all", label: "전체" },
-  { id: "us", label: "미국" },
-  { id: "kr", label: "국내" },
+  { id: "us", label: "미국 뉴스" },
+  { id: "kr", label: "국내 뉴스" },
   { id: "theme", label: "테마" },
   { id: "macro", label: "매크로" }
 ];
@@ -138,8 +138,8 @@ function matchesLeaderFilter(stock: MarketBoardData["usLeadingStocks"][number], 
 function matchesNewsFilter(item: MarketBoardData["headlineFlow"][number], filterId: NewsFilterId) {
   const labelText = `${item.source} ${item.label} ${item.text}`;
 
-  if (filterId === "us") return /미국|AI|금리|나스닥|기술주/i.test(labelText);
-  if (filterId === "kr") return /국내|한국|반도체|코스피|코스닥/i.test(labelText);
+  if (filterId === "us") return item.region === "US";
+  if (filterId === "kr") return item.region === "KR";
   if (filterId === "theme") return /테마|전력|바이오|정책|AI/i.test(labelText);
   if (filterId === "macro") return /매크로|금리|CPI|환율|달러|선물/i.test(labelText);
 
@@ -333,7 +333,10 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                   <time>{formatDateTimeMinute(item.publishedAt)}</time>
                   <b>{item.source}{item.isNew ? " · NEW" : ""}</b>
                   <strong>{item.label}</strong>
-                  <span>{item.text}</span>
+                  <span>
+                    {item.text}
+                    {item.originalText ? <small>{item.originalText}</small> : null}
+                  </span>
                   <OriginalLink href={item.originalUrl} />
                 </li>
               ))}

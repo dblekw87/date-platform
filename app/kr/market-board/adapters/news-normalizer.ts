@@ -8,6 +8,7 @@ export type RawNewsItem = {
   summary?: string;
   source?: string | { name?: string };
   provider?: string;
+  region?: "US" | "KR" | "GLOBAL";
   category?: string;
   label?: string;
   publishedAt?: string;
@@ -79,6 +80,18 @@ function labelFromRaw(item: RawNewsItem) {
   return item.label?.trim() || item.category?.trim() || "헤드라인";
 }
 
+function regionFromRaw(item: RawNewsItem): NewsHeadlineDto["region"] {
+  if (item.region) return item.region;
+
+  const text = `${sourceName(item.source, item.provider)} ${item.provider ?? ""} ${item.category ?? ""} ${item.title ?? ""} ${item.headline ?? ""} ${item.text ?? ""}`;
+
+  if (/[가-힣]/.test(text)) return "KR";
+  if (/naver|국내|korea|kospi|kosdaq/i.test(text)) return "KR";
+  if (/finnhub|benzinga|newsapi|cnbc|reuters|nasdaq|nyse|america|us |u\.s\./i.test(text)) return "US";
+
+  return "GLOBAL";
+}
+
 function hashString(value: string) {
   let hash = 0;
 
@@ -102,6 +115,7 @@ export function normalizeNewsItem(item: RawNewsItem, index: number): NewsHeadlin
     id: stableId || `news-${index}`,
     time: timeFromPublishedAt(publishedAt),
     source: sourceName(item.source, item.provider),
+    region: regionFromRaw(item),
     publishedAt,
     originalUrl,
     label: labelFromRaw(item),

@@ -13,7 +13,8 @@ function getKisCredentials() {
   return {
     appKey: process.env.KIS_APP_KEY,
     appSecret: process.env.KIS_APP_SECRET,
-    htsId: process.env.KIS_HTS_ID
+    htsId: process.env.KIS_HTS_ID,
+    enableMinuteCharts: process.env.KIS_ENABLE_MINUTE_CHARTS === "true"
   };
 }
 
@@ -42,6 +43,23 @@ type KisVolumeRankResponse = {
   msg_cd?: string;
   msg1?: string;
   output?: KisVolumeRankItem[];
+};
+
+type KisMinuteChartItem = {
+  stck_bsop_date?: string;
+  stck_cntg_hour?: string;
+  stck_prpr?: string;
+  stck_hgpr?: string;
+  stck_lwpr?: string;
+  cntg_vol?: string;
+  acml_tr_pbmn?: string;
+};
+
+type KisMinuteChartResponse = {
+  rt_cd?: string;
+  msg_cd?: string;
+  msg1?: string;
+  output2?: KisMinuteChartItem[];
 };
 
 async function getKisAccessToken(credentials: ReturnType<typeof getKisCredentials>) {
@@ -114,6 +132,52 @@ function formatTurnover(value?: string) {
   return `${eok.toFixed(1)}억`;
 }
 
+function minuteRequestTime() {
+  return new Intl.DateTimeFormat("sv-SE", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Seoul"
+  }).format(new Date()).replaceAll(":", "");
+}
+
+function minuteStamp(item: KisMinuteChartItem) {
+  return `${item.stck_bsop_date ?? ""}${item.stck_cntg_hour ?? ""}`;
+}
+
+function buildIntradayPosition(items: KisMinuteChartItem[]) {
+  const bars = [...items]
+    .filter((item) => item.stck_prpr && item.cntg_vol)
+    .sort((a, b) => minuteStamp(a).localeCompare(minuteStamp(b)));
+
+  if (bars.length < 2) return undefined;
+
+  const latest = bars[bars.length - 1];
+  const previous = bars[bars.length - 2];
+  const latestPrice = parseNumeric(latest.stck_prpr);
+  const previousPrice = parseNumeric(previous.stck_prpr);
+  const high = Math.max(...bars.map((item) => parseNumeric(item.stck_hgpr || item.stck_prpr)));
+  const vwapBase = bars.reduce((sum, item) => {
+    const highPrice = parseNumeric(item.stck_hgpr || item.stck_prpr);
+    const lowPrice = parseNumeric(item.stck_lwpr || item.stck_prpr);
+    const closePrice = parseNumeric(item.stck_prpr);
+    const volume = parseNumeric(item.cntg_vol);
+
+    return {
+      amount: sum.amount + ((highPrice + lowPrice + closePrice) / 3) * volume,
+      volume: sum.volume + volume
+    };
+  }, { amount: 0, volume: 0 });
+  const vwap = vwapBase.volume ? vwapBase.amount / vwapBase.volume : 0;
+  const oneMinuteRate = previousPrice ? ((latestPrice - previousPrice) / previousPrice) * 100 : 0;
+  const highGap = high ? ((high - latestPrice) / high) * 100 : 0;
+  const position = latestPrice >= vwap ? "VWAP 위" : "VWAP 아래";
+  const highNote = highGap <= 1 ? "당일 고점 근처" : "고점 대비 눌림";
+
+  return `${position} · 최근 1분 ${oneMinuteRate > 0 ? "+" : ""}${oneMinuteRate.toFixed(2)}% · ${highNote}`;
+}
+
 function toLeadingStock(item: KisVolumeRankItem, index: number): LeadingStockDto | null {
   const symbol = item.mksc_shrn_iscd?.trim();
   const name = item.hts_kor_isnm?.trim();
@@ -138,6 +202,35 @@ function toLeadingStock(item: KisVolumeRankItem, index: number): LeadingStockDto
     timestamp: new Date().toISOString(),
     source: "kis"
   };
+}
+
+async function loadKisMinuteChart(symbol: string, credentials: ReturnType<typeof getKisCredentials>, token: string) {
+  const response = await fetchJson<KisMinuteChartResponse>(
+    buildKisUrl("/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice", {
+      FID_ETC_CLS_CODE: "",
+      FID_COND_MRKT_DIV_CODE: "J",
+      FID_INPUT_ISCD: symbol,
+      FID_INPUT_HOUR_1: minuteRequestTime(),
+      FID_PW_DATA_INCU_YN: "N"
+    }),
+    {
+      timeoutMs: 3500,
+      headers: {
+        authorization: `Bearer ${token}`,
+        appkey: credentials.appKey ?? "",
+        appsecret: credentials.appSecret ?? "",
+        tr_id: "FHKST03010200",
+        custtype: "P",
+        "Content-Type": "application/json; charset=UTF-8"
+      }
+    }
+  );
+
+  if (response.rt_cd && response.rt_cd !== "0") {
+    throw new Error(`KIS minute ${response.msg_cd ?? "error"}`);
+  }
+
+  return buildIntradayPosition(response.output2 ?? []);
 }
 
 async function loadKisVolumeRank(credentials: ReturnType<typeof getKisCredentials>) {
@@ -173,7 +266,28 @@ async function loadKisVolumeRank(credentials: ReturnType<typeof getKisCredential
     throw new Error(`KIS volume-rank ${response.msg_cd ?? "error"}`);
   }
 
-  return response.output ?? [];
+  return { items: response.output ?? [], token };
+}
+
+async function attachMinutePositions(leaders: LeadingStockDto[], credentials: ReturnType<typeof getKisCredentials>, token: string) {
+  if (!credentials.enableMinuteCharts) {
+    return leaders;
+  }
+
+  const targetLeaders = leaders.slice(0, 5);
+  const results = await Promise.allSettled(targetLeaders.map((leader) => loadKisMinuteChart(leader.symbol, credentials, token)));
+  const intradayBySymbol = new Map<string, string>();
+
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled" && result.value) {
+      intradayBySymbol.set(targetLeaders[index].symbol, result.value);
+    }
+  });
+
+  return leaders.map((leader) => ({
+    ...leader,
+    intraday: intradayBySymbol.get(leader.symbol) ?? leader.intraday
+  }));
 }
 
 function buildKisFlowItems(leaders: LeadingStockDto[]): FlowItemDto[] {
@@ -248,10 +362,11 @@ async function loadKisMarketData(): Promise<MarketBoardProviderPayload> {
       return {};
     }
 
-    const krLeadingStocks = (await loadKisVolumeRank(credentials))
+    const volumeRank = await loadKisVolumeRank(credentials);
+    const krLeadingStocks = await attachMinutePositions(volumeRank.items
       .map(toLeadingStock)
       .filter((item): item is LeadingStockDto => Boolean(item))
-      .slice(0, 10);
+      .slice(0, 10), credentials, volumeRank.token);
 
     return krLeadingStocks.length > 0 ? {
       krLeadingStocks,
@@ -264,7 +379,7 @@ export const kisMarketBoardAdapter = createMockFallbackAdapter(
   "kis",
   "한국투자증권 Open API",
   requiredEnv,
-  { timeoutMs: 6500 }
+  { timeoutMs: 9000 }
 );
 
 kisMarketBoardAdapter.load = loadKisMarketData;

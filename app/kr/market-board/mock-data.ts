@@ -53,16 +53,16 @@ export const mockMarketBoardData: MarketBoardData = {
     { id: "kr-news", region: "국내 뉴스", title: "정책, 공시, 테마 뉴스는 소형주 반응 구간만 따로 봅니다.", points: ["테마주 뉴스 반응 감지", "공시 원문 여부 확인", "거래대금 동반 여부 확인"], source: "mock", timestamp }
   ],
   headlineFlow: [
-    { id: "hf-power", time: "09:18", source: "테마", publishedAt: "2026-08-04T09:18:00+09:00", originalUrl: "#", label: "전력설비", text: "AI 전력 수요 뉴스 이후 일부 테마주 거래대금이 증가했습니다.", provider: "mock", isNew: true },
-    { id: "hf-chip", time: "09:00", source: "국내", publishedAt: "2026-08-04T09:00:00+09:00", originalUrl: "#", label: "반도체", text: "국내 반도체 대형주는 미국장 반응과 환율을 함께 확인해야 합니다.", provider: "mock", isNew: true },
-    { id: "hf-rate", time: "08:35", source: "매크로", publishedAt: "2026-08-04T08:35:00+09:00", originalUrl: "#", label: "금리", text: "장기금리 상승 압력이 둔화되며 성장주 부담이 완화되는 흐름입니다.", provider: "mock" },
-    { id: "hf-ai", time: "08:10", source: "미국", publishedAt: "2026-08-04T08:10:00+09:00", originalUrl: "#", label: "AI 인프라", text: "데이터센터 투자 headline이 기술주 반등 구간과 함께 관찰됩니다.", provider: "mock" },
-    { id: "hf-futures", time: "07:58", source: "매크로", publishedAt: "2026-08-04T07:58:00+09:00", originalUrl: "#", label: "선물", text: "미국 지수선물과 국내 야간선물 방향을 개장 전 기준점으로 확인합니다.", provider: "mock" },
-    { id: "hf-bio", time: "07:44", source: "미국", publishedAt: "2026-08-04T07:44:00+09:00", originalUrl: "#", label: "바이오", text: "FDA 관련 헤드라인은 원문과 공시 여부를 분리해 확인합니다.", provider: "mock" },
-    { id: "hf-policy", time: "07:31", source: "국내", publishedAt: "2026-08-04T07:31:00+09:00", originalUrl: "#", label: "정책", text: "정책 뉴스는 업종별 반응과 거래대금 동반 여부만 참고합니다.", provider: "mock" },
-    { id: "hf-fx", time: "07:12", source: "매크로", publishedAt: "2026-08-04T07:12:00+09:00", originalUrl: "#", label: "환율", text: "원/달러 환율은 국내 수출주와 외국인 수급 확인의 보조 지표입니다.", provider: "mock" },
-    { id: "hf-oil", time: "06:55", source: "매크로", publishedAt: "2026-08-04T06:55:00+09:00", originalUrl: "#", label: "유가", text: "WTI 흐름은 에너지 비용 민감 업종과 함께 참고합니다.", provider: "mock" },
-    { id: "hf-ma", time: "06:42", source: "미국", publishedAt: "2026-08-04T06:42:00+09:00", originalUrl: "#", label: "M&A", text: "인수합병 보도는 SEC 원문과 거래 조건 확인 전까지 후보로만 표시합니다.", provider: "mock" }
+    { id: "hf-power", time: "09:18", source: "테마", region: "KR", publishedAt: "2026-08-04T09:18:00+09:00", originalUrl: "#", label: "전력설비", text: "AI 전력 수요 뉴스 이후 일부 테마주 거래대금이 증가했습니다.", provider: "mock", isNew: true },
+    { id: "hf-chip", time: "09:00", source: "국내", region: "KR", publishedAt: "2026-08-04T09:00:00+09:00", originalUrl: "#", label: "반도체", text: "국내 반도체 대형주는 미국장 반응과 환율을 함께 확인해야 합니다.", provider: "mock", isNew: true },
+    { id: "hf-rate", time: "08:35", source: "매크로", region: "GLOBAL", publishedAt: "2026-08-04T08:35:00+09:00", originalUrl: "#", label: "금리", text: "장기금리 상승 압력이 둔화되며 성장주 부담이 완화되는 흐름입니다.", provider: "mock" },
+    { id: "hf-ai", time: "08:10", source: "미국", region: "US", publishedAt: "2026-08-04T08:10:00+09:00", originalUrl: "#", label: "AI 인프라", text: "데이터센터 투자 headline이 기술주 반등 구간과 함께 관찰됩니다.", provider: "mock" },
+    { id: "hf-futures", time: "07:58", source: "매크로", region: "GLOBAL", publishedAt: "2026-08-04T07:58:00+09:00", originalUrl: "#", label: "선물", text: "미국 지수선물과 국내 야간선물 방향을 개장 전 기준점으로 확인합니다.", provider: "mock" },
+    { id: "hf-bio", time: "07:44", source: "미국", region: "US", publishedAt: "2026-08-04T07:44:00+09:00", originalUrl: "#", label: "바이오", text: "FDA 관련 헤드라인은 원문과 공시 여부를 분리해 확인합니다.", provider: "mock" },
+    { id: "hf-policy", time: "07:31", source: "국내", region: "KR", publishedAt: "2026-08-04T07:31:00+09:00", originalUrl: "#", label: "정책", text: "정책 뉴스는 업종별 반응과 거래대금 동반 여부만 참고합니다.", provider: "mock" },
+    { id: "hf-fx", time: "07:12", source: "매크로", region: "GLOBAL", publishedAt: "2026-08-04T07:12:00+09:00", originalUrl: "#", label: "환율", text: "원/달러 환율은 국내 수출주와 외국인 수급 확인의 보조 지표입니다.", provider: "mock" },
+    { id: "hf-oil", time: "06:55", source: "매크로", region: "GLOBAL", publishedAt: "2026-08-04T06:55:00+09:00", originalUrl: "#", label: "유가", text: "WTI 흐름은 에너지 비용 민감 업종과 함께 참고합니다.", provider: "mock" },
+    { id: "hf-ma", time: "06:42", source: "미국", region: "US", publishedAt: "2026-08-04T06:42:00+09:00", originalUrl: "#", label: "M&A", text: "인수합병 보도는 SEC 원문과 거래 조건 확인 전까지 후보로만 표시합니다.", provider: "mock" }
   ],
   calendarItems: [
     { id: "cal-big-tech", date: "2026-08-04", day: "화", type: "실적", title: "미국 대형 기술주 실적 발표", market: "미국", check: "가이던스와 시간외 반응", detail: "발표 후 시간외 지수선물, QQQ, SOXX 반응을 같이 확인합니다.", source: "mock" },

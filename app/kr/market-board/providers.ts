@@ -25,6 +25,16 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
 }
 
 function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoardData>): MarketBoardData {
+  const mergeById = <T extends { id: string }>(baseItems: T[], payloadItems?: T[]) => {
+    if (!payloadItems) return baseItems;
+
+    const byId = new Map(baseItems.map((item) => [item.id, item]));
+
+    payloadItems.forEach((item) => byId.set(item.id, item));
+
+    return [...byId.values()];
+  };
+
   return {
     ...base,
     ...payload,
@@ -33,7 +43,7 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
     leaderTabs: payload.leaderTabs ?? base.leaderTabs,
     adSlots: payload.adSlots ?? base.adSlots,
     providerStatuses: payload.providerStatuses ?? base.providerStatuses,
-    macroSnapshot: payload.macroSnapshot ?? base.macroSnapshot,
+    macroSnapshot: mergeById(base.macroSnapshot, payload.macroSnapshot),
     marketBrief: payload.marketBrief ?? base.marketBrief,
     headlineFlow: payload.headlineFlow ?? base.headlineFlow,
     calendarItems: payload.calendarItems ?? base.calendarItems,

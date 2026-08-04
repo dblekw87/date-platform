@@ -1,7 +1,7 @@
 import styles from "../../page.module.scss";
 
 const skeletonCards = Array.from({ length: 12 }, (_, index) => `market-card-${index}`);
-const skeletonProviders = ["provider-toss", "provider-kis", "provider-krx", "provider-dart", "provider-sec", "provider-news"];
+const skeletonProviders = ["provider-toss", "provider-kis", "provider-krx", "provider-market", "provider-dart", "provider-sec", "provider-news"];
 const skeletonTabs = ["tab-market", "tab-news", "tab-calendar", "tab-breaking", "tab-flow"];
 const skeletonBriefs = ["brief-us", "brief-kr"];
 

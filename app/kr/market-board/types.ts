@@ -2,7 +2,7 @@ export type MarketBoardTabId = "market" | "news" | "calendar" | "breaking" | "fl
 
 export type RegionCode = "US" | "KR" | "GLOBAL" | "CRYPTO";
 
-export type SourceProvider = "mock" | "toss" | "kis" | "krx" | "dart" | "sec" | "news";
+export type SourceProvider = "mock" | "toss" | "kis" | "krx" | "dart" | "sec" | "news" | "market";
 
 export type Tone = "up" | "down" | "flat";
 

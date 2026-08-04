@@ -10,3 +10,5 @@ dist/
 *.tsbuildinfo
 
 data/runtime/
+
+.vercel

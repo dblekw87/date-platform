@@ -34,6 +34,7 @@ export const mockMarketBoardData: MarketBoardData = {
   macroSnapshot: [
     { id: "nasdaq-future", label: "NASDAQ 선물", market: "US", instrumentType: "future", symbol: "NQ", value: "+0.42%", tone: "up", note: "AI 대형주 반등 구간", timestamp, source: "mock" },
     { id: "sp500-future", label: "S&P 500 선물", market: "US", instrumentType: "future", symbol: "ES", value: "+0.28%", tone: "up", note: "미국장 전체 기준", timestamp, source: "mock" },
+    { id: "phlx-sox", label: "필라델피아 반도체지수", market: "US", instrumentType: "index", symbol: "SOX", value: "+0.51%", tone: "up", note: "미국 반도체 섹터 기준", timestamp, source: "mock" },
     { id: "kospi-day-future", label: "KOSPI 주간선물", market: "KR", instrumentType: "future", symbol: "K200", value: "대기", tone: "flat", note: "장중 수급 확인", timestamp, source: "mock" },
     { id: "kospi-night-future", label: "KOSPI 야간선물", market: "KR", instrumentType: "future", symbol: "K200N", value: "+0.31%", tone: "up", note: "국내 개장 전 반응", timestamp, source: "mock" },
     { id: "wti", label: "오일선물", market: "GLOBAL", instrumentType: "commodity", symbol: "WTI", value: "78.4", tone: "up", note: "에너지 비용 변수", timestamp, source: "mock" },

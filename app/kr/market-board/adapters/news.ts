@@ -4,7 +4,7 @@ import { dedupeNews, normalizeNewsFeed, type RawNewsFeed, type RawNewsItem } fro
 import { recordNewsHeadlineEvents, recordNewsHeadlines } from "./news-state";
 import { createMockFallbackAdapter } from "./types";
 import type { MarketBoardProviderPayload } from "./types";
-import type { LeadingStockDto, NewsHeadlineDto } from "../types";
+import type { CalendarEventDto, LeadingStockDto, NewsHeadlineDto } from "../types";
 
 const requiredEnv = ["MARKET_BOARD_NEWS_FEED_URL", "NAVER_API_HUB_KEY", "NEWSAPI_KEY", "FINNHUB_API_KEY", "BENZINGA_API_KEY"];
 const naverNewsQueries = ["국내 증시", "코스피 코스닥", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산", "로봇 원전", "자동차 은행", "인수합병 공시"];
@@ -17,6 +17,20 @@ type LeaderNewsQuery = {
   region: "KR" | "US";
   language: "ko" | "en";
   label?: string;
+};
+
+type FinnhubEarningsCalendarResponse = {
+  earningsCalendar?: Array<{
+    date?: string;
+    epsActual?: number | null;
+    epsEstimate?: number | null;
+    hour?: string;
+    quarter?: number;
+    revenueActual?: number | null;
+    revenueEstimate?: number | null;
+    symbol?: string;
+    year?: number;
+  }>;
 };
 
 function getNewsCredentials() {
@@ -81,6 +95,75 @@ function buildQueryUrl(baseUrl: string, params: Record<string, string | number |
   });
 
   return url.toString();
+}
+
+function todayDate() {
+  return new Intl.DateTimeFormat("sv-SE", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Seoul"
+  }).format(new Date());
+}
+
+function addDays(dateText: string, days: number) {
+  const date = new Date(`${dateText}T00:00:00+09:00`);
+
+  date.setUTCDate(date.getUTCDate() + days);
+
+  return new Intl.DateTimeFormat("sv-SE", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Seoul"
+  }).format(date);
+}
+
+function dayLabel(dateText: string) {
+  const date = new Date(`${dateText}T00:00:00+09:00`);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    weekday: "short",
+    timeZone: "Asia/Seoul"
+  }).format(date).replace(".", "");
+}
+
+async function loadFinnhubEarningsCalendar(credentials: ReturnType<typeof getNewsCredentials>): Promise<CalendarEventDto[]> {
+  if (!credentials.finnhubApiKey) return [];
+
+  const from = todayDate();
+  const to = addDays(from, 21);
+  const response = await fetchJson<FinnhubEarningsCalendarResponse>(buildQueryUrl("https://finnhub.io/api/v1/calendar/earnings", {
+    from,
+    to,
+    token: credentials.finnhubApiKey
+  }), { timeoutMs: 2200 });
+
+  return (response.earningsCalendar ?? [])
+    .flatMap((item): CalendarEventDto[] => {
+      if (!item.date || !item.symbol) return [];
+
+      return [{
+        id: `finnhub-earnings-${item.symbol}-${item.date}`,
+        date: item.date,
+        day: dayLabel(item.date),
+        type: "실적",
+        title: `${item.symbol} 실적 발표`,
+        market: "미국",
+        check: "EPS·매출 컨센서스와 시간외 반응",
+        detail: [
+          item.year && item.quarter ? `${item.year} Q${item.quarter}` : null,
+          item.hour ? `발표 ${item.hour}` : null,
+          typeof item.epsEstimate === "number" ? `EPS 예상 ${item.epsEstimate}` : null,
+          typeof item.revenueEstimate === "number" ? `매출 예상 ${Math.round(item.revenueEstimate).toLocaleString("ko-KR")}` : null
+        ].filter(Boolean).join(" · ") || "발표 후 지수선물, 업종 ETF, 관련 주도주 반응을 확인합니다.",
+        source: "Finnhub",
+        originalUrl: `https://www.nasdaq.com/market-activity/stocks/${item.symbol.toLowerCase()}/earnings`
+      }];
+    })
+    .slice(0, 40);
 }
 
 function loadNaverNewsFeed(query: string, credentials: ReturnType<typeof getNewsCredentials>) {
@@ -516,7 +599,12 @@ async function loadNewsHeadlines(): Promise<MarketBoardProviderPayload> {
       detectedAt
     })));
 
-    return headlineFlowWithState.length > 0 ? { headlineFlow: headlineFlowWithState } : {};
+    const calendarItems = await loadFinnhubEarningsCalendar(credentials).catch(() => []);
+
+    return {
+      ...(headlineFlowWithState.length > 0 ? { headlineFlow: headlineFlowWithState } : {}),
+      ...(calendarItems.length > 0 ? { calendarItems } : {})
+    };
   });
 }
 

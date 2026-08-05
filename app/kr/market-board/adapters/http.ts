@@ -35,7 +35,9 @@ export async function fetchText(url: string, options?: JsonRequestOptions): Prom
   try {
     const response = await fetch(url, {
       cache: "no-store",
+      method: options?.method ?? "GET",
       headers: options?.headers,
+      body: options?.body,
       signal: controller.signal
     });
 

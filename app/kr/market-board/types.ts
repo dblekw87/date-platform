@@ -57,7 +57,7 @@ export type CalendarEventDto = {
   id: string;
   date: string;
   day: string;
-  type: "실적" | "공모주" | "매크로" | "FOMC" | "공시";
+  type: "실적" | "공모주" | "신규상장" | "매크로" | "FOMC" | "공시";
   title: string;
   market: "미국" | "국내";
   check: string;

@@ -68,7 +68,7 @@ export const mockMarketBoardData: MarketBoardData = {
     { id: "cal-cpi", date: "2026-08-06", day: "목", type: "매크로", title: "CPI 발표", market: "미국", check: "컨센서스와 금리 반응", detail: "예상치 대비 결과보다 10Y 금리, 달러지수, 나스닥 선물의 동시 반응을 봅니다.", source: "BLS" },
     { id: "cal-fomc", date: "2026-08-07", day: "금", type: "FOMC", title: "연준 발언 / 금리 경로", market: "미국", check: "인상·동결 표현 변화", detail: "성명서 문구 변화와 기자회견에서 물가, 고용, 인하 시점 표현을 확인합니다.", source: "Federal Reserve" },
     { id: "cal-kr-earnings", date: "2026-08-10", day: "월", type: "실적", title: "국내 반도체 / 2차전지 실적", market: "국내", check: "컨센서스 대비 매출과 마진", detail: "장전 발표면 시초가 갭보다 외국인 수급과 거래대금 유지 여부를 우선 봅니다.", source: "mock" },
-    { id: "cal-listing", date: "2026-08-12", day: "수", type: "공모주", title: "신규 상장 예정 종목", market: "국내", check: "상장일 유통물량", detail: "시초가 형성 이후 거래대금과 기관 의무보유확약 해제 일정을 확인합니다.", source: "mock" }
+    { id: "cal-listing", date: "2026-08-12", day: "수", type: "신규상장", title: "신규 상장 예정 종목", market: "국내", check: "상장일 유통물량", detail: "시초가 형성 이후 거래대금과 기관 의무보유확약 해제 일정을 확인합니다.", source: "mock" }
   ],
   usDisclosures: [
     { id: "sec-13dg", market: "US", source: "SEC", urgency: "지분", formType: "13D/G", title: "행동주의 / 대량보유 지분 변동", filedAt: "2026-08-04T08:20:00+09:00", originalUrl: "#", tags: ["소형주도 포함"], action: "보유 목적과 지분율 변화 확인" },

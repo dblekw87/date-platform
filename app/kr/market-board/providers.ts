@@ -71,7 +71,8 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
     macroSnapshot: mergeMacroSnapshot(base.macroSnapshot, payload.macroSnapshot),
     marketBrief: mergeById(base.marketBrief, payload.marketBrief),
     headlineFlow: payload.headlineFlow ?? base.headlineFlow,
-    calendarItems: payload.calendarItems ?? base.calendarItems,
+    calendarItems: mergeById(base.calendarItems, payload.calendarItems)
+      .sort((left, right) => left.date.localeCompare(right.date) || left.type.localeCompare(right.type) || left.title.localeCompare(right.title)),
     usDisclosures: payload.usDisclosures ?? base.usDisclosures,
     krDisclosures: payload.krDisclosures ?? base.krDisclosures,
     flowItems: payload.flowItems ?? base.flowItems,

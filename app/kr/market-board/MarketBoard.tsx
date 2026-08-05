@@ -12,6 +12,7 @@ type NewsFilterId = "all" | "us" | "kr" | "theme" | "macro";
 type LeadingStock = MarketBoardData["usLeadingStocks"][number];
 type Headline = MarketBoardData["headlineFlow"][number];
 type Disclosure = MarketBoardData["usDisclosures"][number];
+type CalendarEvent = MarketBoardData["calendarItems"][number];
 
 const disclosureFilters: Array<{ id: DisclosureFilterId; label: string }> = [
   { id: "all", label: "전체" },
@@ -38,20 +39,59 @@ const newsFilters: Array<{ id: NewsFilterId; label: string }> = [
   { id: "macro", label: "매크로" }
 ];
 
-const calendarDays = Array.from({ length: 35 }, (_, index) => {
-  const day = index - 5 + 1;
-
-  if (day < 1) {
-    return null;
-  }
-
-  return {
-    date: `2026-08-${String(day).padStart(2, "0")}`,
-    day
-  };
-});
-
 const weekdayLabels = ["월", "화", "수", "목", "금", "토", "일"];
+
+function todaySeoulDate() {
+  return new Intl.DateTimeFormat("sv-SE", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Seoul"
+  }).format(new Date());
+}
+
+function buildCalendarDays(anchorDate: string) {
+  const [year, month] = anchorDate.split("-").map(Number);
+  const firstDate = new Date(Date.UTC(year, month - 1, 1));
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const mondayOffset = (firstDate.getUTCDay() + 6) % 7;
+  const cellCount = Math.ceil((mondayOffset + lastDay) / 7) * 7;
+
+  return Array.from({ length: cellCount }, (_, index) => {
+    const day = index - mondayOffset + 1;
+
+    if (day < 1 || day > lastDay) {
+      return null;
+    }
+
+    return {
+      date: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+      day
+    };
+  });
+}
+
+function formatCalendarMonth(value: string) {
+  const [year, month] = value.split("-");
+
+  return `${year}년 ${Number(month)}월`;
+}
+
+function formatCalendarDayLabel(value: string) {
+  const [, month, day] = value.split("-");
+
+  return `${Number(month)}월 ${Number(day)}일`;
+}
+
+function calendarDaySummary(events: CalendarEvent[]) {
+  const domestic = events.filter((event) => event.market === "국내").length;
+  const us = events.filter((event) => event.market === "미국").length;
+
+  return [
+    domestic > 0 ? `국내 ${domestic}` : null,
+    us > 0 ? `미국 ${us}` : null
+  ].filter(Boolean);
+}
 
 function formatDateTimeMinute(value?: string) {
   if (!value) return "확인 대기";
@@ -339,7 +379,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const [leaderRegion, setLeaderRegion] = useState<LeaderRegion>("us");
   const [leaderFilter, setLeaderFilter] = useState<LeaderFilterId>("turnover");
   const [selectedLeaderId, setSelectedLeaderId] = useState<string | null>(null);
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState("2026-08-04");
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(todaySeoulDate);
   const activeDescription = useMemo(() => liveBoard.tabs.find((tab) => tab.id === activeTab)?.description, [activeTab, liveBoard.tabs]);
   const sortedHeadlines = useMemo(
     () => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
@@ -361,7 +401,11 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const selectedLeaderNews = selectedLeader ? relatedLeaderNews(selectedLeader, sortedHeadlines).slice(0, 8) : [];
   const selectedThemeNews = selectedLeader ? relatedThemeNews(selectedLeader, sortedHeadlines).filter((item) => !selectedLeaderNews.some((news) => news.id === item.id)).slice(0, 8) : [];
   const selectedDisclosures = selectedLeader ? relatedDisclosures(selectedLeader, activeLeaderDisclosures).slice(0, 8) : [];
-  const selectedCalendarItems = liveBoard.calendarItems.filter((item) => item.date === selectedCalendarDate);
+  const calendarDays = useMemo(() => buildCalendarDays(selectedCalendarDate), [selectedCalendarDate]);
+  const calendarToday = useMemo(() => todaySeoulDate(), []);
+  const selectedCalendarItems = liveBoard.calendarItems
+    .filter((item) => item.date === selectedCalendarDate)
+    .sort((left, right) => left.type.localeCompare(right.type) || left.title.localeCompare(right.title));
   const secProvider = liveBoard.providerStatuses.find((provider) => provider.id === "sec");
   const newDisclosureCount = activeDisclosures.filter((item) => item.isNew).length;
   const smallCapDisclosureCount = activeDisclosures.filter((item) => item.issuerType === "small-cap").length;
@@ -544,8 +588,8 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
           </div>
           <div className={styles.calendarShell}>
             <header>
-              <strong>2026년 8월</strong>
-              <span>오늘 8월 4일 기준</span>
+              <strong>{formatCalendarMonth(selectedCalendarDate)}</strong>
+              <span>오늘 {formatCalendarDayLabel(calendarToday)} 기준</span>
             </header>
             <div className={styles.weekdays} aria-hidden="true">
               {weekdayLabels.map((label) => <span key={label}>{label}</span>)}
@@ -553,27 +597,29 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
             <div className={styles.monthGrid} role="grid" aria-label="2026년 8월 일정">
               {calendarDays.map((day, index) => {
                 const events = day ? liveBoard.calendarItems.filter((item) => item.date === day.date) : [];
+                const summaries = calendarDaySummary(events);
 
                 return (
                   <button
-                    aria-label={day ? `8월 ${day.day}일 일정 ${events.length}개` : "빈 날짜"}
+                    aria-label={day ? `${formatCalendarDayLabel(day.date)} 일정 ${events.length}개` : "빈 날짜"}
                     aria-pressed={day?.date === selectedCalendarDate}
                     className={!day ? styles.emptyDay : undefined}
+                    data-today={day?.date === calendarToday ? "true" : undefined}
                     disabled={!day}
                     key={`${index}-${day?.date ?? "empty"}`}
                     onClick={() => day ? setSelectedCalendarDate(day.date) : undefined}
                     type="button"
                   >
                     {day ? <strong>{day.day}</strong> : null}
-                    {events.slice(0, 2).map((event) => <span key={`${event.date}-${event.title}`}>{event.type}</span>)}
-                    {events.length > 2 ? <em>+{events.length - 2}</em> : null}
+                    {summaries.map((summary) => <span key={`${day?.date}-${summary}`}>{summary}</span>)}
+                    {events.length > 0 ? <em>{events.length}건</em> : null}
                   </button>
                 );
               })}
             </div>
           </div>
           <section className={styles.calendarDetail} aria-live="polite" aria-labelledby="calendar-detail-title">
-            <span>{selectedCalendarDate.replace("2026-08-", "8월 ")}일</span>
+            <span>{formatCalendarDayLabel(selectedCalendarDate)}</span>
             <h3 id="calendar-detail-title">선택한 날짜의 이벤트</h3>
             {selectedCalendarItems.length > 0 ? (
               <div className={styles.calendarEvents}>

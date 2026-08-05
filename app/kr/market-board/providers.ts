@@ -89,6 +89,10 @@ function hasLiveLeadingStocks(payloads: Partial<MarketBoardData>[]) {
   );
 }
 
+function hasLiveCalendarItems(payloads: Partial<MarketBoardData>[]) {
+  return payloads.some((payload) => payload.calendarItems && payload.calendarItems.length > 0);
+}
+
 function mergeNewsHeadlines(baseItems: NewsHeadlineDto[], payloadItems: NewsHeadlineDto[]) {
   const byId = new Map(baseItems.map((item) => [item.id, item]));
 
@@ -255,6 +259,9 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
   if (!hasLiveLeadingStocks(providerPayloads)) {
     baseData.usLeadingStocks = [];
     baseData.krLeadingStocks = [];
+  }
+  if (hasLiveCalendarItems(providerPayloads)) {
+    baseData.calendarItems = [];
   }
 
   const mergedData = attachDerivedThemeBriefs(providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData));

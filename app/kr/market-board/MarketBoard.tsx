@@ -83,6 +83,22 @@ function formatCalendarDayLabel(value: string) {
   return `${Number(month)}월 ${Number(day)}일`;
 }
 
+function calendarTimeNote(item: CalendarEvent) {
+  if (item.publishedAt) {
+    return `한국 확인 ${formatDateTimeMinute(item.publishedAt)}`;
+  }
+
+  if (item.market === "미국" && item.type === "실적") {
+    return `${formatCalendarDayLabel(item.date)} 미국 현지일 · 한국은 다음날 새벽 확인 가능`;
+  }
+
+  if (item.market === "미국") {
+    return `${formatCalendarDayLabel(item.date)} 미국 현지일`;
+  }
+
+  return `${formatCalendarDayLabel(item.date)} 한국 기준`;
+}
+
 function calendarDaySummary(events: CalendarEvent[]) {
   const domestic = events.filter((event) => event.market === "국내").length;
   const us = events.filter((event) => event.market === "미국").length;
@@ -724,7 +740,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                     <time>{formatCalendarDayLabel(item.date)}</time>
                     <span>{item.type} · {item.market}</span>
                     <strong>{item.title}</strong>
-                    <small>{displaySource(item.source)}</small>
+                    <small>{calendarTimeNote(item)} · {displaySource(item.source)}</small>
                   </li>
                 ))}
               </ol>
@@ -739,7 +755,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                   <article key={`${item.date}-${item.title}`}>
                     <b>{item.type} · {item.market}</b>
                     <h4>{item.title}</h4>
-                    <small>{displaySource(item.source)} · {formatDateTimeMinute(item.publishedAt ?? item.date)} · <OriginalLink href={item.originalUrl} /></small>
+                    <small>{calendarTimeNote(item)} · {displaySource(item.source)} · <OriginalLink href={item.originalUrl} /></small>
                     <dl>
                       <div>
                         <dt>먼저 볼 것</dt>

@@ -152,7 +152,7 @@ async function loadFinnhubEarningsCalendar(credentials: ReturnType<typeof getNew
         type: "실적",
         title: `${item.symbol} 실적 발표`,
         market: "미국",
-        check: "EPS·매출 컨센서스와 시간외 반응",
+        check: "미국 현지일과 한국 확인 시간을 분리해 EPS·매출 컨센서스와 시간외 반응 확인",
         detail: [
           item.year && item.quarter ? `${item.year} Q${item.quarter}` : null,
           item.hour ? `발표 ${item.hour}` : null,

@@ -1369,9 +1369,10 @@
 .leaderRowHeader {
   border-bottom: 1px solid rgba(31, 38, 32, 0.12);
   color: #657067;
-  padding: 0 10px 8px;
+  padding: 8px 12px;
   font-size: 12px;
   font-weight: 800;
+  text-align: center;
 }
 
 .leaderRowHeader span:nth-child(7) {
@@ -1383,7 +1384,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.86);
   cursor: pointer;
-  padding: 12px 10px;
+  padding: 12px;
 }
 
 .leaderRows article:nth-child(even) {
@@ -2124,6 +2125,29 @@
   border-color: rgba(29, 102, 128, 0.16);
   background: rgba(29, 102, 128, 0.1);
   color: #1d6680;
+}
+
+.leaderRowHeader span {
+  min-width: 0;
+  padding: 0 4px;
+  text-align: center;
+}
+
+.leaderRowHeader span:nth-child(2) {
+  text-align: left;
+}
+
+.leaderRank,
+.leaderTheme,
+.leaderMetric,
+.leaderRate {
+  justify-self: center;
+  text-align: center;
+}
+
+.leaderName {
+  padding: 0 6px;
+  text-align: left;
 }
 
 .tabs button:focus-visible,

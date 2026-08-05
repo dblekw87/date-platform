@@ -24,12 +24,12 @@ export const mockMarketBoardData: MarketBoardData = {
     { id: "bottom", label: "하단 광고 영역", reserved: true }
   ],
   providerStatuses: [
-    { id: "toss", label: "토스증권 Open API", status: "mock", message: "API 키 없음 · mock fallback", checkedAt: timestamp },
-    { id: "kis", label: "한국투자증권 Open API", status: "mock", message: "API 키 없음 · mock fallback", checkedAt: timestamp },
-    { id: "krx", label: "KRX Open API / KIND", status: "mock", message: "API 키 없음 · mock fallback", checkedAt: timestamp },
-    { id: "dart", label: "DART Open API", status: "mock", message: "API 키 없음 · mock fallback", checkedAt: timestamp },
+    { id: "toss", label: "토스증권 Open API", status: "mock", message: "API 키 없음 · provider 비활성", checkedAt: timestamp },
+    { id: "kis", label: "한국투자증권 Open API", status: "mock", message: "API 키 없음 · provider 비활성", checkedAt: timestamp },
+    { id: "krx", label: "KRX Open API / KIND", status: "mock", message: "API 키 없음 · provider 비활성", checkedAt: timestamp },
+    { id: "dart", label: "DART Open API", status: "mock", message: "API 키 없음 · provider 비활성", checkedAt: timestamp },
     { id: "sec", label: "SEC EDGAR", status: "ready", message: "공개 API · adapter 준비", checkedAt: timestamp },
-    { id: "news", label: "뉴스 공급자", status: "mock", message: "뉴스 API 키 없음 · mock fallback", checkedAt: timestamp }
+    { id: "news", label: "뉴스 공급자", status: "mock", message: "뉴스 API 키 없음 · provider 비활성", checkedAt: timestamp }
   ],
   macroSnapshot: [
     { id: "nasdaq-future", label: "NASDAQ 선물", market: "US", instrumentType: "future", symbol: "NQ", value: "+0.42%", tone: "up", note: "AI 대형주 반등 구간", timestamp, source: "mock" },

@@ -35,7 +35,7 @@ const focusEarningsCalendarItems: MarketBoardData["calendarItems"] = [
 ];
 
 function missingCredentialMessage(requiredEnv: string[]) {
-  return requiredEnv.length > 0 ? `${requiredEnv.join(", ")} 없음 · mock fallback` : "공개 adapter · mock fallback";
+  return requiredEnv.length > 0 ? `${requiredEnv.join(", ")} 없음 · provider 비활성` : "공개 adapter 대기";
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | typeof timeoutSymbol> {
@@ -164,7 +164,7 @@ function buildThemeLeadershipBrief(id: string, region: string, leaders: LeadingS
   leaders.forEach((leader) => {
     const theme = leaderTheme(leader);
 
-    if (!theme || theme === "개별 이슈") return;
+    if (!theme || theme === "개별 이슈" || theme === "미분류") return;
 
     const current = byTheme.get(theme) ?? { turnover: 0, leaders: [] };
 
@@ -252,7 +252,7 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
               id: adapter.id,
               label: adapter.label,
               status: "error",
-              message: `${adapter.timeoutMs}ms 초과 · mock fallback`,
+              message: `${adapter.timeoutMs}ms 초과 · 해당 데이터 제외`,
               checkedAt
             } satisfies ProviderStatusDto
           };
@@ -264,7 +264,7 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
             id: adapter.id,
             label: adapter.label,
             status: "ready",
-            message: "adapter 활성화 · mock fallback 유지",
+            message: "adapter 활성화 · live 데이터 수신",
             checkedAt
           } satisfies ProviderStatusDto
         };
@@ -277,7 +277,7 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
             id: adapter.id,
             label: adapter.label,
             status: "error",
-            message: `adapter 오류${reason} · mock fallback`,
+            message: `adapter 오류${reason} · 해당 데이터 제외`,
             checkedAt
           } satisfies ProviderStatusDto
         };

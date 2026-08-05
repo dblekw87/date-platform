@@ -88,7 +88,7 @@
 | CoinGecko API | BTC 가격 fallback | public |
 | U.S. Treasury XML | 미국 10년물 금리 fallback | public |
 
-API 키가 없는 환경에서도 프로젝트를 실행할 수 있도록 mock fallback 데이터를 유지합니다. 이 덕분에 GitHub 검토자나 면접관도 별도 키 없이 UI와 데이터 흐름을 확인할 수 있습니다.
+API 키가 없는 환경에서도 프로젝트는 실행되지만, 해당 provider의 콘텐츠는 화면 데이터에서 제외됩니다. 탭, 레이아웃, 상태 스트립은 유지하고 실제 adapter가 수신한 데이터만 보드에 표시합니다.
 
 ## Production Data Health
 
@@ -102,9 +102,9 @@ Vercel Production 기준으로 `/api/market-board`의 provider 상태를 점검�
 | DART Open API | `ready` | 국내 공시 adapter 활성화 |
 | SEC EDGAR | `ready` | 미국 공시 public adapter 활성화 |
 | 뉴스 공급자 | `ready` | 뉴스 정규화 adapter 활성화 |
-| Toss Invest API | `error` | Production 요청이 `403`을 반환해 mock fallback 유지 |
+| Toss Invest API | `ready` | 국내/미국 랭킹, 환율, 시장 지표 adapter 활성화 |
 
-Toss adapter가 실패해도 보드는 전체 렌더링을 유지합니다. 이는 외부 금융 API가 실패하거나 권한 문제가 발생해도 사용자가 시장 보드의 나머지 정보를 계속 확인할 수 있게 하기 위한 의도적인 fallback 설계입니다.
+개별 adapter가 실패해도 보드는 전체 렌더링을 유지합니다. 실패한 provider의 콘텐츠는 제외하고, 정상 수신된 provider 데이터만 병합해 사용자가 나머지 시장 정보를 계속 확인할 수 있게 설계했습니다.
 
 ## Frontend Tech Stack
 
@@ -148,7 +148,7 @@ app/
       - 여러 API adapter 실행
       - timeout 처리
       - provider status 생성
-      - mock fallback merge
+      - live provider merge
       - 테마 브리프 파생 데이터 생성
 
     types.ts
@@ -184,7 +184,7 @@ External APIs
 각 데이터 공급자는 독립적인 adapter로 분리되어 있습니다.
 
 - API별 인증 방식과 응답 구조를 adapter 안에 격리
-- adapter 실패 시 전체 화면이 깨지지 않도록 mock fallback 유지
+- adapter 실패 시 전체 화면이 깨지지 않도록 해당 provider 데이터만 제외
 - provider 상태를 상단 상태 스트립에 표시
 - 동일한 DTO로 정규화해 UI 컴포넌트가 공급자 차이를 몰라도 되게 설계
 
@@ -194,7 +194,7 @@ External APIs
 
 - timeout 발생 시 해당 provider만 error 상태 처리
 - 나머지 provider 데이터는 정상 반영
-- 부족한 데이터는 mock baseline으로 보완
+- 부족한 데이터는 빈 상태와 provider 상태로 명확히 표시
 - UI는 항상 렌더링 가능한 상태 유지
 
 ## UI/UX Implementation
@@ -244,7 +244,7 @@ External APIs
 
 - provider status 표시
 - adapter timeout
-- mock fallback
+- provider fallback 상태
 - DTO merge
 - 원문 링크 대기 상태 처리
 
@@ -264,7 +264,7 @@ External APIs
 
 ### 4. 실제 서비스에 가까운 운영 상태 표현
 
-상단 provider strip을 통해 어떤 데이터 공급자가 ready/mock/error 상태인지 보여줍니다. 포트폴리오 프로젝트지만 실제 운영 환경에서 필요한 관측 가능성을 UI에 반영했습니다.
+상단 provider strip을 통해 어떤 데이터 공급자가 ready/mock/error 상태인지 보여줍니다. `mock` 상태는 콘텐츠 대체가 아니라 해당 provider 비활성 상태를 뜻하도록 정리했습니다.
 
 ## Running Locally
 
@@ -281,7 +281,7 @@ http://localhost:3000
 
 ## Environment Variables
 
-모든 값이 필수는 아닙니다. 값이 없으면 해당 adapter는 mock fallback으로 동작합니다.
+모든 값이 필수는 아닙니다. 값이 없으면 해당 adapter는 비활성 처리되고, 화면에는 다른 live provider 데이터만 표시됩니다.
 
 ```bash
 KIS_APP_KEY=

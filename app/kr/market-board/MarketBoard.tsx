@@ -157,9 +157,7 @@ function displaySource(source?: string) {
 }
 
 function displayProviderMessage(message: string) {
-  return message
-    .replace(/mock fallback/gi, "보조 데이터 유지")
-    .replace(/mock/gi, "참고값");
+  return message.replace(/mock/gi, "비활성");
 }
 
 function ProviderStatusStrip({ board }: { board: MarketBoardData }) {

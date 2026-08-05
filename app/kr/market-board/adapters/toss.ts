@@ -416,6 +416,14 @@ async function loadStocks(token: string, symbols: string[]) {
   return bySymbol;
 }
 
+async function loadStocksOrEmpty(token: string, symbols: string[]) {
+  try {
+    return await loadStocks(token, symbols);
+  } catch {
+    return new Map<string, TossStockInfo>();
+  }
+}
+
 async function loadPriceLimits(token: string, symbols: string[]) {
   const entries = await Promise.allSettled(symbols.slice(0, 8).map(async (symbol) => {
     const response = await tossGet<TossPriceLimitResponse>("/api/v1/price-limits", token, { symbol });
@@ -848,13 +856,18 @@ async function loadTossMarketData(): Promise<MarketBoardProviderPayload> {
     }
 
     const token = await getTossAccessToken(credentials);
-    const [krTurnover, krVolume, krGainers, usTurnover, usVolume, usGainers, usdKrw, marketIndicators] = await Promise.all([
-      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_AMOUNT", "realtime", 80),
-      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_VOLUME", "realtime", 80),
-      loadRankingOrEmpty(token, "KR", "TOP_GAINERS", "1d", 80),
-      loadRankingOrEmpty(token, "US", "MARKET_TRADING_AMOUNT", "realtime", 80),
-      loadRankingOrEmpty(token, "US", "MARKET_TRADING_VOLUME", "realtime", 80),
-      loadRankingOrEmpty(token, "US", "TOP_GAINERS", "1d", 80),
+    const rankingCount = 30;
+    const [krTurnover, krVolume, krGainers] = await Promise.all([
+      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_AMOUNT", "realtime", rankingCount),
+      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_VOLUME", "realtime", rankingCount),
+      loadRankingOrEmpty(token, "KR", "TOP_GAINERS", "1d", rankingCount)
+    ]);
+    const [usTurnover, usVolume, usGainers] = await Promise.all([
+      loadRankingOrEmpty(token, "US", "MARKET_TRADING_AMOUNT", "realtime", rankingCount),
+      loadRankingOrEmpty(token, "US", "MARKET_TRADING_VOLUME", "realtime", rankingCount),
+      loadRankingOrEmpty(token, "US", "TOP_GAINERS", "1d", rankingCount)
+    ]);
+    const [usdKrw, marketIndicators] = await Promise.all([
       loadUsdKrwSnapshot(token).catch(() => null),
       loadMarketIndicatorSnapshots(token).catch(() => [])
     ]);
@@ -869,8 +882,8 @@ async function loadTossMarketData(): Promise<MarketBoardProviderPayload> {
     const krCandidateSymbols = krCandidateItems.flatMap((item) => item.symbol ? [item.symbol] : []);
     const usCandidateSymbols = usCandidateItems.flatMap((item) => item.symbol ? [item.symbol] : []);
     const [krStocks, usStocks, krPriceLimits, krWarnings] = await Promise.all([
-      loadStocks(token, krCandidateSymbols),
-      loadStocks(token, usCandidateSymbols),
+      loadStocksOrEmpty(token, krCandidateSymbols),
+      loadStocksOrEmpty(token, usCandidateSymbols),
       loadPriceLimits(token, krCandidateSymbols),
       loadStockWarnings(token, krCandidateSymbols)
     ]);

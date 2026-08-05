@@ -211,17 +211,17 @@ function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   if (filterId === "gainers") {
     const rank = leaderRankFor(stock, "gainers");
 
-    return !etf && rank !== null && rank <= 30;
+    return !etf && (rank !== null ? rank <= 30 : changeTone(leaderChangeRate(stock)) === "up");
   }
   if (filterId === "turnover") {
     const rank = leaderRankFor(stock, "turnover");
 
-    return !etf && rank !== null && rank <= 30;
+    return !etf && (rank !== null ? rank <= 30 : !/거래대금 확인 중|확인 중/i.test(stock.turnover));
   }
   if (filterId === "volume") {
     const rank = leaderRankFor(stock, "volume");
 
-    return !etf && rank !== null && rank <= 30;
+    return !etf && (rank !== null ? rank <= 30 : !/거래량 확인 중|확인 중/i.test(leaderVolumeOnly(stock)));
   }
   if (filterId === "etf") return etf;
   if (filterId === "risk") return /거래정지|정리매매|관리종목|투자경고|투자위험|단기과열|상장폐지|상장상태|VI 발동|변동성완화/i.test(labelText);
@@ -544,7 +544,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
       }
     }
 
-    timeoutId = setTimeout(refreshBoard, refreshIntervalMs);
+    void refreshBoard();
 
     return () => {
       ignore = true;

@@ -111,11 +111,12 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
   };
 }
 
-function hasLiveLeadingStocks(payloads: Partial<MarketBoardData>[]) {
-  return payloads.some((payload) =>
-    (payload.krLeadingStocks && payload.krLeadingStocks.length > 0) ||
-    (payload.usLeadingStocks && payload.usLeadingStocks.length > 0)
-  );
+function hasLiveKrLeadingStocks(payloads: Partial<MarketBoardData>[]) {
+  return payloads.some((payload) => payload.krLeadingStocks && payload.krLeadingStocks.length > 0);
+}
+
+function hasLiveUsLeadingStocks(payloads: Partial<MarketBoardData>[]) {
+  return payloads.some((payload) => payload.usLeadingStocks && payload.usLeadingStocks.length > 0);
 }
 
 function hasLiveCalendarItems(payloads: Partial<MarketBoardData>[]) {
@@ -285,10 +286,8 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
     providerStatuses: providerResults.map((result) => result.status)
   };
 
-  if (!hasLiveLeadingStocks(providerPayloads)) {
-    baseData.usLeadingStocks = [];
-    baseData.krLeadingStocks = [];
-  }
+  if (!hasLiveUsLeadingStocks(providerPayloads)) baseData.usLeadingStocks = [];
+  if (!hasLiveKrLeadingStocks(providerPayloads)) baseData.krLeadingStocks = [];
   if (hasLiveCalendarItems(providerPayloads)) {
     baseData.calendarItems = focusEarningsCalendarItems;
   }

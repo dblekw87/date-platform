@@ -1353,21 +1353,23 @@
 .leaderRows {
   display: grid;
   gap: 6px;
+  min-width: 0;
 }
 
 .leaderRowHeader,
 .leaderRows article {
   display: grid;
-  grid-template-columns: 54px minmax(200px, 1.25fr) minmax(126px, 0.72fr) minmax(154px, 0.9fr) minmax(154px, 0.9fr) minmax(96px, 0.52fr);
+  grid-template-columns: 50px minmax(180px, 1.15fr) minmax(118px, 0.66fr) minmax(132px, 0.78fr) minmax(132px, 0.78fr) minmax(86px, 0.48fr);
   align-items: center;
-  min-width: 860px;
-  gap: 12px;
+  width: 100%;
+  min-width: 760px;
+  gap: 10px;
 }
 
 .leaderRowHeader {
   border-bottom: 1px solid rgba(31, 38, 32, 0.12);
   color: #657067;
-  padding: 0 14px 8px;
+  padding: 0 10px 8px;
   font-size: 12px;
   font-weight: 800;
 }
@@ -1381,7 +1383,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.86);
   cursor: pointer;
-  padding: 12px 14px;
+  padding: 12px 10px;
 }
 
 .leaderRows article:nth-child(even) {

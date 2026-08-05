@@ -20,9 +20,9 @@ const focusEarningsCalendarItems: MarketBoardData["calendarItems"] = [
     publishedAt: "2026-08-05T05:15:00+09:00"
   },
   {
-    id: "focus-earnings-sndk-2026-08-05",
-    date: "2026-08-05",
-    day: "수",
+    id: "focus-earnings-sndk-2026-08-06-kst",
+    date: "2026-08-06",
+    day: "목",
     type: "실적",
     title: "SanDisk 실적 발표",
     market: "미국",

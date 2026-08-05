@@ -736,10 +736,15 @@ function buildTossBrief(macroSnapshot: MarketSnapshotDto[], krLeaders: LeadingSt
   const briefs: MarketBriefDto[] = [];
 
   if (krLeaders.length > 0 || usLeaders.length > 0) {
+    const leadingTitleParts = [
+      krLeaders[0] ? `국내 ${krLeaders[0].name}` : null,
+      usLeaders[0] ? `미국 ${usLeaders[0].name}` : null
+    ].filter(Boolean);
+
     briefs.push({
       id: "toss-leadership",
       region: "주도주",
-      title: `${krLeaders[0]?.name ?? "국내"} / ${usLeaders[0]?.name ?? "미국"} 거래대금 상위 흐름입니다.`,
+      title: `${leadingTitleParts.join(" / ")} 거래대금 상위 흐름입니다.`,
       points: [
         krLeaders[0] ? `국내 ${krLeaders[0].name} ${krLeaders[0].turnover} · ${krLeaders[0].burst}` : "국내 랭킹 확인 대기",
         usLeaders[0] ? `미국 ${usLeaders[0].name} ${usLeaders[0].turnover} · ${usLeaders[0].burst}` : "미국 랭킹 확인 대기",

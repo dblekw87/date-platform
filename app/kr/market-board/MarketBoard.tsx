@@ -497,7 +497,8 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const activeDisclosures = disclosureRegion === "us" ? liveBoard.usDisclosures : liveBoard.krDisclosures;
   const filteredDisclosures = activeDisclosures.filter((item) => matchesDisclosureFilter(item, disclosureFilter));
   const activeDisclosureDescription = liveBoard.disclosureTabs.find((tab) => tab.id === disclosureRegion)?.description;
-  const activeLeadingStocks = leaderRegion === "us" ? liveBoard.usLeadingStocks : liveBoard.krLeadingStocks;
+  const effectiveLeaderRegion: LeaderRegion = leaderRegion === "us" && liveBoard.usLeadingStocks.length === 0 && liveBoard.krLeadingStocks.length > 0 ? "kr" : leaderRegion;
+  const activeLeadingStocks = effectiveLeaderRegion === "us" ? liveBoard.usLeadingStocks : liveBoard.krLeadingStocks;
   const filteredLeadingStocks = sortLeadingStocks(activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter)), leaderFilter);
   const selectedLeader = filteredLeadingStocks.find((stock) => stock.id === selectedLeaderId) ?? filteredLeadingStocks[0];
   const activeLeaderDisclosures = selectedLeader?.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures;
@@ -861,7 +862,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
             </div>
             <div className={styles.leaderTabs} role="group" aria-label="시장 선택">
               {liveBoard.leaderTabs.map((tab) => (
-                <button aria-pressed={leaderRegion === tab.id} key={tab.id} onClick={() => setLeaderRegion(tab.id)} type="button">
+                <button aria-pressed={effectiveLeaderRegion === tab.id} key={tab.id} onClick={() => setLeaderRegion(tab.id)} type="button">
                   {tab.label}
                 </button>
               ))}

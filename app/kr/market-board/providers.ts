@@ -155,7 +155,10 @@ function parseTurnoverValue(value: string) {
 function leaderTheme(leader: LeadingStockDto) {
   const [theme] = leader.reason.split(" · ");
 
-  return theme && theme !== "ETF" ? theme : "";
+  if (!theme || theme === "ETF" || theme === "미분류") return "";
+  if (/KIS|토스증권|거래대금|거래량|상승률|순위|표시순위/i.test(theme)) return "";
+
+  return theme;
 }
 
 function buildThemeLeadershipBrief(id: string, region: string, leaders: LeadingStockDto[], currency: "KRW" | "USD"): MarketBriefDto | null {

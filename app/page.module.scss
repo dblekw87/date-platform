@@ -1340,13 +1340,14 @@
 
 .leaderWorkspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.38fr);
   gap: 18px;
   align-items: start;
 }
 
 .leaderWorkspace > div {
   min-width: 0;
+  overflow-x: auto;
 }
 
 .leaderRows {
@@ -1357,16 +1358,16 @@
 .leaderRowHeader,
 .leaderRows article {
   display: grid;
-  grid-template-columns: 48px minmax(160px, 1.1fr) minmax(92px, 0.6fr) minmax(112px, 0.7fr) minmax(126px, 0.75fr) minmax(74px, 0.45fr);
+  grid-template-columns: 54px minmax(200px, 1.25fr) minmax(126px, 0.72fr) minmax(154px, 0.9fr) minmax(154px, 0.9fr) minmax(96px, 0.52fr);
   align-items: center;
-  min-width: 0;
+  min-width: 860px;
   gap: 12px;
 }
 
 .leaderRowHeader {
   border-bottom: 1px solid rgba(31, 38, 32, 0.12);
   color: #657067;
-  padding: 0 12px 8px;
+  padding: 0 14px 8px;
   font-size: 12px;
   font-weight: 800;
 }
@@ -1380,7 +1381,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.86);
   cursor: pointer;
-  padding: 12px;
+  padding: 12px 14px;
 }
 
 .leaderRows article:nth-child(even) {
@@ -2236,6 +2237,7 @@
   .leaderRows article {
     grid-template-columns: 52px minmax(0, 1fr);
     align-items: start;
+    min-width: 0;
   }
 
   .leaderTheme,

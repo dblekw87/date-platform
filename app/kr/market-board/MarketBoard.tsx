@@ -132,6 +132,20 @@ function OriginalLink({ href }: { href?: string }) {
   return href && href !== "#" ? <a href={href} rel="noreferrer" target="_blank">원문</a> : <span>원문 대기</span>;
 }
 
+function displaySource(source?: string) {
+  if (!source) return "출처 확인";
+  if (source === "mock") return "참고값";
+  if (source === "market") return "시장 데이터";
+
+  return source;
+}
+
+function displayProviderMessage(message: string) {
+  return message
+    .replace(/mock fallback/gi, "보조 데이터 유지")
+    .replace(/mock/gi, "참고값");
+}
+
 function ProviderStatusStrip({ board }: { board: MarketBoardData }) {
   const checkedAt = board.providerStatuses[0]?.checkedAt;
 
@@ -140,7 +154,7 @@ function ProviderStatusStrip({ board }: { board: MarketBoardData }) {
       <strong>데이터 연결 상태{checkedAt ? ` · ${formatDateTimeMinute(checkedAt)}` : ""}</strong>
       <div>
         {board.providerStatuses.map((provider) => (
-          <span data-status={provider.status} key={provider.id} title={provider.message}>
+          <span data-status={provider.status} key={provider.id} title={displayProviderMessage(provider.message)}>
             {provider.label}
           </span>
         ))}
@@ -547,7 +561,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                 <strong>{item.label}</strong>
                 <span>{item.value}</span>
                 <small>{item.note}</small>
-                <em>{item.source} · {formatDateTimeMinute(item.timestamp)}</em>
+                <em>{displaySource(item.source)} · {formatDateTimeMinute(item.timestamp)}</em>
               </article>
             ))}
           </div>
@@ -675,7 +689,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                     <time>{formatCalendarDayLabel(item.date)}</time>
                     <span>{item.type} · {item.market}</span>
                     <strong>{item.title}</strong>
-                    <small>{item.source}</small>
+                    <small>{displaySource(item.source)}</small>
                   </li>
                 ))}
               </ol>
@@ -690,7 +704,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                   <article key={`${item.date}-${item.title}`}>
                     <b>{item.type} · {item.market}</b>
                     <h4>{item.title}</h4>
-                    <small>{item.source} · {formatDateTimeMinute(item.publishedAt ?? item.date)} · <OriginalLink href={item.originalUrl} /></small>
+                    <small>{displaySource(item.source)} · {formatDateTimeMinute(item.publishedAt ?? item.date)} · <OriginalLink href={item.originalUrl} /></small>
                     <dl>
                       <div>
                         <dt>먼저 볼 것</dt>

@@ -29,7 +29,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function KoreanPrototypeLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function KoreanLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const isHome = pathname === "/kr";
 
@@ -39,7 +39,7 @@ export default function KoreanPrototypeLayout({ children }: Readonly<{ children:
         <Link className={styles.logo} href="/kr" aria-label="DATE 한국형 홈">
           DATE
         </Link>
-        {isHome ? <span className={styles.homeMeta}>시장 확인 보드 · Prototype</span> : null}
+        {isHome ? <span className={styles.homeMeta}>시장 확인 보드</span> : null}
         {!isHome ? (
           <>
             <nav className={styles.desktopNav} aria-label="주요 메뉴">
@@ -70,7 +70,7 @@ export default function KoreanPrototypeLayout({ children }: Readonly<{ children:
       {children}
 
       {!isHome ? <footer className={styles.footer}>
-        <span>DATE 한국형 경험 Prototype</span>
+        <span>DATE 한국형 경험</span>
         <nav aria-label="하단 이동">
           {[...desktopNavigation, ...secondaryRoutes].map((item) => (
             <Link href={item.href} key={item.href}>

@@ -68,10 +68,10 @@ const samsung: StockMock = {
   kind: "종목·기업",
   sector: "반도체",
   themes: ["반도체", "AI 인프라"],
-  price: "현재가 예시 xx,xxx",
-  change: "예시 +0.0%",
+  price: "현재가 확인 중",
+  change: "등락률 확인 중",
   sessionState: "장 중",
-  updatedAt: "마지막 업데이트 예시 10:40",
+  updatedAt: "마지막 업데이트 확인 중",
   firstChange: "반도체 규제 범위 확대 가능성과 HBM 공급망 영향을 먼저 확인해야 합니다.",
   confidence: "공식 확인",
   causalLabel: "움직임과 연결된 정보",
@@ -82,8 +82,8 @@ const samsung: StockMock = {
   relatedMarkets: ["KOSPI", "KOSPI 선물", "NASDAQ", "USD/KRW"],
   leadEvidence: {
     title: "반도체 규제 범위 확대 가능성 관련 공식 발표 후보",
-    source: "공식 출처 Placeholder",
-    publishedAt: "공개 시각 예시 09:30",
+    source: "공식 출처 확인",
+    publishedAt: "공개 시각 확인 중",
     confidence: "공식 확인",
     supports: "관련 발표 후보가 삼성전자 공급망 검토 대상과 연결될 수 있음을 확인합니다.",
     limitation: "규제 적용 범위와 시행 시점은 아직 단정할 수 없습니다.",
@@ -94,8 +94,8 @@ const samsung: StockMock = {
   supportingEvidence: [
     {
       title: "AI 인프라 투자 확대와 HBM 수요 연결 후보",
-      source: "공식 발표 Placeholder",
-      publishedAt: "마지막 확인 예시 10:20",
+      source: "공식 발표 확인",
+      publishedAt: "마지막 확인 중",
       confidence: "복수 출처 확인",
       supports: "HBM 수요와 AI 인프라 투자가 같은 테마 안에서 연결됩니다.",
       limitation: "삼성전자 실적 영향으로 직접 단정할 수 없습니다.",
@@ -107,8 +107,8 @@ const samsung: StockMock = {
   alternativeEvidence: [
     {
       title: "환율 변화가 수출주 해석에 미치는 영향",
-      source: "시장 데이터 Placeholder",
-      publishedAt: "마지막 확인 예시 11:10",
+      source: "시장 데이터 확인",
+      publishedAt: "마지막 확인 중",
       confidence: "단일 출처",
       supports: "USD/KRW 변화가 수출주 해석의 보조 기준점이 됩니다.",
       limitation: "환율만으로 종목 움직임의 원인을 단정할 수 없습니다.",
@@ -121,13 +121,13 @@ const samsung: StockMock = {
     {
       title: "정책 적용 대상 기업의 범위",
       needed: "공식 시행 문서 또는 기관 발표",
-      recheck: "다시 확인 예시 15:00",
+      recheck: "장중 재확인",
       limitation: "현재 해석은 공급망 노출 가능성에 머뭅니다."
     }
   ],
   marketReaction: {
-    priceFlow: "작은 가격 흐름 Placeholder",
-    volume: "거래량 예시: 평소 대비 확인 중",
+    priceFlow: "가격 흐름은 차트 데이터 연결 후 표시",
+    volume: "거래량 확인 중",
     index: "KOSPI와 KOSPI 선물 동시 확인",
     theme: "반도체 테마 확산 여부 확인"
   },
@@ -171,11 +171,11 @@ const unknownStock: StockMock = {
   symbol: "UNKNOWN",
   name: "확인되지 않은 종목",
   market: "시장 미확인",
-  kind: "종목 Placeholder",
+  kind: "종목 확인 필요",
   sector: "업종 미확인",
   themes: ["관련 테마 없음"],
-  price: "현재가 예시 없음",
-  change: "등락 예시 없음",
+  price: "현재가 없음",
+  change: "등락률 없음",
   sessionState: "확인 불가",
   updatedAt: "마지막 업데이트 없음",
   firstChange: "공식 정보가 확인되지 않은 종목입니다.",
@@ -183,7 +183,7 @@ const unknownStock: StockMock = {
   causalLabel: "현재 확인된 변화",
   changeSummary: "이 종목에 연결된 공식 정보가 아직 없습니다.",
   whyItMayMatter: "정확한 종목 코드나 공식 정보를 확인한 뒤 분석을 시작해야 합니다.",
-  confirmedFacts: ["입력한 종목 코드에 대한 Prototype 데이터가 없습니다."],
+  confirmedFacts: ["입력한 종목 코드에 대한 공식 정보가 연결되지 않았습니다."],
   notConfirmed: ["종목명, 시장, 관련 근거, 관련 기업을 확인할 수 없습니다."],
   relatedMarkets: ["시장 미확인"],
   leadEvidence: {
@@ -204,7 +204,7 @@ const unknownStock: StockMock = {
       title: "종목 코드 확인",
       needed: "정확한 종목 코드 또는 검색 결과",
       recheck: "검색에서 다시 확인",
-      limitation: "현재 화면은 오류가 아니라 Placeholder 상태입니다."
+      limitation: "현재 화면은 공식 정보가 연결되지 않은 상태입니다."
     }
   ],
   marketReaction: {

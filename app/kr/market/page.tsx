@@ -68,13 +68,13 @@ const marketStates = [
 ];
 
 const marketBoard = [
-  { group: "국내", name: "KOSPI", primary: "현물 예시 2,7xx", secondary: "선물 주간 예시 · 선물 야간 예시", status: "장중 확인" },
-  { group: "국내", name: "KOSDAQ", primary: "현물 예시 8xx", secondary: "선물 예시 · 중소형주 흐름", status: "장중 확인" },
-  { group: "미국", name: "NASDAQ", primary: "현물 예시 1x,xxx", secondary: "선물 예시 · 야간 반응", status: "마감 후 참고" },
-  { group: "미국", name: "S&P 500", primary: "현물 예시 5,xxx", secondary: "선물 예시 · 미국 시장 기준", status: "마감 후 참고" },
-  { group: "환율", name: "USD/KRW", primary: "환율 예시 1,3xx", secondary: "장중 흐름 · 야간 환율 참고", status: "확인 중" },
-  { group: "원자재", name: "WTI 유가", primary: "유가 예시 xx.xx", secondary: "선물 예시 · 에너지 비용 영향", status: "확인 중" },
-  { group: "원자재", name: "금", primary: "현물 예시 x,xxx", secondary: "선물 예시 · 안전자산 참고", status: "확인 중" }
+  { group: "국내", name: "KOSPI", primary: "현물 지수", secondary: "주간·야간 선물 흐름과 함께 확인", status: "장중 확인" },
+  { group: "국내", name: "KOSDAQ", primary: "중소형주 지수", secondary: "거래대금 상위 테마 확산 여부 확인", status: "장중 확인" },
+  { group: "미국", name: "NASDAQ", primary: "기술주 기준", secondary: "선물과 QQQ 흐름을 함께 확인", status: "마감 후 참고" },
+  { group: "미국", name: "S&P 500", primary: "미국 전체 기준", secondary: "위험 선호와 업종 확산 확인", status: "마감 후 참고" },
+  { group: "환율", name: "USD/KRW", primary: "원/달러 환율", secondary: "수출주와 외국인 수급 해석에 사용", status: "확인 중" },
+  { group: "원자재", name: "WTI 유가", primary: "에너지 비용 기준", secondary: "화학·운송·항공 업종 영향 확인", status: "확인 중" },
+  { group: "원자재", name: "금", primary: "안전자산 기준", secondary: "금리와 위험 회피 흐름 보조 확인", status: "확인 중" }
 ];
 
 const timelineItems = [
@@ -145,8 +145,8 @@ export default function KoreanMarketPage() {
         copyClassName={styles.heroCopy}
         description={
           <>
-            등락률보다 먼저 공식 정보, 선물 흐름, 환율, 관련 종목의 연결을 확인합니다. 현재 화면은 예시 값으로
-            시장 이해 흐름을 검증합니다.
+            등락률보다 먼저 공식 정보, 선물 흐름, 환율, 관련 종목의 연결을 확인합니다. 수치는 시장 보드에서
+            실시간 기준으로 보고, 이 화면에서는 확인 순서를 정리합니다.
           </>
         }
         eyebrow="시장 · 장 중 기준"
@@ -260,7 +260,7 @@ export default function KoreanMarketPage() {
       <section className={styles.marketBoard} aria-labelledby="board-title">
         <KRSectionHeader
           className={styles.sectionHeader}
-          description="현물과 선물이 존재하는 시장은 같은 박스 안에서 함께 봅니다. 모든 값은 예시입니다."
+          description="현물과 선물이 존재하는 시장은 같은 박스 안에서 함께 봅니다. 실제 값은 시장 보드의 연결 상태를 기준으로 확인합니다."
           descriptionAs="span"
           eyebrow="시장 기준점"
           eyebrowClassName={styles.eyebrow}

@@ -46,7 +46,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
     <main className={styles.page}>
       <KRHero
         aside={
-          <aside className={styles.quotePanel} aria-label="종목 가격 예시">
+          <aside className={styles.quotePanel} aria-label="종목 가격 정보">
             <KRInformationBadge className={styles.infoBadge}>{stock.market}</KRInformationBadge>
             <strong>{stock.price}</strong>
             <span>{stock.change}</span>
@@ -178,7 +178,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
       <section className={styles.marketReaction} aria-labelledby="reaction-title">
         <KRSectionHeader className={styles.sectionHeader} eyebrow="시장 반응" eyebrowClassName={styles.eyebrow} id="reaction-title" title="차트는 원인 증명이 아니라 보조 기준입니다." />
         <div className={styles.reactionGrid}>
-          <div className={styles.chartPlaceholder}>{stock.marketReaction.priceFlow}</div>
+          <div className={styles.chartFrame}>{stock.marketReaction.priceFlow}</div>
           <dl>
             <div>
               <dt>거래량 또는 시장 반응</dt>
@@ -253,7 +253,7 @@ export default async function KoreanStockPage({ params }: KoreanStockPageProps) 
           className={styles.emptyState}
           description="입력한 종목 코드에 대한 공식 정보가 없습니다. 검색 또는 시장 화면에서 다시 탐색할 수 있습니다."
           eyebrow="공식 정보 없음"
-          title="확인되지 않은 종목 Placeholder입니다."
+          title="확인되지 않은 종목입니다."
           titleId="unknown-title"
           actions={
             <div className={styles.heroActions}>

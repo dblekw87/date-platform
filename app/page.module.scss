@@ -38,6 +38,18 @@
   letter-spacing: 0;
 }
 
+.siteLogo {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.siteLogo svg {
+  display: block;
+  width: 55px;
+  height: 28px;
+}
+
 .siteHeader span {
   border: 1px solid rgba(31, 38, 32, 0.14);
   border-radius: 999px;

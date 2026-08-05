@@ -273,6 +273,7 @@
   max-width: 860px;
   font-size: clamp(25px, 1.75vw, 31px);
   line-height: 1.14;
+  word-break: keep-all;
   white-space: nowrap;
 }
 
@@ -2223,7 +2224,7 @@
   }
 
   .summary h1 {
-    font-size: 27px;
+    font-size: 26px;
     line-height: 1.12;
     white-space: normal;
   }

@@ -6,6 +6,12 @@
 
 > 매수/매도 추천을 제공하는 서비스가 아니라, 여러 시장 데이터와 원문 링크를 정리해 투자 판단 전 확인 흐름을 돕는 정보 보드입니다.
 
+## Live Demo
+
+- Production: [https://date-platform.vercel.app](https://date-platform.vercel.app)
+- Deployment: Vercel Production
+- Latest verified status: `Ready`
+
 ## Preview
 
 ### Desktop
@@ -308,6 +314,12 @@ npm run test:news  # news normalization test
 npm run lint
 npx tsc --noEmit
 npm run build
+```
+
+Production deployment was verified with Vercel CLI:
+
+```bash
+vercel inspect https://date-platform.vercel.app
 ```
 
 ## Portfolio Review Points

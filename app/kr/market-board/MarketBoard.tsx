@@ -93,6 +93,13 @@ function calendarDaySummary(events: CalendarEvent[]) {
   ].filter(Boolean);
 }
 
+function upcomingCalendarItems(items: CalendarEvent[], fromDate: string) {
+  return items
+    .filter((item) => item.date >= fromDate)
+    .sort((left, right) => left.date.localeCompare(right.date) || left.type.localeCompare(right.type) || left.title.localeCompare(right.title))
+    .slice(0, 8);
+}
+
 function formatDateTimeMinute(value?: string) {
   if (!value) return "확인 대기";
 
@@ -446,6 +453,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const selectedCalendarItems = liveBoard.calendarItems
     .filter((item) => item.date === selectedCalendarDate)
     .sort((left, right) => left.type.localeCompare(right.type) || left.title.localeCompare(right.title));
+  const upcomingItems = upcomingCalendarItems(liveBoard.calendarItems, calendarToday);
   const secProvider = liveBoard.providerStatuses.find((provider) => provider.id === "sec");
   const newDisclosureCount = activeDisclosures.filter((item) => item.isNew).length;
   const smallCapDisclosureCount = activeDisclosures.filter((item) => item.issuerType === "small-cap").length;
@@ -658,6 +666,21 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
               })}
             </div>
           </div>
+          {upcomingItems.length > 0 ? (
+            <section className={styles.upcomingCalendar} aria-labelledby="upcoming-calendar-title">
+              <h3 id="upcoming-calendar-title">다가오는 주요 일정</h3>
+              <ol>
+                {upcomingItems.map((item) => (
+                  <li key={`${item.id}-${item.date}`}>
+                    <time>{formatCalendarDayLabel(item.date)}</time>
+                    <span>{item.type} · {item.market}</span>
+                    <strong>{item.title}</strong>
+                    <small>{item.source}</small>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
           <section className={styles.calendarDetail} aria-live="polite" aria-labelledby="calendar-detail-title">
             <span>{formatCalendarDayLabel(selectedCalendarDate)}</span>
             <h3 id="calendar-detail-title">선택한 날짜의 이벤트</h3>

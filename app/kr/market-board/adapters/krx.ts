@@ -345,8 +345,11 @@ async function loadKrxCalendarItems(credentials: ReturnType<typeof getKrxCredent
 }
 
 async function loadKrxMarketData(): Promise<MarketBoardProviderPayload> {
-  return readThroughCache("market-board:krx:market:v3", marketBoardCacheTtl.calendar, async () => {
+  return readThroughCache("market-board:krx:market:v4", marketBoardCacheTtl.calendar, async () => {
     const credentials = getKrxCredentials();
+    const today = todaySeoulDate();
+    const fromDate = addDays(today, -45);
+    const toDate = addDays(today, 180);
     const results = await Promise.allSettled([
       loadKindListingCalendarItems(),
       loadKindOfferingCalendarItems(),
@@ -354,6 +357,7 @@ async function loadKrxMarketData(): Promise<MarketBoardProviderPayload> {
     ]);
     const calendarItems = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
     const uniqueItems = [...new Map(calendarItems.map((item) => [item.id, item])).values()]
+      .filter((item) => item.date >= fromDate && item.date <= toDate)
       .sort((left, right) => left.date.localeCompare(right.date) || left.type.localeCompare(right.type) || left.title.localeCompare(right.title))
       .slice(0, 80);
 

@@ -175,6 +175,30 @@ function formatTurnover(value?: string) {
   return `${eok.toFixed(1)}억`;
 }
 
+function isLikelyNonOperatingEquity(name: string) {
+  return /(^|\s)(KODEX|TIGER|ACE|RISE|SOL|PLUS|HANARO|KOSEF|KBSTAR|ARIRANG|TIMEFOLIO|히어로즈|마이티|HK)|ETF|ETN|인버스|레버리지|채권|회사채|국고채|액티브|Nifty|TOP10|스팩|SPAC|우선주|우B|우C|리츠|REIT/i.test(name);
+}
+
+function isUsableLeaderCandidate(item: KisVolumeRankItem) {
+  const symbol = item.mksc_shrn_iscd?.trim();
+  const name = item.hts_kor_isnm?.trim();
+  const turnover = parseNumeric(item.acml_tr_pbmn || item.avrg_tr_pbmn);
+  const price = parseNumeric(item.stck_prpr);
+  const changeRate = parseNumeric(item.prdy_ctrt);
+  const volume = parseNumeric(item.acml_vol);
+  const volumeIncrease = parseNumeric(item.vol_inrt);
+
+  return Boolean(
+    symbol &&
+    name &&
+    !isLikelyNonOperatingEquity(name) &&
+    turnover > 0 &&
+    price > 0 &&
+    Math.abs(changeRate) >= 1 &&
+    (volume > 0 || volumeIncrease > 0)
+  );
+}
+
 function formatValue(value?: number, precision = 2) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "확인 중";
 
@@ -246,10 +270,11 @@ function toLeadingStock(item: KisVolumeRankItem, index: number): LeadingStockDto
   const symbol = item.mksc_shrn_iscd?.trim();
   const name = item.hts_kor_isnm?.trim();
 
-  if (!symbol || !name) return null;
+  if (!symbol || !name || !isUsableLeaderCandidate(item)) return null;
 
   const changeRate = formatSignedPercent(item.prdy_ctrt);
   const volumeIncrease = parseNumeric(item.vol_inrt);
+  const accumulatedVolume = parseNumeric(item.acml_vol);
   const rank = item.data_rank?.trim() || String(index + 1);
 
   return {
@@ -258,10 +283,10 @@ function toLeadingStock(item: KisVolumeRankItem, index: number): LeadingStockDto
     name,
     market: "KR",
     marketLabel: "국내 거래대금",
-    burst: volumeIncrease > 0 ? `거래량증가율 ${volumeIncrease.toFixed(1)}%` : `누적거래량 ${parseNumeric(item.acml_vol).toLocaleString("ko-KR")}주`,
+    burst: volumeIncrease > 0 ? `거래량증가율 ${volumeIncrease.toFixed(1)}%` : `누적거래량 ${accumulatedVolume.toLocaleString("ko-KR")}주`,
     turnover: formatTurnover(item.acml_tr_pbmn || item.avrg_tr_pbmn),
     intraday: `현재가 ${parseNumeric(item.stck_prpr).toLocaleString("ko-KR")}원 · ${changeRate}`,
-    reason: `KIS 거래대금순위 #${rank} · 거래량과 거래대금 동반 확인`,
+    reason: `KIS 거래대금순위 #${rank} · 보통주 후보 · 거래량과 거래대금 동반 확인`,
     caution: "뉴스·공시 원문과 장중 거래대금 유지 여부 확인",
     timestamp: new Date().toISOString(),
     source: "kis"

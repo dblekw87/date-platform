@@ -1,13 +1,15 @@
 import { marketBoardCacheTtl, readThroughCache } from "./cache";
-import { fetchJson } from "./http";
+import { fetchJson, fetchText } from "./http";
 import { dedupeNews, normalizeNewsFeed, type RawNewsFeed, type RawNewsItem } from "./news-normalizer";
 import { recordNewsHeadlineEvents, recordNewsHeadlines } from "./news-state";
 import { createMockFallbackAdapter } from "./types";
 import type { MarketBoardProviderPayload } from "./types";
+import type { LeadingStockDto, NewsHeadlineDto } from "../types";
 
 const requiredEnv = ["MARKET_BOARD_NEWS_FEED_URL", "NAVER_API_HUB_KEY", "NEWSAPI_KEY", "FINNHUB_API_KEY", "BENZINGA_API_KEY"];
 const naverNewsQueries = ["국내 증시", "코스피 코스닥", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산", "로봇 원전", "자동차 은행", "인수합병 공시"];
 const koreanNewsQueries = ["국내 증시", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산"];
+const koreanRssQueries = ["국내 증시", "코스피 코스닥", "반도체 주식", "2차전지 주식", "바이오 제약 주식", "조선 방산 주식", "로봇 원전 주식", "국내 공시 인수합병"];
 const globalNewsQueries = ["stock market", "earnings", "interest rates", "semiconductor stocks", "energy oil", "banks", "biotech stocks", "small cap stocks", "merger acquisition"];
 
 function getNewsCredentials() {
@@ -15,12 +17,41 @@ function getNewsCredentials() {
     feedUrl: process.env.MARKET_BOARD_NEWS_FEED_URL,
     naverApiHubKeyId: process.env.NAVER_API_HUB_KEY_ID,
     naverApiHubKey: process.env.NAVER_API_HUB_KEY,
+    naverSearchClientId: process.env.NAVER_SEARCH_CLIENT_ID ?? process.env.NAVER_CLIENT_ID,
+    naverSearchClientSecret: process.env.NAVER_SEARCH_CLIENT_SECRET ?? process.env.NAVER_CLIENT_SECRET,
     newsApiKey: process.env.NEWSAPI_KEY,
     finnhubApiKey: process.env.FINNHUB_API_KEY,
     benzingaApiKey: process.env.BENZINGA_API_KEY,
     papagoClientId: process.env.NAVER_PAPAGO_CLIENT_ID,
     papagoClientSecret: process.env.NAVER_PAPAGO_CLIENT_SECRET
   };
+}
+
+function decodeXml(value: string) {
+  return value
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/&quot;/g, "\"")
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .trim();
+}
+
+function firstXmlValue(xml: string, tag: string) {
+  const match = xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "i"));
+
+  return match?.[1] ? decodeXml(match[1]) : undefined;
+}
+
+function stripXmlTags(value?: string) {
+  return value?.replace(/<[^>]+>/g, "").trim();
+}
+
+function isArticleLikeRssSource(source?: string, title?: string) {
+  const text = `${source ?? ""} ${title ?? ""}`;
+
+  return !/blog|블로그|cafe|카페|tistory|티스토리|brunch|브런치/i.test(text);
 }
 
 async function settleFeeds(loaders: Array<() => Promise<RawNewsFeed>>) {
@@ -75,6 +106,72 @@ function loadNaverNewsFeed(query: string, credentials: ReturnType<typeof getNews
         text: item.title || item.description
       }))
     };
+  };
+}
+
+function loadNaverDevelopersNewsFeed(query: string, credentials: ReturnType<typeof getNewsCredentials>) {
+  return async (): Promise<RawNewsFeed> => {
+    if (!credentials.naverSearchClientId || !credentials.naverSearchClientSecret) return [];
+
+    const url = buildQueryUrl("https://openapi.naver.com/v1/search/news.json", {
+      query,
+      display: 10,
+      start: 1,
+      sort: "date"
+    });
+    const response = await fetchJson<{ items?: Array<RawNewsItem & { description?: string }> }>(url, {
+      timeoutMs: 2500,
+      headers: {
+        "X-Naver-Client-Id": credentials.naverSearchClientId,
+        "X-Naver-Client-Secret": credentials.naverSearchClientSecret
+      }
+    });
+
+    return {
+      items: (response.items ?? []).map((item) => ({
+        ...item,
+        source: item.source ?? "NAVER",
+        provider: "NAVER",
+        region: "KR",
+        category: query,
+        originalUrl: item.originallink || item.link,
+        text: item.title || item.description
+      }))
+    };
+  };
+}
+
+function loadGoogleNewsRssFeed(query: string, options?: { region?: "KR" | "US"; language?: "ko" | "en" }) {
+  return async (): Promise<RawNewsFeed> => {
+    const region = options?.region ?? "KR";
+    const language = options?.language ?? "ko";
+    const url = buildQueryUrl("https://news.google.com/rss/search", {
+      q: `${query} when:2d`,
+      hl: language,
+      gl: region,
+      ceid: `${region}:${language}`
+    });
+    const xml = await fetchText(url, { timeoutMs: 3500 });
+    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
+      .slice(0, 12)
+      .map((match) => {
+        const itemXml = match[1];
+        const source = firstXmlValue(itemXml, "source");
+        const title = stripXmlTags(firstXmlValue(itemXml, "title"));
+
+        return {
+          title,
+          source: source || "Google News",
+          provider: "Google News",
+          region,
+          category: query,
+          pubDate: firstXmlValue(itemXml, "pubDate"),
+          originalUrl: firstXmlValue(itemXml, "link")
+        } satisfies RawNewsItem;
+      })
+      .filter((item) => isArticleLikeRssSource(item.source, item.title));
+
+    return { items };
   };
 }
 
@@ -211,11 +308,120 @@ function limitDominantLabels<T extends Array<{ label: string; region: string; pu
   }) as T;
 }
 
+function leaderTheme(leader: LeadingStockDto) {
+  const [theme] = leader.reason.split(" · ");
+
+  return theme && theme !== "기타" ? theme : undefined;
+}
+
+function leaderSearchName(leader: LeadingStockDto) {
+  return leader.name
+    .replace(/\s+(Inc\.?|Corporation|Corp\.?|Ltd\.?|PLC|Co\.?)$/i, "")
+    .trim();
+}
+
+function uniqueByValue<T>(items: T[], keyOf: (item: T) => string) {
+  const seen = new Set<string>();
+
+  return items.filter((item) => {
+    const key = keyOf(item);
+
+    if (!key || seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
+}
+
+function textIncludesSymbol(text: string, symbol: string) {
+  if (/^\d+$/.test(symbol)) return text.includes(symbol);
+
+  return new RegExp(`(^|[^A-Za-z0-9])${symbol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^A-Za-z0-9]|$)`, "i").test(text);
+}
+
+export function attachLeaderNewsTags(headlines: NewsHeadlineDto[], leaders: LeadingStockDto[]) {
+  const leaderCandidates = leaders
+    .map((leader) => ({
+      name: leaderSearchName(leader),
+      symbol: leader.symbol,
+      market: leader.market,
+      theme: leaderTheme(leader)
+    }))
+    .filter((leader) => leader.name || leader.symbol);
+
+  return headlines.map((headline) => {
+    const text = `${headline.source} ${headline.label} ${headline.text} ${headline.originalText ?? ""}`;
+    const relatedSymbols = uniqueByValue(
+      leaderCandidates
+        .filter((leader) =>
+          headline.region === leader.market &&
+          ((leader.name && text.toLowerCase().includes(leader.name.toLowerCase())) || textIncludesSymbol(text, leader.symbol))
+        )
+        .map((leader) => leader.symbol),
+      (symbol) => symbol
+    ).slice(0, 4);
+    const relatedThemes = uniqueByValue(
+      leaderCandidates
+        .filter((leader) => leader.theme && text.includes(leader.theme))
+        .map((leader) => leader.theme as string),
+      (theme) => theme
+    ).slice(0, 4);
+
+    if (relatedSymbols.length === 0 && relatedThemes.length === 0) return headline;
+
+    return {
+      ...headline,
+      ...(relatedSymbols.length > 0 ? { relatedSymbols } : {}),
+      ...(relatedThemes.length > 0 ? { relatedThemes } : {})
+    };
+  });
+}
+
+export async function loadLeaderNewsHeadlines(leaders: LeadingStockDto[]) {
+  const leaderQueries = uniqueByValue(
+    leaders
+      .slice(0, 18)
+      .map((leader) => ({
+        query: leader.market === "KR" ? `${leaderSearchName(leader)} 주식` : `${leader.symbol} stock news`,
+        region: leader.market,
+        language: leader.market === "KR" ? "ko" as const : "en" as const
+      })),
+    (item) => `${item.region}:${item.query}`
+  ).slice(0, 10);
+  const themeQueries = uniqueByValue(
+    leaders
+      .flatMap((leader) => {
+        const theme = leaderTheme(leader);
+
+        return theme ? [{ query: `${theme} 주식`, region: leader.market, language: "ko" as const }] : [];
+      }),
+    (item) => `${item.region}:${item.query}`
+  ).slice(0, 4);
+  const loaders = [...leaderQueries, ...themeQueries].map((item) =>
+    loadGoogleNewsRssFeed(item.query, { region: item.region, language: item.language })
+  );
+  const headlines = dedupeNews((await settleFeeds(loaders)).filter(isMarketRelevantHeadline)).slice(0, 30);
+  const taggedHeadlines = attachLeaderNewsTags(headlines, leaders);
+  const newHeadlineIds = await recordNewsHeadlines(taggedHeadlines.map((item) => item.id));
+
+  return taggedHeadlines.map((item) => ({
+    ...item,
+    isNew: newHeadlineIds.has(item.id)
+  }));
+}
+
 async function loadNewsHeadlines(): Promise<MarketBoardProviderPayload> {
   return readThroughCache("market-board:news:headlines", marketBoardCacheTtl.news, async () => {
     const credentials = getNewsCredentials();
 
-    if (!credentials.feedUrl && !credentials.naverApiHubKey && !credentials.newsApiKey && !credentials.finnhubApiKey && !credentials.benzingaApiKey) {
+    if (
+      !credentials.feedUrl &&
+      !credentials.naverApiHubKey &&
+      !credentials.naverSearchClientSecret &&
+      !credentials.newsApiKey &&
+      !credentials.finnhubApiKey &&
+      !credentials.benzingaApiKey
+    ) {
       return {};
     }
 
@@ -226,7 +432,9 @@ async function loadNewsHeadlines(): Promise<MarketBoardProviderPayload> {
     }
 
     naverNewsQueries.forEach((query) => loaders.push(loadNaverNewsFeed(query, credentials)));
+    naverNewsQueries.forEach((query) => loaders.push(loadNaverDevelopersNewsFeed(query, credentials)));
     koreanNewsQueries.forEach((query) => loaders.push(loadNewsApiFeed(query, credentials, { language: "ko", region: "KR" })));
+    koreanRssQueries.forEach((query) => loaders.push(loadGoogleNewsRssFeed(query)));
     globalNewsQueries.forEach((query) => loaders.push(loadNewsApiFeed(query, credentials, { language: "en", region: "US" })));
     loaders.push(loadFinnhubFeed("general", credentials));
     loaders.push(loadFinnhubFeed("forex", credentials));
@@ -260,7 +468,7 @@ export const newsMarketBoardAdapter = createMockFallbackAdapter(
   "news",
   "뉴스 공급자",
   requiredEnv,
-  { credentialStrategy: "any", timeoutMs: 1800 }
+  { credentialStrategy: "any", timeoutMs: 6500 }
 );
 
 newsMarketBoardAdapter.load = loadNewsHeadlines;

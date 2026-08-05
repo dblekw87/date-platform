@@ -1,6 +1,7 @@
 import { marketBoardProviderAdapters } from "./adapters";
+import { attachLeaderNewsTags, loadLeaderNewsHeadlines } from "./adapters/news";
 import { mockMarketBoardData } from "./mock-data";
-import type { MarketBoardData, ProviderStatusDto } from "./types";
+import type { MarketBoardData, NewsHeadlineDto, ProviderStatusDto } from "./types";
 
 const timeoutSymbol = Symbol("market-board-provider-timeout");
 
@@ -54,6 +55,21 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
     krLeadingStocks: payload.krLeadingStocks ?? base.krLeadingStocks,
     smallCapScanner: payload.smallCapScanner ?? base.smallCapScanner
   };
+}
+
+function hasLiveLeadingStocks(payloads: Partial<MarketBoardData>[]) {
+  return payloads.some((payload) =>
+    (payload.krLeadingStocks && payload.krLeadingStocks.length > 0) ||
+    (payload.usLeadingStocks && payload.usLeadingStocks.length > 0)
+  );
+}
+
+function mergeNewsHeadlines(baseItems: NewsHeadlineDto[], payloadItems: NewsHeadlineDto[]) {
+  const byId = new Map(baseItems.map((item) => [item.id, item]));
+
+  payloadItems.forEach((item) => byId.set(item.id, item));
+
+  return [...byId.values()].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
 export async function getMarketBoardData(): Promise<MarketBoardData> {
@@ -116,9 +132,27 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
     })
   );
   const providerPayloads = providerResults.map((result) => result.payload);
-
-  return providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, {
+  const baseData: MarketBoardData = {
     ...mockMarketBoardData,
     providerStatuses: providerResults.map((result) => result.status)
-  });
+  };
+
+  if (!hasLiveLeadingStocks(providerPayloads)) {
+    baseData.usLeadingStocks = [];
+    baseData.krLeadingStocks = [];
+  }
+
+  const mergedData = providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData);
+  const leaders = [...mergedData.krLeadingStocks, ...mergedData.usLeadingStocks];
+
+  if (leaders.length === 0) return mergedData;
+
+  const taggedHeadlines = attachLeaderNewsTags(mergedData.headlineFlow, leaders);
+  const leaderNewsResult = await withTimeout(loadLeaderNewsHeadlines(leaders), 4500);
+  const leaderHeadlines = leaderNewsResult === timeoutSymbol ? [] : leaderNewsResult;
+
+  return {
+    ...mergedData,
+    headlineFlow: mergeNewsHeadlines(taggedHeadlines, leaderHeadlines)
+  };
 }

@@ -8,8 +8,8 @@ import { tossMarketBoardAdapter } from "./toss";
 import type { MarketBoardProviderAdapter } from "./types";
 
 export const marketBoardProviderAdapters: MarketBoardProviderAdapter[] = [
-  tossMarketBoardAdapter,
   kisMarketBoardAdapter,
+  tossMarketBoardAdapter,
   krxMarketBoardAdapter,
   marketDataMarketBoardAdapter,
   dartMarketBoardAdapter,

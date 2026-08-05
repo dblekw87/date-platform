@@ -7,8 +7,11 @@ import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId 
 const refreshIntervalMs = 60_000;
 
 type DisclosureFilterId = "all" | "new" | "small-cap" | "ma" | "sale" | "issuance";
-type LeaderFilterId = "all" | "turnover" | "breakout" | "pullback" | "risk";
+type LeaderFilterId = "all" | "turnover" | "gainers" | "volume" | "risk";
 type NewsFilterId = "all" | "us" | "kr" | "theme" | "macro";
+type LeadingStock = MarketBoardData["usLeadingStocks"][number];
+type Headline = MarketBoardData["headlineFlow"][number];
+type Disclosure = MarketBoardData["usDisclosures"][number];
 
 const disclosureFilters: Array<{ id: DisclosureFilterId; label: string }> = [
   { id: "all", label: "전체" },
@@ -22,8 +25,8 @@ const disclosureFilters: Array<{ id: DisclosureFilterId; label: string }> = [
 const leaderFilters: Array<{ id: LeaderFilterId; label: string }> = [
   { id: "all", label: "전체" },
   { id: "turnover", label: "거래대금" },
-  { id: "breakout", label: "돌파" },
-  { id: "pullback", label: "눌림" },
+  { id: "gainers", label: "상승률" },
+  { id: "volume", label: "거래량" },
   { id: "risk", label: "주의" }
 ];
 
@@ -124,18 +127,31 @@ function matchesDisclosureFilter(item: MarketBoardData["usDisclosures"][number],
   return true;
 }
 
-function matchesLeaderFilter(stock: MarketBoardData["usLeadingStocks"][number], filterId: LeaderFilterId) {
+function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   const labelText = `${stock.burst} ${stock.turnover} ${stock.intraday} ${stock.reason} ${stock.caution}`;
+  const primaryText = `${stock.marketLabel} ${stock.reason}`;
 
-  if (filterId === "turnover") return /\$|억|거래대금|M/i.test(labelText);
-  if (filterId === "breakout") return /돌파|고점|상한가/i.test(labelText);
-  if (filterId === "pullback") return /눌림|VWAP|반등/i.test(labelText);
+  if (filterId === "gainers") {
+    const rank = leaderRankFor(stock, "gainers");
+
+    return /상한가 주도/i.test(primaryText) || (rank !== null && rank <= 30);
+  }
+  if (filterId === "turnover") {
+    const rank = leaderRankFor(stock, "turnover");
+
+    return rank !== null && rank <= 30;
+  }
+  if (filterId === "volume") {
+    const rank = leaderRankFor(stock, "volume");
+
+    return rank !== null && rank <= 30;
+  }
   if (filterId === "risk") return /주의|부담|스프레드|확인|유지 필요/i.test(labelText);
 
   return true;
 }
 
-function matchesNewsFilter(item: MarketBoardData["headlineFlow"][number], filterId: NewsFilterId) {
+function matchesNewsFilter(item: Headline, filterId: NewsFilterId) {
   const labelText = `${item.source} ${item.label} ${item.text}`;
 
   if (filterId === "us") return item.region === "US";
@@ -146,6 +162,116 @@ function matchesNewsFilter(item: MarketBoardData["headlineFlow"][number], filter
   return true;
 }
 
+function newsFilterCount(items: MarketBoardData["headlineFlow"], filterId: NewsFilterId) {
+  return items.filter((item) => matchesNewsFilter(item, filterId)).length;
+}
+
+function relatedHeadlineTags(item: Headline) {
+  return [
+    ...(item.relatedSymbols ?? []).map((symbol) => `종목 ${symbol}`),
+    ...(item.relatedThemes ?? []).map((theme) => `테마 ${theme}`)
+  ];
+}
+
+function leaderTheme(stock: LeadingStock) {
+  const [theme] = stock.reason.split(" · ");
+
+  return theme || "기타";
+}
+
+function leaderChangeRate(stock: LeadingStock) {
+  const match = `${stock.burst} ${stock.intraday}`.match(/[+-]\d+(?:\.\d+)?%/);
+
+  return match?.[0] ?? "확인";
+}
+
+function leaderRankFor(stock: LeadingStock, filterId: Extract<LeaderFilterId, "turnover" | "gainers" | "volume">) {
+  const patterns = {
+    turnover: /거래대금 #(\d+)/i,
+    gainers: /상승률 #(\d+)/i,
+    volume: /거래량 #(\d+)/i
+  };
+  const match = `${stock.marketLabel} ${stock.reason}`.match(patterns[filterId]);
+
+  return match?.[1] ? Number(match[1]) : null;
+}
+
+function sortLeadingStocks(stocks: MarketBoardData["usLeadingStocks"], filterId: LeaderFilterId) {
+  if (filterId !== "turnover" && filterId !== "gainers" && filterId !== "volume") return stocks;
+
+  return [...stocks].sort((left, right) => {
+    const leftRank = leaderRankFor(left, filterId) ?? 999;
+    const rightRank = leaderRankFor(right, filterId) ?? 999;
+
+    return leftRank - rightRank;
+  });
+}
+
+function normalizeForMatch(value: string) {
+  return value.toLowerCase().replace(/\s+/g, "");
+}
+
+function stockNameAliases(stock: LeadingStock) {
+  const aliases = new Set([
+    stock.name,
+    stock.name.replace(/\s+(inc\.?|corporation|corp\.?|ltd\.?|plc|co\.?)$/i, ""),
+    stock.symbol
+  ]);
+
+  if (stock.name.includes("SK하이닉스")) aliases.add("하이닉스");
+  if (stock.name.includes("삼성전자")) aliases.add("삼전");
+
+  return [...aliases].map((alias) => alias.trim()).filter(Boolean);
+}
+
+function headlineMatchesLeader(item: Headline, stock: LeadingStock) {
+  if (item.region !== stock.market) return false;
+  if (item.relatedSymbols?.includes(stock.symbol)) return true;
+
+  const text = normalizeForMatch(`${item.source} ${item.label} ${item.text} ${item.originalText ?? ""}`);
+
+  return stockNameAliases(stock).some((alias) => {
+    if (/^\d+$/.test(alias) && alias.length < 5) return false;
+
+    return text.includes(normalizeForMatch(alias));
+  });
+}
+
+function headlineMatchesTheme(item: Headline, stock: LeadingStock) {
+  const theme = leaderTheme(stock);
+
+  if (!theme || theme === "기타") return false;
+  if (item.relatedThemes?.includes(theme)) return true;
+
+  return `${item.label} ${item.text}`.includes(theme);
+}
+
+function relatedLeaderNews(stock: LeadingStock, headlines: Headline[]) {
+  return headlines.filter((item) => headlineMatchesLeader(item, stock));
+}
+
+function relatedThemeNews(stock: LeadingStock, headlines: Headline[]) {
+  return headlines.filter((item) => headlineMatchesTheme(item, stock));
+}
+
+function relatedDisclosures(stock: LeadingStock, disclosures: Disclosure[]) {
+  const aliases = stockNameAliases(stock).map(normalizeForMatch);
+
+  return disclosures.filter((item) => {
+    const text = normalizeForMatch(`${item.symbol ?? ""} ${item.companyName ?? ""} ${item.title} ${item.tags.join(" ")} ${item.eventType ?? ""}`);
+
+    return item.symbol === stock.symbol || aliases.some((alias) => alias && text.includes(alias));
+  });
+}
+
+function leaderRankSummary(stock: LeadingStock) {
+  return [
+    leaderRankFor(stock, "turnover") ? `거래대금 #${leaderRankFor(stock, "turnover")}` : null,
+    leaderRankFor(stock, "gainers") ? `상승률 #${leaderRankFor(stock, "gainers")}` : null,
+    leaderRankFor(stock, "volume") ? `거래량 #${leaderRankFor(stock, "volume")}` : null
+  ].filter(Boolean).join(" · ");
+}
+
 export function MarketBoard({ board }: { board: MarketBoardData }) {
   const [liveBoard, setLiveBoard] = useState(board);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -154,7 +280,8 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const [disclosureRegion, setDisclosureRegion] = useState<DisclosureRegion>("us");
   const [disclosureFilter, setDisclosureFilter] = useState<DisclosureFilterId>("all");
   const [leaderRegion, setLeaderRegion] = useState<LeaderRegion>("us");
-  const [leaderFilter, setLeaderFilter] = useState<LeaderFilterId>("all");
+  const [leaderFilter, setLeaderFilter] = useState<LeaderFilterId>("turnover");
+  const [selectedLeaderId, setSelectedLeaderId] = useState<string | null>(null);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState("2026-08-04");
   const activeDescription = useMemo(() => liveBoard.tabs.find((tab) => tab.id === activeTab)?.description, [activeTab, liveBoard.tabs]);
   const sortedHeadlines = useMemo(
@@ -171,7 +298,12 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const filteredDisclosures = activeDisclosures.filter((item) => matchesDisclosureFilter(item, disclosureFilter));
   const activeDisclosureDescription = liveBoard.disclosureTabs.find((tab) => tab.id === disclosureRegion)?.description;
   const activeLeadingStocks = leaderRegion === "us" ? liveBoard.usLeadingStocks : liveBoard.krLeadingStocks;
-  const filteredLeadingStocks = activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter));
+  const filteredLeadingStocks = sortLeadingStocks(activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter)), leaderFilter);
+  const selectedLeader = filteredLeadingStocks.find((stock) => stock.id === selectedLeaderId) ?? filteredLeadingStocks[0];
+  const activeLeaderDisclosures = selectedLeader?.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures;
+  const selectedLeaderNews = selectedLeader ? relatedLeaderNews(selectedLeader, sortedHeadlines).slice(0, 8) : [];
+  const selectedThemeNews = selectedLeader ? relatedThemeNews(selectedLeader, sortedHeadlines).filter((item) => !selectedLeaderNews.some((news) => news.id === item.id)).slice(0, 8) : [];
+  const selectedDisclosures = selectedLeader ? relatedDisclosures(selectedLeader, activeLeaderDisclosures).slice(0, 8) : [];
   const selectedCalendarItems = liveBoard.calendarItems.filter((item) => item.date === selectedCalendarDate);
   const secProvider = liveBoard.providerStatuses.find((provider) => provider.id === "sec");
   const newDisclosureCount = activeDisclosures.filter((item) => item.isNew).length;
@@ -307,7 +439,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
           <div className={styles.newsFilters} role="group" aria-label="뉴스 필터">
             {newsFilters.map((filter) => (
               <button aria-pressed={newsFilter === filter.id} key={filter.id} onClick={() => setNewsFilter(filter.id)} type="button">
-                {filter.label}
+                {filter.label} {newsFilterCount(sortedHeadlines, filter.id)}
               </button>
             ))}
           </div>
@@ -331,11 +463,12 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
               {filteredHeadlines.map((item) => (
                 <li data-new={item.isNew ? "true" : undefined} key={item.id}>
                   <time>{formatDateTimeMinute(item.publishedAt)}</time>
-                  <b>{item.source}{item.isNew ? " · NEW" : ""}</b>
+                  <b>{item.source}{item.sourceDetail ? ` · ${item.sourceDetail}` : ""}{item.isNew ? " · NEW" : ""}</b>
                   <strong>{item.label}</strong>
                   <span>
                     {item.text}
                     {item.originalText ? <small>{item.originalText}</small> : null}
+                    {relatedHeadlineTags(item).length > 0 ? <small>{relatedHeadlineTags(item).join(" · ")}</small> : null}
                   </span>
                   <OriginalLink href={item.originalUrl} />
                 </li>
@@ -493,7 +626,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
           <section className={styles.leaderBoard} aria-labelledby="leader-board-title">
             <div className={styles.sectionHeader}>
               <p className={styles.eyebrow}>거래 집중 종목</p>
-              <h2 id="leader-board-title">거래량과 거래대금이 함께 잡히는 종목을 참고로 봅니다.</h2>
+              <h2 id="leader-board-title">상승률이 크고 거래량이 동반되는 급등주를 참고로 봅니다.</h2>
             </div>
             <div className={styles.leaderTabs} role="group" aria-label="시장 선택">
               {liveBoard.leaderTabs.map((tab) => (
@@ -512,8 +645,12 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                 <strong>{activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "turnover")).length}개</strong>
               </div>
               <div>
-                <span>돌파·눌림</span>
-                <strong>{activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "breakout") || matchesLeaderFilter(stock, "pullback")).length}개</strong>
+                <span>상승률 확인</span>
+                <strong>{activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "gainers")).length}개</strong>
+              </div>
+              <div>
+                <span>거래량 확인</span>
+                <strong>{activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "volume")).length}개</strong>
               </div>
             </section>
             <div className={styles.leaderFilterTabs} role="group" aria-label="거래 집중 필터">
@@ -523,34 +660,134 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                 </button>
               ))}
             </div>
-            <div className={styles.leaderRows}>
-              {filteredLeadingStocks.map((stock, index) => (
-                <article key={stock.id}>
+            <div className={styles.leaderWorkspace}>
+              <div>
+                <div className={styles.leaderRows} role="table" aria-label="주도주 목록">
+                  <div className={styles.leaderRowHeader} role="row">
+                    <span>순위</span>
+                    <span>종목</span>
+                    <span>테마</span>
+                    <span>거래대금</span>
+                    <span>거래량</span>
+                    <span>상승률</span>
+                    <span>기준</span>
+                  </div>
+                  {filteredLeadingStocks.map((stock, index) => {
+                    const rowNews = relatedLeaderNews(stock, sortedHeadlines);
+                    const rowThemeNews = relatedThemeNews(stock, sortedHeadlines);
+                    const rowDisclosures = relatedDisclosures(stock, stock.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures);
+                    const latestNews = rowNews[0] ?? rowThemeNews[0];
+
+                    return (
+                      <article
+                        aria-selected={selectedLeader?.id === stock.id}
+                        key={stock.id}
+                        onClick={() => setSelectedLeaderId(stock.id)}
+                        role="row"
+                        tabIndex={0}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setSelectedLeaderId(stock.id);
+                          }
+                        }}
+                      >
+                        <span className={styles.leaderRank}>#{index + 1}</span>
+                        <div className={styles.leaderName}>
+                          <strong>{stock.name}</strong>
+                          <small>{stock.symbol}</small>
+                        </div>
+                        <span className={styles.leaderTheme}>{leaderTheme(stock)}</span>
+                        <strong className={styles.leaderMetric}>{stock.turnover}</strong>
+                        <span className={styles.leaderMetric}>{stock.burst}</span>
+                        <strong className={styles.leaderRate}>{leaderChangeRate(stock)}</strong>
+                        <div className={styles.leaderReason}>
+                          <span>{stock.marketLabel}</span>
+                          <small>뉴스 {rowNews.length}건 · 테마 {rowThemeNews.length}건 · 공시 {rowDisclosures.length}건</small>
+                          {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{stock.reason}</small>}
+                          <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "관련 원문 후보 확인" : stock.caution}</em>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+                {filteredLeadingStocks.length === 0 ? <p className={styles.emptyDisclosure}>선택한 필터에 해당하는 종목이 없습니다.</p> : null}
+              </div>
+              {selectedLeader ? (
+                <section className={styles.leaderInsightPanel} aria-labelledby="leader-insight-title">
                   <header>
-                    <span>{stock.marketLabel}</span>
-                    <b>#{index + 1}</b>
-                    <strong>{stock.name}</strong>
+                    <div>
+                      <span>{selectedLeader.marketLabel}</span>
+                      <h3 id="leader-insight-title">{selectedLeader.name} 원인 후보</h3>
+                      <p>{leaderRankSummary(selectedLeader) || selectedLeader.reason}</p>
+                    </div>
+                    <strong>뉴스 {selectedLeaderNews.length} · 테마 {selectedThemeNews.length} · 공시 {selectedDisclosures.length}</strong>
                   </header>
-                  <dl>
-                    <div>
-                      <dt>순간 거래량</dt>
-                      <dd>{stock.burst}</dd>
-                    </div>
-                    <div>
-                      <dt>거래대금</dt>
-                      <dd>{stock.turnover}</dd>
-                    </div>
-                    <div>
-                      <dt>분봉 위치</dt>
-                      <dd>{stock.intraday}</dd>
-                    </div>
-                  </dl>
-                  <p>{stock.reason}</p>
-                  <small>{stock.caution}</small>
-                </article>
-              ))}
+                  <div className={styles.leaderInsightGrid}>
+                    <article>
+                      <h4>관련 뉴스</h4>
+                      {selectedLeaderNews.length > 0 ? (
+                        <ol>
+                          {selectedLeaderNews.slice(0, 4).map((item) => (
+                            <li key={item.id}>
+                              <b>{item.source} · {formatDateTimeMinute(item.publishedAt)}</b>
+                              <span>{item.text}</span>
+                              <OriginalLink href={item.originalUrl} />
+                            </li>
+                          ))}
+                        </ol>
+                      ) : <p>직접 연결된 종목 뉴스가 없습니다.</p>}
+                    </article>
+                    <article>
+                      <h4>관련 공시</h4>
+                      {selectedDisclosures.length > 0 ? (
+                        <ol>
+                          {selectedDisclosures.slice(0, 4).map((item) => (
+                            <li key={item.id}>
+                              <b>{item.source} {item.formType} · {formatDateTimeMinute(item.filedAt)}</b>
+                              <span>{item.title}</span>
+                              <OriginalLink href={item.originalUrl} />
+                            </li>
+                          ))}
+                        </ol>
+                      ) : <p>매칭된 공시는 없습니다.</p>}
+                    </article>
+                    <article>
+                      <h4>테마 뉴스</h4>
+                      {selectedThemeNews.length > 0 ? (
+                        <ol>
+                          {selectedThemeNews.slice(0, 4).map((item) => (
+                            <li key={item.id}>
+                              <b>{item.source} · {formatDateTimeMinute(item.publishedAt)}</b>
+                              <span>{item.text}</span>
+                              <OriginalLink href={item.originalUrl} />
+                            </li>
+                          ))}
+                        </ol>
+                      ) : <p>{leaderTheme(selectedLeader)} 테마 뉴스가 없습니다.</p>}
+                    </article>
+                    <article>
+                      <h4>랭킹 기준</h4>
+                      <dl>
+                        <div>
+                          <dt>거래대금</dt>
+                          <dd>{selectedLeader.turnover}</dd>
+                        </div>
+                        <div>
+                          <dt>거래량·등락</dt>
+                          <dd>{selectedLeader.burst}</dd>
+                        </div>
+                        <div>
+                          <dt>현재 위치</dt>
+                          <dd>{selectedLeader.intraday}</dd>
+                        </div>
+                      </dl>
+                      <p>{selectedLeader.caution}</p>
+                    </article>
+                  </div>
+                </section>
+              ) : null}
             </div>
-            {filteredLeadingStocks.length === 0 ? <p className={styles.emptyDisclosure}>선택한 필터에 해당하는 종목이 없습니다.</p> : null}
           </section>
         </section>
       ) : null}

@@ -23,8 +23,9 @@ const fixture = {
     },
     {
       id: "benzinga-ma-001",
-      headline: "Small-cap company announces merger agreement",
+      headline: "Breaking: Small-cap company announces merger agreement",
       source: "Benzinga",
+      category: "breaking",
       publishedAt: "2026-08-04T00:55:00Z",
       url: "https://example.com/benzinga-ma"
     },
@@ -58,6 +59,7 @@ assert.deepEqual(
 assert.equal(normalized[0].source, "Finnhub");
 assert.equal(normalized[1].id, "benzinga-ma-001");
 assert.equal(normalized[1].source, "Benzinga");
+assert.equal(normalized[1].sourceDetail, "속보");
 assert.equal(normalized[2].source, "NewsAPI Source");
 assert.equal(normalized[3].source, "NAVER");
 assert.equal(normalized[3].originalUrl, "https://example.com/naver-chip");

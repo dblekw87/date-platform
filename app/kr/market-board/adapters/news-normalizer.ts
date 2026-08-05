@@ -11,6 +11,9 @@ export type RawNewsItem = {
   region?: "US" | "KR" | "GLOBAL";
   category?: string;
   label?: string;
+  type?: string;
+  newsType?: string;
+  urgency?: string;
   publishedAt?: string;
   pubDate?: string;
   created?: string;
@@ -86,7 +89,25 @@ function labelFromRaw(item: RawNewsItem) {
   if (/merger|acquisition|m&a|인수|합병/.test(text)) return "M&A";
   if (/policy|정책|규제/.test(text)) return "정책";
 
-  return item.label?.trim() || item.category?.trim() || "헤드라인";
+  const fallback = item.label?.trim() || item.category?.trim();
+
+  if (fallback && !/^(general|business|stock market|stocks|news|headline|headlines)$/i.test(fallback)) return fallback;
+
+  return "헤드라인";
+}
+
+function sourceDetailFromRaw(item: RawNewsItem) {
+  const values = [item.label, item.category, item.type, item.newsType, item.urgency]
+    .map((value) => value?.trim())
+    .filter((value): value is string => Boolean(value));
+  const text = `${values.join(" ")} ${item.title ?? ""} ${item.headline ?? ""}`;
+
+  if (/속보|breaking|urgent|flash|newsflash/i.test(text)) return "속보";
+  if (/단독|exclusive/i.test(text)) return "단독";
+  if (/업데이트|종합|\bupdate\b|updated/i.test(text)) return "업데이트";
+  if (/보도자료|press release|prnewswire|businesswire|globenewswire|globe newswire/i.test(text)) return "보도자료";
+
+  return undefined;
 }
 
 function regionFromRaw(item: RawNewsItem): NewsHeadlineDto["region"] {
@@ -154,19 +175,31 @@ function headlineFingerprint(item: NewsHeadlineDto) {
   return `${item.region}|${compact}`.slice(0, 220);
 }
 
+function cleanNewsTitle(title: string, source: string) {
+  const escapedSource = source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  return title
+    .replace(new RegExp(`\\s+-\\s+${escapedSource}\\s*$`, "i"), "")
+    .replace(/\s+-\s+Google News\s*$/i, "")
+    .trim();
+}
+
 export function normalizeNewsItem(item: RawNewsItem, index: number): NewsHeadlineDto | null {
-  const title = stripHtml(item.headline?.trim() || item.title?.trim() || item.text?.trim() || "");
+  const rawTitle = stripHtml(item.headline?.trim() || item.title?.trim() || item.text?.trim() || "");
   const originalUrl = item.originalUrl || item.originallink || item.url || item.link || "#";
 
-  if (!title) return null;
+  if (!rawTitle) return null;
 
   const publishedAt = publishedAtFromRaw(item);
+  const source = sourceName(item.source, item.provider);
+  const title = cleanNewsTitle(rawTitle, source);
   const stableId = item.id || `news-${hashString(`${originalUrl}|${publishedAt}|${title}`)}`;
 
   return {
     id: stableId || `news-${index}`,
     time: timeFromPublishedAt(publishedAt),
-    source: sourceName(item.source, item.provider),
+    source,
+    sourceDetail: sourceDetailFromRaw(item),
     region: regionFromRaw(item),
     publishedAt,
     originalUrl,

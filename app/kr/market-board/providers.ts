@@ -5,6 +5,35 @@ import type { LeadingStockDto, MarketBoardData, MarketBriefDto, MarketSnapshotDt
 
 const timeoutSymbol = Symbol("market-board-provider-timeout");
 
+const focusEarningsCalendarItems: MarketBoardData["calendarItems"] = [
+  {
+    id: "focus-earnings-amd-2026-08-04",
+    date: "2026-08-04",
+    day: "화",
+    type: "실적",
+    title: "AMD 실적 발표",
+    market: "미국",
+    check: "미국 8월 4일 장마감 후 발표 · 한국은 8월 5일 새벽 확인",
+    detail: "AMD IR 기준 fiscal Q2 2026 실적 발표입니다. 발표 후 시간외 반응, 반도체 ETF, 관련 AI 인프라 종목 반응을 함께 확인합니다.",
+    source: "AMD IR",
+    originalUrl: "https://ir.amd.com/news-events/press-releases/detail/1289/amd-to-report-fiscal-second-quarter-2026-financial-results",
+    publishedAt: "2026-08-05T05:15:00+09:00"
+  },
+  {
+    id: "focus-earnings-sndk-2026-08-05",
+    date: "2026-08-05",
+    day: "수",
+    type: "실적",
+    title: "SanDisk 실적 발표",
+    market: "미국",
+    check: "미국 8월 5일 13:30 PT 컨퍼런스콜 · 한국은 8월 6일 05:30 확인",
+    detail: "Sandisk IR 기준 fiscal Q4/FY 2026 실적 발표입니다. NAND/스토리지 가격, Western Digital 동반 반응, 반도체 수급을 함께 확인합니다.",
+    source: "Sandisk IR",
+    originalUrl: "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-07-09-sandisk-report-fiscal-fourth-quarter-fiscal-year-2026-results-august-5",
+    publishedAt: "2026-08-06T05:30:00+09:00"
+  }
+];
+
 function missingCredentialMessage(requiredEnv: string[]) {
   return requiredEnv.length > 0 ? `${requiredEnv.join(", ")} 없음 · mock fallback` : "공개 adapter · mock fallback";
 }
@@ -261,7 +290,7 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
     baseData.krLeadingStocks = [];
   }
   if (hasLiveCalendarItems(providerPayloads)) {
-    baseData.calendarItems = [];
+    baseData.calendarItems = focusEarningsCalendarItems;
   }
 
   const mergedData = attachDerivedThemeBriefs(providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData));

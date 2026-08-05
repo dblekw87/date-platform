@@ -2095,7 +2095,13 @@
 }
 
 .leaderInsightGrid dl div:has(.leaderIntradayBadges) {
-  grid-template-columns: minmax(92px, max-content) minmax(0, 1fr);
+  grid-template-columns: 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.leaderInsightGrid dl div:has(.leaderIntradayBadges) dt {
+  width: 100%;
 }
 
 .leaderInsightGrid dd[data-change] {
@@ -2112,12 +2118,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  min-width: 0;
 }
 
 .leaderIntradayBadges span {
   display: inline-flex;
   min-height: 32px;
+  max-width: 100%;
   align-items: center;
   border: 1px solid rgba(31, 38, 32, 0.1);
   border-radius: 999px;

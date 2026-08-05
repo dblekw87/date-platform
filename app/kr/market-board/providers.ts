@@ -1,7 +1,7 @@
 import { marketBoardProviderAdapters } from "./adapters";
 import { attachLeaderNewsTags, loadLeaderNewsHeadlines } from "./adapters/news";
 import { mockMarketBoardData } from "./mock-data";
-import type { MarketBoardData, NewsHeadlineDto, ProviderStatusDto } from "./types";
+import type { MarketBoardData, MarketSnapshotDto, NewsHeadlineDto, ProviderStatusDto, SourceProvider } from "./types";
 
 const timeoutSymbol = Symbol("market-board-provider-timeout");
 
@@ -35,6 +35,30 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
 
     return [...byId.values()];
   };
+  const mergeMacroSnapshot = (baseItems: MarketSnapshotDto[], payloadItems?: MarketSnapshotDto[]) => {
+    const providerPriority: Record<SourceProvider, number> = {
+      kis: 60,
+      toss: 50,
+      market: 40,
+      krx: 30,
+      dart: 20,
+      sec: 20,
+      news: 20,
+      mock: 0
+    };
+    const byKey = new Map<string, MarketSnapshotDto>();
+
+    mergeById(baseItems, payloadItems).forEach((item) => {
+      const key = `${item.market}:${item.instrumentType}:${item.symbol.toUpperCase()}`;
+      const current = byKey.get(key);
+
+      if (!current || providerPriority[item.source] >= providerPriority[current.source]) {
+        byKey.set(key, item);
+      }
+    });
+
+    return [...byKey.values()];
+  };
 
   return {
     ...base,
@@ -44,7 +68,7 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
     leaderTabs: payload.leaderTabs ?? base.leaderTabs,
     adSlots: payload.adSlots ?? base.adSlots,
     providerStatuses: payload.providerStatuses ?? base.providerStatuses,
-    macroSnapshot: mergeById(base.macroSnapshot, payload.macroSnapshot),
+    macroSnapshot: mergeMacroSnapshot(base.macroSnapshot, payload.macroSnapshot),
     marketBrief: mergeById(base.marketBrief, payload.marketBrief),
     headlineFlow: payload.headlineFlow ?? base.headlineFlow,
     calendarItems: payload.calendarItems ?? base.calendarItems,

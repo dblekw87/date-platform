@@ -7,7 +7,7 @@ import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId 
 const refreshIntervalMs = 60_000;
 
 type DisclosureFilterId = "all" | "new" | "small-cap" | "ma" | "sale" | "issuance";
-type LeaderFilterId = "all" | "turnover" | "gainers" | "volume" | "risk";
+type LeaderFilterId = "turnover" | "gainers" | "volume" | "etf" | "risk";
 type NewsFilterId = "all" | "us" | "kr" | "theme" | "macro";
 type LeadingStock = MarketBoardData["usLeadingStocks"][number];
 type Headline = MarketBoardData["headlineFlow"][number];
@@ -23,10 +23,10 @@ const disclosureFilters: Array<{ id: DisclosureFilterId; label: string }> = [
 ];
 
 const leaderFilters: Array<{ id: LeaderFilterId; label: string }> = [
-  { id: "all", label: "전체" },
   { id: "turnover", label: "거래대금" },
   { id: "gainers", label: "상승률" },
   { id: "volume", label: "거래량" },
+  { id: "etf", label: "ETF" },
   { id: "risk", label: "주의" }
 ];
 
@@ -82,7 +82,7 @@ function AdSlot({ label }: { label: string }) {
 }
 
 function OriginalLink({ href }: { href?: string }) {
-  return href && href !== "#" ? <a href={href}>원문</a> : <span>원문 대기</span>;
+  return href && href !== "#" ? <a href={href} rel="noreferrer" target="_blank">원문</a> : <span>원문 대기</span>;
 }
 
 function ProviderStatusStrip({ board }: { board: MarketBoardData }) {
@@ -130,22 +130,24 @@ function matchesDisclosureFilter(item: MarketBoardData["usDisclosures"][number],
 function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   const labelText = `${stock.burst} ${stock.turnover} ${stock.intraday} ${stock.reason} ${stock.caution}`;
   const primaryText = `${stock.marketLabel} ${stock.reason}`;
+  const etf = isEtfLeader(stock);
 
   if (filterId === "gainers") {
     const rank = leaderRankFor(stock, "gainers");
 
-    return /상한가 주도/i.test(primaryText) || (rank !== null && rank <= 30);
+    return !etf && (/상한가 주도/i.test(primaryText) || (rank !== null && rank <= 30));
   }
   if (filterId === "turnover") {
     const rank = leaderRankFor(stock, "turnover");
 
-    return rank !== null && rank <= 30;
+    return !etf && ((rank !== null && rank <= 30) || /거래대금 주도/i.test(primaryText));
   }
   if (filterId === "volume") {
     const rank = leaderRankFor(stock, "volume");
 
-    return rank !== null && rank <= 30;
+    return !etf && ((rank !== null && rank <= 30) || /거래량 주도/i.test(primaryText));
   }
+  if (filterId === "etf") return etf;
   if (filterId === "risk") return /주의|부담|스프레드|확인|유지 필요/i.test(labelText);
 
   return true;
@@ -176,13 +178,26 @@ function relatedHeadlineTags(item: Headline) {
 function leaderTheme(stock: LeadingStock) {
   const [theme] = stock.reason.split(" · ");
 
-  return theme || "기타";
+  return theme || "개별 이슈";
+}
+
+function isEtfLeader(stock: LeadingStock) {
+  return leaderTheme(stock) === "ETF" ||
+    /(^|\s)(KODEX|TIGER|ACE|RISE|SOL|PLUS|HANARO|KOSEF|KBSTAR|ARIRANG|TIMEFOLIO|히어로즈|마이티|HK)|ETF|ETN|인버스|레버리지|채권|회사채|국고채|액티브|Nifty|TOP10/i.test(`${stock.name} ${stock.reason}`);
 }
 
 function leaderChangeRate(stock: LeadingStock) {
   const match = `${stock.burst} ${stock.intraday}`.match(/[+-]\d+(?:\.\d+)?%/);
 
   return match?.[0] ?? "확인";
+}
+
+function leaderVolumeOnly(stock: LeadingStock) {
+  return stock.burst
+    .replace(/상한가 도달\s*·\s*/g, "")
+    .replace(/\s*·\s*[+-]\d+(?:\.\d+)?%/g, "")
+    .replace(/\s*[+-]\d+(?:\.\d+)?%/g, "")
+    .trim();
 }
 
 function leaderRankFor(stock: LeadingStock, filterId: Extract<LeaderFilterId, "turnover" | "gainers" | "volume">) {
@@ -197,11 +212,12 @@ function leaderRankFor(stock: LeadingStock, filterId: Extract<LeaderFilterId, "t
 }
 
 function sortLeadingStocks(stocks: MarketBoardData["usLeadingStocks"], filterId: LeaderFilterId) {
-  if (filterId !== "turnover" && filterId !== "gainers" && filterId !== "volume") return stocks;
+  if (filterId !== "turnover" && filterId !== "gainers" && filterId !== "volume" && filterId !== "etf") return stocks;
 
   return [...stocks].sort((left, right) => {
-    const leftRank = leaderRankFor(left, filterId) ?? 999;
-    const rightRank = leaderRankFor(right, filterId) ?? 999;
+    const rankFilter = filterId === "etf" ? "turnover" : filterId;
+    const leftRank = leaderRankFor(left, rankFilter) ?? leaderRankFor(left, "volume") ?? leaderRankFor(left, "gainers") ?? 999;
+    const rightRank = leaderRankFor(right, rankFilter) ?? leaderRankFor(right, "volume") ?? leaderRankFor(right, "gainers") ?? 999;
 
     return leftRank - rightRank;
   });
@@ -220,6 +236,11 @@ function stockNameAliases(stock: LeadingStock) {
 
   if (stock.name.includes("SK하이닉스")) aliases.add("하이닉스");
   if (stock.name.includes("삼성전자")) aliases.add("삼전");
+  if (stock.symbol === "AMD") aliases.add("Advanced Micro Devices");
+  if (stock.symbol === "INTC") aliases.add("Intel");
+  if (stock.symbol === "MU") aliases.add("Micron Technology");
+  if (stock.symbol === "NVDA") aliases.add("Nvidia");
+  if (stock.symbol === "SNDK") aliases.add("Sandisk");
 
   return [...aliases].map((alias) => alias.trim()).filter(Boolean);
 }
@@ -237,17 +258,53 @@ function headlineMatchesLeader(item: Headline, stock: LeadingStock) {
   });
 }
 
+function isLikelyIndividualCompanyHeadline(item: Headline, stock: LeadingStock) {
+  if (headlineMatchesLeader(item, stock)) return false;
+
+  const text = `${item.source} ${item.label} ${item.text} ${item.originalText ?? ""}`;
+  const broadMarketSignal = /업종|섹터|테마|시장|증시|코스피|코스닥|나스닥|수급|정책|정부|규제|금리|환율|지수|전망|투자심리|랠리|강세|약세|호황|불황|industry|sector|market|policy|regulation|outlook/i.test(text);
+  const individualSignal = /주가|주식|자사주|회장|대표|임원|계약|공급|임상|승인|실적|매출|영업이익|인수|합병|급락|급등|베팅|지분|CB|BW|유증|stock|shares|ceo|chairman|contract|trial|approval|earnings|revenue/i.test(text);
+
+  return individualSignal && !broadMarketSignal;
+}
+
 function headlineMatchesTheme(item: Headline, stock: LeadingStock) {
   const theme = leaderTheme(stock);
 
-  if (!theme || theme === "기타") return false;
+  if (item.region !== stock.market && item.region !== "GLOBAL") return false;
+  if (!theme || theme === "개별 이슈" || theme === "ETF") return false;
+  if (isLikelyIndividualCompanyHeadline(item, stock)) return false;
   if (item.relatedThemes?.includes(theme)) return true;
 
   return `${item.label} ${item.text}`.includes(theme);
 }
 
+function headlineCauseLabel(item: Headline) {
+  const text = `${item.label} ${item.text} ${item.originalText ?? ""}`;
+
+  if (/실적|가이던스|컨센서스|earnings|guidance|revenue|results|quarter|q[1-4]|eps|sales|forecast/i.test(text)) return "실적";
+  if (/공시|sec|8-k|10-q|10-k|s-1|424b|13d|13g|filing|disclosure/i.test(text)) return "공시";
+  if (/인수|합병|m&a|merger|acquisition|tender/i.test(text)) return "M&A";
+
+  return "뉴스";
+}
+
+function headlineCauseScore(item: Headline, stock: LeadingStock) {
+  const label = headlineCauseLabel(item);
+  const directScore = headlineMatchesLeader(item, stock) ? 100 : 0;
+  const causeScore = label === "실적" ? 30 : label === "공시" ? 20 : label === "M&A" ? 18 : 0;
+
+  return directScore + causeScore;
+}
+
 function relatedLeaderNews(stock: LeadingStock, headlines: Headline[]) {
-  return headlines.filter((item) => headlineMatchesLeader(item, stock));
+  return headlines
+    .filter((item) => headlineMatchesLeader(item, stock))
+    .sort((left, right) => {
+      const scoreDiff = headlineCauseScore(right, stock) - headlineCauseScore(left, stock);
+
+      return scoreDiff || right.publishedAt.localeCompare(left.publishedAt);
+    });
 }
 
 function relatedThemeNews(stock: LeadingStock, headlines: Headline[]) {
@@ -699,13 +756,13 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                         </div>
                         <span className={styles.leaderTheme}>{leaderTheme(stock)}</span>
                         <strong className={styles.leaderMetric}>{stock.turnover}</strong>
-                        <span className={styles.leaderMetric}>{stock.burst}</span>
+                        <span className={styles.leaderMetric}>{leaderVolumeOnly(stock)}</span>
                         <strong className={styles.leaderRate}>{leaderChangeRate(stock)}</strong>
                         <div className={styles.leaderReason}>
                           <span>{stock.marketLabel}</span>
                           <small>뉴스 {rowNews.length}건 · 테마 {rowThemeNews.length}건 · 공시 {rowDisclosures.length}건</small>
                           {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{stock.reason}</small>}
-                          <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "관련 원문 후보 확인" : stock.caution}</em>
+                          <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "직접 뉴스와 같은 시장 테마 후보 확인" : stock.caution}</em>
                         </div>
                       </article>
                     );
@@ -730,7 +787,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                         <ol>
                           {selectedLeaderNews.slice(0, 4).map((item) => (
                             <li key={item.id}>
-                              <b>{item.source} · {formatDateTimeMinute(item.publishedAt)}</b>
+                              <b>{headlineCauseLabel(item)} · {item.source} · {formatDateTimeMinute(item.publishedAt)}</b>
                               <span>{item.text}</span>
                               <OriginalLink href={item.originalUrl} />
                             </li>
@@ -774,8 +831,8 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                           <dd>{selectedLeader.turnover}</dd>
                         </div>
                         <div>
-                          <dt>거래량·등락</dt>
-                          <dd>{selectedLeader.burst}</dd>
+                          <dt>거래량</dt>
+                          <dd>{leaderVolumeOnly(selectedLeader)}</dd>
                         </div>
                         <div>
                           <dt>현재 위치</dt>

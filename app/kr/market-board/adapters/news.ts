@@ -9,8 +9,15 @@ import type { LeadingStockDto, NewsHeadlineDto } from "../types";
 const requiredEnv = ["MARKET_BOARD_NEWS_FEED_URL", "NAVER_API_HUB_KEY", "NEWSAPI_KEY", "FINNHUB_API_KEY", "BENZINGA_API_KEY"];
 const naverNewsQueries = ["국내 증시", "코스피 코스닥", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산", "로봇 원전", "자동차 은행", "인수합병 공시"];
 const koreanNewsQueries = ["국내 증시", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산"];
-const koreanRssQueries = ["국내 증시", "코스피 코스닥", "반도체 주식", "2차전지 주식", "바이오 제약 주식", "조선 방산 주식", "로봇 원전 주식", "국내 공시 인수합병"];
-const globalNewsQueries = ["stock market", "earnings", "interest rates", "semiconductor stocks", "energy oil", "banks", "biotech stocks", "small cap stocks", "merger acquisition"];
+const koreanRssQueries = ["국내 증시", "코스피 코스닥", "반도체 주식", "2차전지 주식", "바이오 제약 주식", "조선 방산 주식", "로봇 원전 주식", "수소 연료전지 주식", "재생에너지 태양광 풍력 주식", "국내 공시 인수합병"];
+const globalNewsQueries = ["stock market", "earnings", "interest rates", "semiconductor stocks", "energy oil", "hydrogen fuel cell stocks", "renewable energy solar wind stocks", "banks", "biotech stocks", "small cap stocks", "merger acquisition"];
+
+type LeaderNewsQuery = {
+  query: string;
+  region: "KR" | "US";
+  language: "ko" | "en";
+  label?: string;
+};
 
 function getNewsCredentials() {
   return {
@@ -141,7 +148,7 @@ function loadNaverDevelopersNewsFeed(query: string, credentials: ReturnType<type
   };
 }
 
-function loadGoogleNewsRssFeed(query: string, options?: { region?: "KR" | "US"; language?: "ko" | "en" }) {
+function loadGoogleNewsRssFeed(query: string, options?: { region?: "KR" | "US"; language?: "ko" | "en"; label?: string }) {
   return async (): Promise<RawNewsFeed> => {
     const region = options?.region ?? "KR";
     const language = options?.language ?? "ko";
@@ -165,6 +172,7 @@ function loadGoogleNewsRssFeed(query: string, options?: { region?: "KR" | "US"; 
           provider: "Google News",
           region,
           category: query,
+          label: options?.label,
           pubDate: firstXmlValue(itemXml, "pubDate"),
           originalUrl: firstXmlValue(itemXml, "link")
         } satisfies RawNewsItem;
@@ -241,10 +249,10 @@ function shouldTranslateHeadline(item: { region: string; text: string }) {
 }
 
 function isMarketRelevantHeadline(item: { label: string; region: string; source: string; text: string }) {
-  const signalLabels = new Set(["매크로", "실적", "2차전지", "반도체", "AI 인프라", "바이오", "조선·방산", "로봇·원전", "자동차", "금융", "에너지", "암호화폐", "M&A", "정책"]);
+  const signalLabels = new Set(["매크로", "실적", "2차전지", "반도체", "AI 인프라", "AI·방산", "바이오", "항공우주", "조선·방산", "로봇·원전", "MLCC·전자부품", "광통신·네트워크", "수소·연료전지", "재생에너지", "자동차", "금융", "에너지", "암호화폐", "M&A", "정책"]);
   const text = `${signalLabels.has(item.label) ? item.label : ""} ${item.text}`;
 
-  return /주식|증시|시장|코스피|코스닥|환율|금리|국채|선물|외국인|기관|거래량|거래대금|반도체|2차전지|배터리|바이오|제약|조선|방산|로봇|원전|자동차|은행|금융|증권|에너지|유가|가상자산|비트코인|전력|AI|데이터센터|인수|합병|매각|공시|실적|가이던스|정책|규제|stock|stocks|market|shares|nasdaq|nyse|dow|s&p|russell|futures|etf|fed|fomc|cpi|ppi|yield|treasury|rate|rates|inflation|dollar|currency|oil|crude|fuel|gold|energy|earnings|guidance|merger|acquisition|m&a|sale|sec|fda|semiconductor|chip|chips|battery|biotech|pharma|bank|banks|brokerage|defense|shipbuilding|robot|nuclear|crypto|bitcoin|ai|data center|tariff|regulation/i.test(text);
+  return /주식|증시|시장|코스피|코스닥|환율|금리|국채|선물|외국인|기관|거래량|거래대금|반도체|2차전지|배터리|바이오|제약|항공우주|우주|위성|로켓|조선|방산|로봇|원전|mlcc|콘덴서|커패시터|광통신|광모듈|광부품|네트워크|자동차|은행|금융|증권|에너지|유가|가상자산|비트코인|전력|수소|연료전지|신재생|재생에너지|태양광|풍력|AI|데이터센터|인수|합병|매각|공시|실적|가이던스|정책|규제|stock|stocks|market|shares|nasdaq|nyse|dow|s&p|russell|futures|etf|fed|fomc|cpi|ppi|yield|treasury|rate|rates|inflation|dollar|currency|oil|crude|fuel|gold|energy|renewable|hydrogen|fuel cell|solar|wind|earnings|guidance|merger|acquisition|m&a|sale|sec|fda|semiconductor|chip|chips|battery|biotech|pharma|aerospace|space|satellite|rocket|launch|capacitor|optical|photonics|coherent|networking|bank|banks|brokerage|defense|shipbuilding|robot|nuclear|crypto|bitcoin|ai|data center|tariff|regulation/i.test(text);
 }
 
 async function translateHeadline(text: string, credentials: ReturnType<typeof getNewsCredentials>) {
@@ -311,13 +319,43 @@ function limitDominantLabels<T extends Array<{ label: string; region: string; pu
 function leaderTheme(leader: LeadingStockDto) {
   const [theme] = leader.reason.split(" · ");
 
-  return theme && theme !== "기타" ? theme : undefined;
+  return theme && theme !== "개별 이슈" && theme !== "ETF" ? theme : undefined;
 }
 
 function leaderSearchName(leader: LeadingStockDto) {
   return leader.name
     .replace(/\s+(Inc\.?|Corporation|Corp\.?|Ltd\.?|PLC|Co\.?)$/i, "")
     .trim();
+}
+
+const usCompanySearchNames: Record<string, string> = {
+  AMD: "Advanced Micro Devices",
+  INTC: "Intel",
+  MU: "Micron Technology",
+  NVDA: "Nvidia",
+  SNDK: "Sandisk",
+  SPCX: "SPACEX"
+};
+
+const themeSearchTerms: Record<string, { ko: string; en: string }> = {
+  "반도체": { ko: "반도체 주식", en: "semiconductor stocks" },
+  "AI·소프트웨어": { ko: "AI 소프트웨어 주식", en: "AI software stocks" },
+  "AI·방산": { ko: "AI 방산 주식", en: "AI defense stocks" },
+  "전력·에너지": { ko: "전력 에너지 주식", en: "power energy stocks" },
+  "수소·연료전지": { ko: "수소 연료전지 주식", en: "hydrogen fuel cell stocks" },
+  "재생에너지": { ko: "재생에너지 태양광 풍력 주식", en: "renewable energy solar wind stocks" },
+  "바이오": { ko: "바이오 제약 주식", en: "biotech stocks" },
+  "2차전지": { ko: "2차전지 배터리 주식", en: "battery stocks" },
+  "항공우주": { ko: "항공우주 위성 주식", en: "aerospace space satellite stocks" },
+  "조선·방산": { ko: "조선 방산 주식", en: "defense aerospace stocks" },
+  "MLCC·전자부품": { ko: "MLCC 전자부품 주식", en: "MLCC electronic components stocks" },
+  "광통신·네트워크": { ko: "광통신 네트워크 장비 주식", en: "optical networking photonics stocks" },
+  "전자부품·전장": { ko: "전자부품 전장 카메라모듈 주식", en: "electronics components auto parts stocks" },
+  "전자부품·통신장비": { ko: "전자부품 통신장비 주식", en: "electronics communications equipment stocks" }
+};
+
+function leaderCompanySearchName(leader: LeadingStockDto) {
+  return usCompanySearchNames[leader.symbol.toUpperCase()] ?? leaderSearchName(leader);
 }
 
 function uniqueByValue<T>(items: T[], keyOf: (item: T) => string) {
@@ -343,6 +381,7 @@ export function attachLeaderNewsTags(headlines: NewsHeadlineDto[], leaders: Lead
   const leaderCandidates = leaders
     .map((leader) => ({
       name: leaderSearchName(leader),
+      companyName: leaderCompanySearchName(leader),
       symbol: leader.symbol,
       market: leader.market,
       theme: leaderTheme(leader)
@@ -355,7 +394,9 @@ export function attachLeaderNewsTags(headlines: NewsHeadlineDto[], leaders: Lead
       leaderCandidates
         .filter((leader) =>
           headline.region === leader.market &&
-          ((leader.name && text.toLowerCase().includes(leader.name.toLowerCase())) || textIncludesSymbol(text, leader.symbol))
+          ((leader.name && text.toLowerCase().includes(leader.name.toLowerCase())) ||
+            (leader.companyName && text.toLowerCase().includes(leader.companyName.toLowerCase())) ||
+            textIncludesSymbol(text, leader.symbol))
         )
         .map((leader) => leader.symbol),
       (symbol) => symbol
@@ -381,24 +422,39 @@ export async function loadLeaderNewsHeadlines(leaders: LeadingStockDto[]) {
   const leaderQueries = uniqueByValue(
     leaders
       .slice(0, 18)
-      .map((leader) => ({
-        query: leader.market === "KR" ? `${leaderSearchName(leader)} 주식` : `${leader.symbol} stock news`,
-        region: leader.market,
-        language: leader.market === "KR" ? "ko" as const : "en" as const
-      })),
+      .flatMap<LeaderNewsQuery>((leader) => {
+        if (leader.market === "KR") {
+          return [{ query: `${leaderSearchName(leader)} 주식`, region: leader.market, language: "ko", label: "종목 뉴스" }] satisfies LeaderNewsQuery[];
+        }
+
+        const companyName = leaderCompanySearchName(leader);
+
+        return [
+          { query: `${leader.symbol} stock news`, region: leader.market, language: "en" as const, label: "종목 뉴스" },
+          { query: `${companyName} earnings guidance revenue`, region: leader.market, language: "en" as const, label: "종목 뉴스" }
+        ] satisfies LeaderNewsQuery[];
+      }),
     (item) => `${item.region}:${item.query}`
-  ).slice(0, 10);
+  ).slice(0, 16);
   const themeQueries = uniqueByValue(
     leaders
-      .flatMap((leader) => {
+      .flatMap<LeaderNewsQuery>((leader) => {
         const theme = leaderTheme(leader);
+        const terms = theme ? themeSearchTerms[theme] : undefined;
 
-        return theme ? [{ query: `${theme} 주식`, region: leader.market, language: "ko" as const }] : [];
+        if (!theme) return [];
+
+        return [{
+          query: leader.market === "KR" ? terms?.ko ?? `${theme} 주식` : terms?.en ?? `${theme} stocks`,
+          region: leader.market,
+          language: leader.market === "KR" ? "ko" as const : "en" as const,
+          label: `${theme} 테마`
+        }] satisfies LeaderNewsQuery[];
       }),
     (item) => `${item.region}:${item.query}`
   ).slice(0, 4);
   const loaders = [...leaderQueries, ...themeQueries].map((item) =>
-    loadGoogleNewsRssFeed(item.query, { region: item.region, language: item.language })
+    loadGoogleNewsRssFeed(item.query, { region: item.region, language: item.language, label: item.label })
   );
   const headlines = dedupeNews((await settleFeeds(loaders)).filter(isMarketRelevantHeadline)).slice(0, 30);
   const taggedHeadlines = attachLeaderNewsTags(headlines, leaders);
@@ -411,7 +467,7 @@ export async function loadLeaderNewsHeadlines(leaders: LeadingStockDto[]) {
 }
 
 async function loadNewsHeadlines(): Promise<MarketBoardProviderPayload> {
-  return readThroughCache("market-board:news:headlines", marketBoardCacheTtl.news, async () => {
+  return readThroughCache("market-board:news:headlines:v3", marketBoardCacheTtl.news, async () => {
     const credentials = getNewsCredentials();
 
     if (

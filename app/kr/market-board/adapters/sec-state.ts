@@ -7,7 +7,7 @@ export type SecDisclosureEvent = {
   accessionNumber: string;
   symbol: string;
   companyName: string;
-  issuerType: "large-cap" | "small-cap";
+  issuerType: "large-cap" | "small-cap" | "unknown";
   eventType: string;
   formType: string;
   filedAt: string;

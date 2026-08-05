@@ -1,5 +1,5 @@
 .page {
-  width: min(100% - 48px, 1120px);
+  width: min(100% - 48px, 1440px);
   margin: 0 auto;
   color: #161a17;
   font-size: 14px;
@@ -1179,8 +1179,8 @@
 
 .leaderWorkspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.52fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
   align-items: start;
 }
 
@@ -1196,10 +1196,10 @@
 .leaderRowHeader,
 .leaderRows article {
   display: grid;
-  grid-template-columns: 48px minmax(118px, 1fr) minmax(72px, 0.55fr) minmax(86px, 0.6fr) minmax(104px, 0.7fr) minmax(66px, 0.45fr);
+  grid-template-columns: 48px minmax(160px, 1.1fr) minmax(92px, 0.6fr) minmax(112px, 0.7fr) minmax(126px, 0.75fr) minmax(74px, 0.45fr);
   align-items: center;
   min-width: 0;
-  gap: 10px;
+  gap: 12px;
 }
 
 .leaderRowHeader {
@@ -1578,7 +1578,7 @@
 
 @media (min-width: 1800px) {
   .page {
-    width: min(100% - 160px, 1120px);
+    width: min(100% - 160px, 1480px);
   }
 
   .summary {

@@ -209,28 +209,101 @@ function formatTradingVolume(value?: string) {
   return `${Math.round(numeric).toLocaleString("ko-KR")}주`;
 }
 
-function isLikelyNonOperatingEquityName(name: string) {
-  return /(^|\s)(KODEX|TIGER|ACE|RISE|SOL|PLUS|HANARO|KOSEF|KBSTAR|ARIRANG|TIMEFOLIO|히어로즈|마이티|HK)|ETF|ETN|인버스|레버리지|채권|회사채|국고채|액티브|Nifty|TOP10|스팩|SPAC|우선주|우B|우C/i.test(name);
+function isEtfLikeSecurity(stock?: TossStockInfo, name = "") {
+  return stock?.securityType === "ETF" ||
+    stock?.securityType === "ETN" ||
+    /(^|\s)(KODEX|TIGER|ACE|RISE|SOL|PLUS|HANARO|KOSEF|KBSTAR|ARIRANG|TIMEFOLIO|히어로즈|마이티|HK)|ETF|ETN|인버스|레버리지|채권|회사채|국고채|액티브|Nifty|TOP10/i.test(name);
 }
+
+function isLikelyNonOperatingEquityName(name: string) {
+  return /스팩|SPAC|우선주|우B|우C/i.test(name);
+}
+
+const symbolThemeMap: Record<string, string> = {
+  "000660": "반도체",
+  "005930": "반도체",
+  "009150": "MLCC·전자부품",
+  "001820": "MLCC·전자부품",
+  "042700": "반도체",
+  "000990": "반도체",
+  "058470": "반도체",
+  "036930": "반도체",
+  "108860": "AI·소프트웨어",
+  "011070": "전자부품·전장",
+  "950160": "바이오",
+  "034020": "원전",
+  "298040": "전력기기",
+  "010060": "화학·에너지",
+  "336260": "수소·연료전지",
+  "402340": "인터넷·플랫폼",
+  AMD: "반도체",
+  INTC: "반도체",
+  MU: "반도체",
+  NVDA: "반도체",
+  SKHY: "반도체",
+  SNDK: "반도체",
+  TSM: "반도체",
+  AVGO: "반도체",
+  AXTI: "반도체",
+  WDC: "반도체",
+  MRVL: "광통신·네트워크",
+  COHR: "광통신·네트워크",
+  MSFT: "AI·소프트웨어",
+  GOOGL: "인터넷·플랫폼",
+  GOOG: "인터넷·플랫폼",
+  PLTR: "AI·방산",
+  NBIS: "AI·소프트웨어",
+  APP: "AI·소프트웨어",
+  APPS: "AI·소프트웨어",
+  TSLA: "자동차·전장",
+  GEV: "전력기기",
+  VST: "전력기기",
+  CEG: "원전",
+  PLUG: "수소·연료전지",
+  BE: "수소·연료전지",
+  SPCX: "항공우주"
+};
 
 function classifyTheme(symbol: string, name: string) {
   const text = `${symbol} ${name}`;
+  const mappedTheme = symbolThemeMap[symbol.toUpperCase()];
 
-  if (/SK하이닉스|삼성전자|삼성전기|한미반도체|반도체|서울반도체|ISC|테스|리노공업|DB하이텍|주성엔지니어링|NVDA|NVIDIA|엔비디아|AMD|인텔|INTC|마이크론|MU|TSM|브로드컴|AVGO/i.test(text)) return "반도체";
-  if (/LS ELECTRIC|효성중공업|두산에너빌리티|일진전기|HD현대일렉트릭|전력|전기|변압기|송전|원전|에너지|GEV|VST|CEG/i.test(text)) return "전력·에너지";
-  if (/알테오젠|바이오|제약|셀트리온|유한양행|리가켐|HLB|Gene|Medical|Diagnostics|BLUEJAY|BJDX|WGS|진 메디컬/i.test(text)) return "바이오";
-  if (/솔트룩스|AI|인공지능|소프트웨어|팔란티어|PLTR|앱러빈|APP|디지털 터빈|APPS|클라우드|데이터센터/i.test(text)) return "AI·소프트웨어";
-  if (/LG이노텍|RFHIC|케이엠더블유|통신|5G|전장|자율주행|전자부품/i.test(text)) return "전자부품·통신장비";
-  if (/2차전지|배터리|윤성에프앤씨|에코프로|포스코퓨처|엘앤에프|금양|전해액|양극재|리튬/i.test(text)) return "2차전지";
-  if (/조선|방산|한화에어로|현대로템|LIG넥스원|한국항공우주|HD현대중공업|Ship|Defense/i.test(text)) return "조선·방산";
+  if (isEtfLikeSecurity(undefined, name)) return "ETF";
+  if (mappedTheme) return mappedTheme;
 
-  return "기타";
+  if (/반도체|메모리|비메모리|파운드리|hbm|ddr|dram|nand|wafer|웨이퍼|패키징|후공정|소부장|semiconductor|\bchips?\b/i.test(text)) return "반도체";
+  if (/2차전지|배터리|전해액|양극재|음극재|분리막|리튬|니켈|battery|lithium|cathode|anode/i.test(text)) return "2차전지";
+  if (/수소|연료전지|hydrogen|fuel cell/i.test(text)) return "수소·연료전지";
+  if (/신재생|재생에너지|태양광|풍력|해상풍력|renewable|solar|wind/i.test(text)) return "재생에너지";
+  if (/원전|원자력|nuclear|uranium|우라늄|smr/i.test(text)) return "원전";
+  if (/전력기기|전력|변압기|송전|배전|전선|초고압|전기설비|grid|transformer|power equipment|utility/i.test(text)) return "전력기기";
+  if (/바이오|제약|신약|임상|항암|진단|의료기기|bio|biotech|pharma|medical|diagnostics|therapeutics|fda/i.test(text)) return "바이오";
+  if (/ai defense|defense ai|military ai|국방 ai|방산 ai/i.test(text)) return "AI·방산";
+  if (/ai|인공지능|소프트웨어|클라우드|데이터센터|보안|cyber|software|cloud|data center|saas/i.test(text)) return "AI·소프트웨어";
+  if (/로봇|자동화|robot|automation/i.test(text)) return "로봇";
+  if (/항공우주|우주|위성|로켓|발사체|space|spacex|aerospace|satellite|rocket|launch/i.test(text)) return "항공우주";
+  if (/조선|방산|함정|미사일|ship|shipbuilding|defense|missile/i.test(text)) return "조선·방산";
+  if (/mlcc|적층세라믹|콘덴서|커패시터|capacitor|ceramic capacitor/i.test(text)) return "MLCC·전자부품";
+  if (/카메라모듈|기판|패키지기판|광학솔루션|전자부품|전장부품|camera module|substrate|optical solution|electronics component/i.test(text)) return "전자부품·전장";
+  if (/자동차|전기차|자율주행|전장|타이어|vehicle|vehicles|ev\b|autonomous|mobility|auto parts/i.test(text)) return "자동차·전장";
+  if (/광통신|광모듈|광부품|광네트워크|optical|photonics|coherent|networking|data infrastructure/i.test(text)) return "광통신·네트워크";
+  if (/통신|5g|6g|네트워크|rf|telecom|network|wireless/i.test(text)) return "통신장비";
+  if (/인터넷|플랫폼|커머스|웹툰|핀테크|검색|portal|platform|commerce|fintech/i.test(text)) return "인터넷·플랫폼";
+  if (/게임|엔터|음원|콘텐츠|미디어|드라마|웹소설|game|gaming|entertainment|media|content/i.test(text)) return "게임·엔터";
+  if (/화장품|미용|의류|패션|소비재|cosmetic|beauty|fashion|consumer/i.test(text)) return "소비재";
+  if (/은행|보험|증권|금융|brokerage|bank|insurance|financial/i.test(text)) return "금융";
+  if (/건설|건자재|시멘트|인프라|철도|construction|cement|infrastructure/i.test(text)) return "건설·인프라";
+  if (/철강|비철|구리|알루미늄|소재|steel|copper|aluminum|materials/i.test(text)) return "소재";
+  if (/화학|정유|석유|가스|lng|lpg|chemical|oil|crude|gas|refining/i.test(text)) return "화학·에너지";
+  if (/해운|항공|물류|운송|shipping|airline|logistics|transport/i.test(text)) return "운송";
+
+  return "개별 이슈";
 }
 
 function isSupportedSecurityType(stock?: TossStockInfo) {
   if (!stock?.securityType) return true;
 
-  return ["STOCK", "FOREIGN_STOCK", "DEPOSITARY_RECEIPT", "REIT"].includes(stock.securityType);
+  return ["STOCK", "FOREIGN_STOCK", "DEPOSITARY_RECEIPT", "REIT", "ETF", "ETN"].includes(stock.securityType);
 }
 
 function toneFromBasisPoint(value?: string): Tone {
@@ -309,6 +382,14 @@ async function loadRankingOrEmpty(token: string, marketCountry: TossMarketCountr
   try {
     return await loadRanking(token, marketCountry, type, duration, count);
   } catch {
+    if (count > 30) {
+      try {
+        return await loadRanking(token, marketCountry, type, duration, 30);
+      } catch {
+        return { rankedAt: null, rankings: [] };
+      }
+    }
+
     return { rankedAt: null, rankings: [] };
   }
 }
@@ -510,7 +591,7 @@ function stockRiskNote(stock?: TossStockInfo, limit?: TossPriceLimitResponse, it
   if (detail?.liquidationTrading) risk.push("정리매매");
   if (detail?.krxTradingSuspended || detail?.nxtTradingSuspended) risk.push("거래정지 확인");
   if (stock?.status && stock.status !== "ACTIVE") risk.push(`상장상태 ${stock.status}`);
-  if (stock?.securityType && !["STOCK", "FOREIGN_STOCK", "DEPOSITARY_RECEIPT", "REIT"].includes(stock.securityType)) {
+  if (stock?.securityType && !["STOCK", "FOREIGN_STOCK", "DEPOSITARY_RECEIPT", "REIT", "ETF", "ETN"].includes(stock.securityType)) {
     risk.push(stock.securityType);
   }
 
@@ -562,7 +643,7 @@ function toLeadingStock(
   const currentPrice = formatPrice(item.price?.lastPrice, currency);
   const name = stockDisplayName(item, stock);
   const limitUp = isLimitUp(item, limit);
-  const theme = classifyTheme(symbol, name);
+  const theme = isEtfLikeSecurity(stock, name) ? "ETF" : classifyTheme(symbol, name);
 
   if (
     !isSupportedSecurityType(stock) ||
@@ -649,9 +730,9 @@ function topThemeScores(
     const stock = stocks.get(symbol);
     const name = stockDisplayName(item, stock);
 
-    if (!isSupportedSecurityType(stock) || isLikelyNonOperatingEquityName(name)) return;
+    if (!isSupportedSecurityType(stock) || isLikelyNonOperatingEquityName(name) || isEtfLikeSecurity(stock, name)) return;
 
-    const theme = classifyTheme(symbol, name);
+    const theme = isEtfLikeSecurity(stock, name) ? "ETF" : classifyTheme(symbol, name);
     const turnover = parseDecimal(item.tradingAmount);
     const score = byTheme.get(theme) ?? {
       theme,
@@ -667,7 +748,7 @@ function topThemeScores(
   });
 
   return [...byTheme.values()]
-    .filter((score) => score.theme !== "기타" && score.turnover > 0)
+    .filter((score) => score.theme !== "개별 이슈" && score.theme !== "ETF" && score.turnover > 0)
     .sort((left, right) => right.turnover - left.turnover)
     .slice(0, market === "KR" ? 4 : 3);
 }
@@ -713,7 +794,7 @@ function buildThemeBriefs(
 }
 
 async function loadTossMarketData(): Promise<MarketBoardProviderPayload> {
-  return readThroughCache("market-board:toss:market", marketBoardCacheTtl.market, async () => {
+  return readThroughCache("market-board:toss:market:v4", marketBoardCacheTtl.market, async () => {
     const credentials = getTossCredentials();
 
     if (!credentials.clientId || !credentials.clientSecret) {
@@ -722,12 +803,12 @@ async function loadTossMarketData(): Promise<MarketBoardProviderPayload> {
 
     const token = await getTossAccessToken(credentials);
     const [krTurnover, krVolume, krGainers, usTurnover, usVolume, usGainers, usdKrw, marketIndicators] = await Promise.all([
-      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_AMOUNT", "realtime", 30),
-      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_VOLUME", "realtime", 30),
-      loadRankingOrEmpty(token, "KR", "TOP_GAINERS", "1d", 30),
-      loadRankingOrEmpty(token, "US", "MARKET_TRADING_AMOUNT", "realtime", 30),
-      loadRankingOrEmpty(token, "US", "MARKET_TRADING_VOLUME", "realtime", 30),
-      loadRankingOrEmpty(token, "US", "TOP_GAINERS", "1d", 30),
+      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_AMOUNT", "realtime", 80),
+      loadRankingOrEmpty(token, "KR", "MARKET_TRADING_VOLUME", "realtime", 80),
+      loadRankingOrEmpty(token, "KR", "TOP_GAINERS", "1d", 80),
+      loadRankingOrEmpty(token, "US", "MARKET_TRADING_AMOUNT", "realtime", 80),
+      loadRankingOrEmpty(token, "US", "MARKET_TRADING_VOLUME", "realtime", 80),
+      loadRankingOrEmpty(token, "US", "TOP_GAINERS", "1d", 80),
       loadUsdKrwSnapshot(token).catch(() => null),
       loadMarketIndicatorSnapshots(token).catch(() => [])
     ]);

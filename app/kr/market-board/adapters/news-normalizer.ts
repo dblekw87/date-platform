@@ -78,10 +78,16 @@ function labelFromRaw(item: RawNewsItem) {
   if (/earnings|guidance|실적|가이던스|컨센서스/.test(text)) return "실적";
   if (/battery|secondary battery|2차전지|배터리/.test(text)) return "2차전지";
   if (/semiconductor|\bchips?\b|hbm|반도체/.test(text)) return "반도체";
+  if (/ai defense|defense ai|military ai|국방 ai|방산 ai|팔란티어|palantir/.test(text)) return "AI·방산";
   if (/\bai\b|artificial intelligence|data center|데이터센터|전력/.test(text)) return "AI 인프라";
   if (/bio|biotech|pharma|fda|바이오|제약|임상|승인/.test(text)) return "바이오";
-  if (/shipbuilding|shipyard|defense|aerospace|조선|방산|항공|우주/.test(text)) return "조선·방산";
+  if (/aerospace|space|satellite|rocket|launch|항공우주|우주|위성|로켓|발사체/.test(text)) return "항공우주";
+  if (/shipbuilding|shipyard|defense|missile|조선|방산|함정|미사일/.test(text)) return "조선·방산";
   if (/robot|automation|nuclear|uranium|로봇|자동화|원전|원자력/.test(text)) return "로봇·원전";
+  if (/mlcc|capacitor|ceramic capacitor|적층세라믹|콘덴서|커패시터/.test(text)) return "MLCC·전자부품";
+  if (/optical|photonics|coherent|networking|광통신|광모듈|광부품|네트워크/.test(text)) return "광통신·네트워크";
+  if (/hydrogen|fuel cell|수소|연료전지/.test(text)) return "수소·연료전지";
+  if (/renewable|solar|wind|신재생|재생에너지|태양광|풍력|해상풍력/.test(text)) return "재생에너지";
   if (/energy|oil|crude|fuel|gas|wti|lng|에너지|유가|가스/.test(text)) return "에너지";
   if (/\bauto\b|vehicle|vehicles|ev\b|자동차|전기차/.test(text)) return "자동차";
   if (/bank|banks|brokerage|은행|금융|증권/.test(text)) return "금융";
@@ -91,6 +97,7 @@ function labelFromRaw(item: RawNewsItem) {
 
   const fallback = item.label?.trim() || item.category?.trim();
 
+  if (fallback && /주식$|stock news|earnings guidance|earnings revenue|guidance revenue/i.test(fallback)) return "종목 뉴스";
   if (fallback && !/^(general|business|stock market|stocks|news|headline|headlines)$/i.test(fallback)) return fallback;
 
   return "헤드라인";

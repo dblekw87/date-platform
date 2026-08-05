@@ -169,26 +169,25 @@ function matchesDisclosureFilter(item: MarketBoardData["usDisclosures"][number],
 
 function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   const labelText = `${stock.burst} ${stock.turnover} ${stock.intraday} ${stock.reason} ${stock.caution}`;
-  const primaryText = `${stock.marketLabel} ${stock.reason}`;
   const etf = isEtfLeader(stock);
 
   if (filterId === "gainers") {
     const rank = leaderRankFor(stock, "gainers");
 
-    return !etf && (/상한가 주도/i.test(primaryText) || (rank !== null && rank <= 30));
+    return !etf && rank !== null && rank <= 30;
   }
   if (filterId === "turnover") {
     const rank = leaderRankFor(stock, "turnover");
 
-    return !etf && ((rank !== null && rank <= 30) || /거래대금 주도/i.test(primaryText));
+    return !etf && rank !== null && rank <= 30;
   }
   if (filterId === "volume") {
     const rank = leaderRankFor(stock, "volume");
 
-    return !etf && ((rank !== null && rank <= 30) || /거래량 주도/i.test(primaryText));
+    return !etf && rank !== null && rank <= 30;
   }
   if (filterId === "etf") return etf;
-  if (filterId === "risk") return /주의|부담|스프레드|확인|유지 필요/i.test(labelText);
+  if (filterId === "risk") return /거래정지|정리매매|관리종목|투자경고|투자위험|단기과열|상장폐지|상장상태|VI 발동|변동성완화/i.test(labelText);
 
   return true;
 }
@@ -242,7 +241,7 @@ function leaderVolumeOnly(stock: LeadingStock) {
 
 function leaderRankFor(stock: LeadingStock, filterId: Extract<LeaderFilterId, "turnover" | "gainers" | "volume">) {
   const patterns = {
-    turnover: /거래대금 #(\d+)/i,
+    turnover: /(?:거래대금|거래대금순위) #(\d+)/i,
     gainers: /상승률 #(\d+)/i,
     volume: /거래량 #(\d+)/i
   };
@@ -256,8 +255,8 @@ function sortLeadingStocks(stocks: MarketBoardData["usLeadingStocks"], filterId:
 
   return [...stocks].sort((left, right) => {
     const rankFilter = filterId === "etf" ? "turnover" : filterId;
-    const leftRank = leaderRankFor(left, rankFilter) ?? leaderRankFor(left, "volume") ?? leaderRankFor(left, "gainers") ?? 999;
-    const rightRank = leaderRankFor(right, rankFilter) ?? leaderRankFor(right, "volume") ?? leaderRankFor(right, "gainers") ?? 999;
+    const leftRank = leaderRankFor(left, rankFilter) ?? 999;
+    const rightRank = leaderRankFor(right, rankFilter) ?? 999;
 
     return leftRank - rightRank;
   });

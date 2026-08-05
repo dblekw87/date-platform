@@ -62,6 +62,13 @@ type TossPriceLimitResponse = {
   lowerLimitPrice?: string | null;
 };
 
+type TossStockWarning = {
+  warningType?: string;
+  exchange?: string;
+  startDate?: string;
+  endDate?: string | null;
+};
+
 type TossExchangeRateResponse = {
   rate?: string;
   midRate?: string;
@@ -426,6 +433,23 @@ async function loadPriceLimits(token: string, symbols: string[]) {
   return bySymbol;
 }
 
+async function loadStockWarnings(token: string, symbols: string[]) {
+  const entries = await Promise.allSettled(symbols.slice(0, 30).map(async (symbol) => {
+    const response = await tossGet<TossStockWarning[]>(`/api/v1/stocks/${encodeURIComponent(symbol)}/warnings`, token);
+
+    return [symbol, response.result ?? []] as const;
+  }));
+  const bySymbol = new Map<string, TossStockWarning[]>();
+
+  entries.forEach((entry) => {
+    if (entry.status === "fulfilled" && entry.value[1].length > 0) {
+      bySymbol.set(entry.value[0], entry.value[1]);
+    }
+  });
+
+  return bySymbol;
+}
+
 function isLimitUp(item: TossRankingItem, limit?: TossPriceLimitResponse) {
   const lastPrice = parseDecimal(item.price?.lastPrice);
   const upperLimitPrice = parseDecimal(limit?.upperLimitPrice);
@@ -580,22 +604,43 @@ function stockDisplayName(item: TossRankingItem, stock?: TossStockInfo) {
   return stock?.name || stock?.englishName || item.symbol || "Unknown";
 }
 
-function stockRiskNote(stock?: TossStockInfo, limit?: TossPriceLimitResponse, item?: TossRankingItem) {
+function warningLabel(warningType?: string) {
+  const labels: Record<string, string> = {
+    LIQUIDATION_TRADING: "정리매매",
+    OVERHEATED: "단기과열",
+    INVESTMENT_WARNING: "투자경고",
+    INVESTMENT_RISK: "투자위험",
+    VI_STATIC: "VI 발동",
+    VI_DYNAMIC: "VI 발동",
+    VI_STATIC_AND_DYNAMIC: "VI 발동",
+    STOCK_WARRANTS: "신주인수권"
+  };
+
+  return warningType ? labels[warningType] ?? warningType : undefined;
+}
+
+function stockRiskNote(stock?: TossStockInfo, limit?: TossPriceLimitResponse, item?: TossRankingItem, warnings: TossStockWarning[] = []) {
   const risk: string[] = [];
   const detail = stock?.koreanMarketDetail;
   const lastPrice = parseDecimal(item?.price?.lastPrice);
   const upperLimitPrice = parseDecimal(limit?.upperLimitPrice);
 
-  if (upperLimitPrice && lastPrice >= upperLimitPrice) risk.push("상한가 도달");
-  else if (upperLimitPrice && lastPrice / upperLimitPrice >= 0.98) risk.push("상한가 근접");
   if (detail?.liquidationTrading) risk.push("정리매매");
   if (detail?.krxTradingSuspended || detail?.nxtTradingSuspended) risk.push("거래정지 확인");
   if (stock?.status && stock.status !== "ACTIVE") risk.push(`상장상태 ${stock.status}`);
+  warnings.forEach((warning) => {
+    const label = warningLabel(warning.warningType);
+
+    if (label) risk.push(`${label}${warning.exchange ? ` ${warning.exchange}` : ""}`);
+  });
   if (stock?.securityType && !["STOCK", "FOREIGN_STOCK", "DEPOSITARY_RECEIPT", "REIT", "ETF", "ETN"].includes(stock.securityType)) {
     risk.push(stock.securityType);
   }
 
-  return risk.length > 0 ? `${risk.join(" · ")} · 공시와 뉴스 원문 확인` : "공시·뉴스 원문과 장중 거래대금 유지 여부 확인";
+  if (risk.length > 0) return `${[...new Set(risk)].join(" · ")} · 공시와 거래 제한 조건 확인`;
+  if (upperLimitPrice && lastPrice >= upperLimitPrice) return "상한가 도달 · 공시와 뉴스 원문 확인";
+
+  return "공시·뉴스 원문과 장중 거래대금 유지 여부 확인";
 }
 
 function rankingSignalLabel(item: TossRankingItem, market: "KR" | "US", limitUp: boolean) {
@@ -627,6 +672,7 @@ function toLeadingStock(
   limit: TossPriceLimitResponse | undefined,
   candleInsight: IntradayInsight | undefined,
   tradeInsight: TradeInsight | undefined,
+  warnings: TossStockWarning[] | undefined,
   index: number
 ): LeadingStockDto | null {
   const symbol = item.symbol?.trim();
@@ -672,7 +718,7 @@ function toLeadingStock(
     turnover: amount,
     intraday,
     reason: `${theme} · 토스증권 ${rankingReasonLabels(item)} · 표시순위 #${rank} · 거래량 ${volume} · 거래대금 ${amount}${tradeDetail}`,
-    caution: stockRiskNote(stock, limit, item),
+    caution: stockRiskNote(stock, limit, item, warnings),
     timestamp: new Date().toISOString(),
     source: "toss"
   };
@@ -822,10 +868,11 @@ async function loadTossMarketData(): Promise<MarketBoardProviderPayload> {
     ).slice(0, 90);
     const krCandidateSymbols = krCandidateItems.flatMap((item) => item.symbol ? [item.symbol] : []);
     const usCandidateSymbols = usCandidateItems.flatMap((item) => item.symbol ? [item.symbol] : []);
-    const [krStocks, usStocks, krPriceLimits] = await Promise.all([
+    const [krStocks, usStocks, krPriceLimits, krWarnings] = await Promise.all([
       loadStocks(token, krCandidateSymbols),
       loadStocks(token, usCandidateSymbols),
-      loadPriceLimits(token, krCandidateSymbols)
+      loadPriceLimits(token, krCandidateSymbols),
+      loadStockWarnings(token, krCandidateSymbols)
     ]);
     const krRankingItems = selectLeaderCandidates(krCandidateItems, krPriceLimits, 30);
     const usRankingItems = selectLeaderCandidates(usCandidateItems, new Map(), 30);
@@ -841,6 +888,7 @@ async function loadTossMarketData(): Promise<MarketBoardProviderPayload> {
         krPriceLimits.get(item.symbol ?? ""),
         krCandleInsights.get(item.symbol ?? ""),
         krTradeInsights.get(item.symbol ?? ""),
+        krWarnings.get(item.symbol ?? ""),
         index
       ))
       .filter((item): item is LeadingStockDto => Boolean(item));
@@ -852,6 +900,7 @@ async function loadTossMarketData(): Promise<MarketBoardProviderPayload> {
         undefined,
         usCandleInsights.get(item.symbol ?? ""),
         usTradeInsights.get(item.symbol ?? ""),
+        undefined,
         index
       ))
       .filter((item): item is LeadingStockDto => Boolean(item));

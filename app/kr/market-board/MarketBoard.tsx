@@ -500,6 +500,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const effectiveLeaderRegion: LeaderRegion = leaderRegion === "us" && liveBoard.usLeadingStocks.length === 0 && liveBoard.krLeadingStocks.length > 0 ? "kr" : leaderRegion;
   const activeLeadingStocks = effectiveLeaderRegion === "us" ? liveBoard.usLeadingStocks : liveBoard.krLeadingStocks;
   const filteredLeadingStocks = sortLeadingStocks(activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter)), leaderFilter);
+  const leaderDataUnavailable = activeLeadingStocks.length === 0;
   const selectedLeader = filteredLeadingStocks.find((stock) => stock.id === selectedLeaderId) ?? filteredLeadingStocks[0];
   const activeLeaderDisclosures = selectedLeader?.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures;
   const selectedLeaderNews = selectedLeader ? relatedLeaderNews(selectedLeader, sortedHeadlines).slice(0, 8) : [];
@@ -870,19 +871,19 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
             <section className={styles.leaderSignalBar} aria-label="거래 집중 요약">
               <div>
                 <span>표시 종목</span>
-                <strong>{filteredLeadingStocks.length}/{activeLeadingStocks.length}</strong>
+                <strong>{leaderDataUnavailable ? "데이터 대기" : `${filteredLeadingStocks.length}/${activeLeadingStocks.length}`}</strong>
               </div>
               <div>
                 <span>거래대금 확인</span>
-                <strong>{activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "turnover")).length}개</strong>
+                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "turnover")).length}개`}</strong>
               </div>
               <div>
                 <span>상승률 확인</span>
-                <strong>{activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "gainers")).length}개</strong>
+                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "gainers")).length}개`}</strong>
               </div>
               <div>
                 <span>거래량 확인</span>
-                <strong>{activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "volume")).length}개</strong>
+                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "volume")).length}개`}</strong>
               </div>
             </section>
             <div className={styles.leaderFilterTabs} role="group" aria-label="거래 집중 필터">
@@ -945,7 +946,11 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                     );
                   })}
                 </div>
-                {filteredLeadingStocks.length === 0 ? <p className={styles.emptyDisclosure}>선택한 필터에 해당하는 종목이 없습니다.</p> : null}
+                {filteredLeadingStocks.length === 0 ? (
+                  <p className={styles.emptyDisclosure}>
+                    {leaderDataUnavailable ? "주도주 provider가 응답하지 않았습니다. 상단 데이터 연결 상태를 확인해주세요." : "선택한 필터에 해당하는 종목이 없습니다."}
+                  </p>
+                ) : null}
               </div>
               {selectedLeader ? (
                 <section className={styles.leaderInsightPanel} aria-labelledby="leader-insight-title">

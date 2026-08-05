@@ -257,9 +257,10 @@
 }
 
 .summary h1 {
-  max-width: 700px;
-  font-size: clamp(26px, 2vw, 34px);
+  max-width: 860px;
+  font-size: clamp(25px, 1.75vw, 31px);
   line-height: 1.14;
+  white-space: nowrap;
 }
 
 .summary p,
@@ -2210,6 +2211,7 @@
   .summary h1 {
     font-size: 27px;
     line-height: 1.12;
+    white-space: normal;
   }
 
   .tabs {

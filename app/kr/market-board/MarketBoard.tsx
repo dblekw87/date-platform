@@ -368,6 +368,47 @@ function leaderRankSummary(stock: LeadingStock) {
   ].filter(Boolean).join(" · ");
 }
 
+function leaderRankSummaryForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
+  if (filterId === "turnover") return leaderRankFor(stock, "turnover") ? `거래대금 #${leaderRankFor(stock, "turnover")}` : "거래대금 순위";
+  if (filterId === "gainers") return leaderRankFor(stock, "gainers") ? `상승률 #${leaderRankFor(stock, "gainers")}` : "상승률 순위";
+  if (filterId === "volume") return leaderRankFor(stock, "volume") ? `거래량 #${leaderRankFor(stock, "volume")}` : "거래량 순위";
+  if (filterId === "etf") return leaderRankFor(stock, "turnover") ? `ETF 거래대금 #${leaderRankFor(stock, "turnover")}` : "ETF";
+
+  return leaderRankSummary(stock) || "주의";
+}
+
+function leaderSignalForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
+  const region = stock.market === "US" ? "미국" : "국내";
+
+  if (filterId === "turnover") return `${region} 거래대금 주도`;
+  if (filterId === "gainers") return `${region} 상승률 주도`;
+  if (filterId === "volume") return `${region} 거래량 주도`;
+  if (filterId === "etf") return `${region} ETF`;
+  if (filterId === "risk") return `${region} 주의`;
+
+  return stock.marketLabel;
+}
+
+function leaderReasonForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
+  const theme = leaderTheme(stock);
+  const rank = leaderRankSummaryForFilter(stock, filterId);
+
+  if (filterId === "turnover" || filterId === "etf") {
+    return `${theme} · 토스증권 ${rank} · 거래대금 ${stock.turnover}`;
+  }
+  if (filterId === "gainers") {
+    return `${theme} · 토스증권 ${rank} · 상승률 ${leaderChangeRate(stock)}`;
+  }
+  if (filterId === "volume") {
+    return `${theme} · 토스증권 ${rank} · 거래량 ${leaderVolumeOnly(stock)}`;
+  }
+  if (filterId === "risk") {
+    return `${rank} · ${stock.caution}`;
+  }
+
+  return stock.reason;
+}
+
 export function MarketBoard({ board }: { board: MarketBoardData }) {
   const [liveBoard, setLiveBoard] = useState(board);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -804,9 +845,9 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                         <span className={styles.leaderMetric}>{leaderVolumeOnly(stock)}</span>
                         <strong className={styles.leaderRate}>{leaderChangeRate(stock)}</strong>
                         <div className={styles.leaderReason}>
-                          <span>{stock.marketLabel}</span>
+                          <span>{leaderSignalForFilter(stock, leaderFilter)}</span>
                           <small>뉴스 {rowNews.length}건 · 테마 {rowThemeNews.length}건 · 공시 {rowDisclosures.length}건</small>
-                          {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{stock.reason}</small>}
+                          {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, leaderFilter)}</small>}
                           <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "직접 뉴스와 같은 시장 테마 후보 확인" : stock.caution}</em>
                         </div>
                       </article>
@@ -819,9 +860,9 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                 <section className={styles.leaderInsightPanel} aria-labelledby="leader-insight-title">
                   <header>
                     <div>
-                      <span>{selectedLeader.marketLabel}</span>
+                      <span>{leaderSignalForFilter(selectedLeader, leaderFilter)}</span>
                       <h3 id="leader-insight-title">{selectedLeader.name} 원인 후보</h3>
-                      <p>{leaderRankSummary(selectedLeader) || selectedLeader.reason}</p>
+                      <p>{leaderReasonForFilter(selectedLeader, leaderFilter)}</p>
                     </div>
                     <strong>뉴스 {selectedLeaderNews.length} · 테마 {selectedThemeNews.length} · 공시 {selectedDisclosures.length}</strong>
                   </header>

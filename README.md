@@ -6,6 +6,16 @@
 
 > 매수/매도 추천을 제공하는 서비스가 아니라, 여러 시장 데이터와 원문 링크를 정리해 투자 판단 전 확인 흐름을 돕는 정보 보드입니다.
 
+## Preview
+
+### Desktop
+
+![DATE Market Board desktop preview](./public/portfolio/date-market-board-desktop.png)
+
+### Mobile
+
+![DATE Market Board mobile preview](./public/portfolio/date-market-board-mobile.png)
+
 ## Project Summary
 
 | Item | Description |

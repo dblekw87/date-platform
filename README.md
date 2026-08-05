@@ -90,6 +90,22 @@
 
 API 키가 없는 환경에서도 프로젝트를 실행할 수 있도록 mock fallback 데이터를 유지합니다. 이 덕분에 GitHub 검토자나 면접관도 별도 키 없이 UI와 데이터 흐름을 확인할 수 있습니다.
 
+## Production Data Health
+
+Vercel Production 기준으로 `/api/market-board`의 provider 상태를 점검했습니다.
+
+| Provider | Production Status | Note |
+| --- | --- | --- |
+| 한국투자증권 Open API | `ready` | 국내 지수/수급 후보 데이터 adapter 활성화 |
+| KRX Open API / KIND | `ready` | 일정 데이터 adapter 활성화 |
+| 시장 데이터 | `ready` | 환율, 금리, ETF, BTC 등 public/fallback market adapter 활성화 |
+| DART Open API | `ready` | 국내 공시 adapter 활성화 |
+| SEC EDGAR | `ready` | 미국 공시 public adapter 활성화 |
+| 뉴스 공급자 | `ready` | 뉴스 정규화 adapter 활성화 |
+| Toss Invest API | `error` | Production 요청이 `403`을 반환해 mock fallback 유지 |
+
+Toss adapter가 실패해도 보드는 전체 렌더링을 유지합니다. 이는 외부 금융 API가 실패하거나 권한 문제가 발생해도 사용자가 시장 보드의 나머지 정보를 계속 확인할 수 있게 하기 위한 의도적인 fallback 설계입니다.
+
 ## Frontend Tech Stack
 
 | Area | Stack |

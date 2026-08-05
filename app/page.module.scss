@@ -2071,6 +2071,58 @@
   padding-top: 0;
 }
 
+.leaderInsightGrid dl div:has(dd[data-change]) {
+  grid-template-columns: minmax(92px, max-content) minmax(0, 1fr);
+}
+
+.leaderInsightGrid dl div:has(.leaderIntradayBadges) {
+  grid-template-columns: minmax(92px, max-content) minmax(0, 1fr);
+}
+
+.leaderInsightGrid dd[data-change] {
+  width: 100%;
+  justify-self: stretch;
+  min-height: 34px;
+  justify-content: flex-end;
+  text-align: right;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.leaderIntradayBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.leaderIntradayBadges span {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  border: 1px solid rgba(31, 38, 32, 0.1);
+  border-radius: 999px;
+  background: rgba(31, 38, 32, 0.06);
+  color: #3f463d;
+  padding: 4px 9px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.leaderIntradayBadges span[data-change="up"] {
+  border-color: rgba(177, 58, 43, 0.16);
+  background: rgba(177, 58, 43, 0.1);
+  color: #b13a2b;
+}
+
+.leaderIntradayBadges span[data-change="down"] {
+  border-color: rgba(29, 102, 128, 0.16);
+  background: rgba(29, 102, 128, 0.1);
+  color: #1d6680;
+}
+
 .tabs button:focus-visible,
 .disclosureTabs button:focus-visible,
 .disclosureFilters button:focus-visible,

@@ -270,6 +270,15 @@ function metricChangeTone(value: string, fallback?: "up" | "down" | "flat") {
   return "flat";
 }
 
+function intradayParts(value: string) {
+  const [pricePart, changePart] = value.split(/\s*·\s*/);
+
+  return {
+    price: pricePart?.trim() || value,
+    change: changePart?.trim() || ""
+  };
+}
+
 function leaderVolumeOnly(stock: LeadingStock) {
   return stock.burst
     .replace(/상한가 도달\s*·\s*/g, "")
@@ -480,6 +489,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const selectedLeaderNews = selectedLeader ? relatedLeaderNews(selectedLeader, sortedHeadlines).slice(0, 8) : [];
   const selectedThemeNews = selectedLeader ? relatedThemeNews(selectedLeader, sortedHeadlines).filter((item) => !selectedLeaderNews.some((news) => news.id === item.id)).slice(0, 8) : [];
   const selectedDisclosures = selectedLeader ? relatedDisclosures(selectedLeader, activeLeaderDisclosures).slice(0, 8) : [];
+  const selectedIntradayParts = selectedLeader ? intradayParts(selectedLeader.intraday) : null;
   const calendarDays = useMemo(() => buildCalendarDays(selectedCalendarDate), [selectedCalendarDate]);
   const calendarToday = useMemo(() => todaySeoulDate(), []);
   const selectedCalendarItems = liveBoard.calendarItems
@@ -979,7 +989,14 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                         </div>
                         <div>
                           <dt>현재 위치</dt>
-                          <dd data-change={metricChangeTone(selectedLeader.intraday)}>{selectedLeader.intraday}</dd>
+                          <dd className={styles.leaderIntradayBadges}>
+                            <span>{selectedIntradayParts?.price}</span>
+                            {selectedIntradayParts?.change ? (
+                              <span data-change={metricChangeTone(selectedIntradayParts.change)}>
+                                {selectedIntradayParts.change}
+                              </span>
+                            ) : null}
+                          </dd>
                         </div>
                       </dl>
                       <p>{selectedLeader.caution}</p>

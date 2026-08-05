@@ -1,7 +1,7 @@
 import { marketBoardProviderAdapters } from "./adapters";
 import { attachLeaderNewsTags, loadLeaderNewsHeadlines } from "./adapters/news";
 import { mockMarketBoardData } from "./mock-data";
-import type { MarketBoardData, MarketSnapshotDto, NewsHeadlineDto, ProviderStatusDto, SourceProvider } from "./types";
+import type { LeadingStockDto, MarketBoardData, MarketBriefDto, MarketSnapshotDto, NewsHeadlineDto, ProviderStatusDto, SourceProvider } from "./types";
 
 const timeoutSymbol = Symbol("market-board-provider-timeout");
 
@@ -97,6 +97,96 @@ function mergeNewsHeadlines(baseItems: NewsHeadlineDto[], payloadItems: NewsHead
   return [...byId.values()].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
 
+function parseTurnoverValue(value: string) {
+  const normalized = value.replace(/,/g, "");
+  const number = Number(normalized.match(/\d+(?:\.\d+)?/)?.[0] ?? 0);
+
+  if (!Number.isFinite(number)) return 0;
+  if (/\$/.test(value)) {
+    if (/B/i.test(value)) return number * 1_000_000_000;
+    if (/M/i.test(value)) return number * 1_000_000;
+
+    return number;
+  }
+  if (/조/.test(value)) return number * 1_000_000_000_000;
+  if (/억/.test(value)) return number * 100_000_000;
+
+  return number;
+}
+
+function leaderTheme(leader: LeadingStockDto) {
+  const [theme] = leader.reason.split(" · ");
+
+  return theme && theme !== "ETF" ? theme : "";
+}
+
+function buildThemeLeadershipBrief(id: string, region: string, leaders: LeadingStockDto[], currency: "KRW" | "USD"): MarketBriefDto | null {
+  const byTheme = new Map<string, { turnover: number; leaders: string[] }>();
+
+  leaders.forEach((leader) => {
+    const theme = leaderTheme(leader);
+
+    if (!theme || theme === "개별 이슈") return;
+
+    const current = byTheme.get(theme) ?? { turnover: 0, leaders: [] };
+
+    current.turnover += parseTurnoverValue(leader.turnover);
+    if (current.leaders.length < 3) current.leaders.push(leader.name);
+    byTheme.set(theme, current);
+  });
+
+  const themes = [...byTheme.entries()]
+    .map(([theme, score]) => ({ theme, ...score }))
+    .filter((score) => score.turnover > 0)
+    .sort((left, right) => right.turnover - left.turnover)
+    .slice(0, 3);
+
+  if (themes.length === 0) return null;
+
+  const formatAmount = (value: number) => {
+    if (currency === "USD") {
+      if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
+      if (value >= 1_000_000) return `$${Math.round(value / 1_000_000).toLocaleString("ko-KR")}M`;
+
+      return `$${Math.round(value).toLocaleString("ko-KR")}`;
+    }
+
+    const eok = value / 100_000_000;
+
+    if (eok >= 10_000) return `${(eok / 10_000).toFixed(1)}조`;
+    if (eok >= 100) return `${Math.round(eok).toLocaleString("ko-KR")}억`;
+
+    return `${eok.toFixed(1)}억`;
+  };
+
+  return {
+    id,
+    region,
+    title: `금일 강세 테마는 ${themes.map((theme, index) => `${index + 1}위 ${theme.theme}`).join(", ")}입니다.`,
+    points: themes.map((theme) => `${theme.theme}: ${formatAmount(theme.turnover)} · ${theme.leaders.join(", ")}`),
+    source: "toss",
+    timestamp: new Date().toISOString()
+  };
+}
+
+function attachDerivedThemeBriefs(data: MarketBoardData): MarketBoardData {
+  const derived = [
+    buildThemeLeadershipBrief("derived-kr-theme-leadership", "시황 · 국내 강세 테마", data.krLeadingStocks, "KRW"),
+    buildThemeLeadershipBrief("derived-us-theme-leadership", "시황 · 미국 강세 테마", data.usLeadingStocks, "USD")
+  ].filter((brief): brief is MarketBriefDto => Boolean(brief));
+
+  if (derived.length === 0) return data;
+
+  const byId = new Map(data.marketBrief.map((brief) => [brief.id, brief]));
+
+  derived.forEach((brief) => byId.set(brief.id, brief));
+
+  return {
+    ...data,
+    marketBrief: [...byId.values()]
+  };
+}
+
 export async function getMarketBoardData(): Promise<MarketBoardData> {
   const checkedAt = new Date().toISOString();
   const providerResults = await Promise.all(
@@ -167,7 +257,7 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
     baseData.krLeadingStocks = [];
   }
 
-  const mergedData = providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData);
+  const mergedData = attachDerivedThemeBriefs(providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData));
   const leaders = [...mergedData.krLeadingStocks, ...mergedData.usLeadingStocks];
 
   if (leaders.length === 0) return mergedData;

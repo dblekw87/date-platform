@@ -2253,9 +2253,9 @@
   }
 
   .realtimeNews li {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-    gap: 8px;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 10px;
   }
 
   .calendarEvents dl {
@@ -2271,15 +2271,16 @@
   }
 
   .realtimeNews header {
-    display: grid;
-    grid-template-columns: repeat(2, max-content);
-    justify-content: start;
-    gap: 10px;
-    margin-bottom: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+    justify-content: space-between;
+    margin-bottom: 0;
   }
 
   .realtimeNews header div {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   .realtimeNews ol {
@@ -2325,8 +2326,6 @@
     font-size: 10px;
   }
 
-  .realtimeNews time,
-  .realtimeNews b,
   .realtimeNews strong,
   .realtimeNews li > span,
   .realtimeNews a {
@@ -2334,7 +2333,15 @@
   }
 
   .realtimeNews time {
-    white-space: normal;
+    align-self: center;
+    grid-column: 1;
+    white-space: nowrap;
+  }
+
+  .realtimeNews b {
+    align-self: center;
+    grid-column: 2;
+    justify-self: start;
   }
 }
 

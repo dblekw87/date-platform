@@ -111,16 +111,20 @@ function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoar
   };
 }
 
-function hasLiveKrLeadingStocks(payloads: Partial<MarketBoardData>[]) {
-  return payloads.some((payload) => payload.krLeadingStocks && payload.krLeadingStocks.length > 0);
-}
-
-function hasLiveUsLeadingStocks(payloads: Partial<MarketBoardData>[]) {
-  return payloads.some((payload) => payload.usLeadingStocks && payload.usLeadingStocks.length > 0);
-}
-
-function hasLiveCalendarItems(payloads: Partial<MarketBoardData>[]) {
-  return payloads.some((payload) => payload.calendarItems && payload.calendarItems.length > 0);
+function withoutMockContent(data: MarketBoardData): MarketBoardData {
+  return {
+    ...data,
+    macroSnapshot: [],
+    marketBrief: [],
+    headlineFlow: [],
+    calendarItems: focusEarningsCalendarItems,
+    usDisclosures: [],
+    krDisclosures: [],
+    flowItems: [],
+    usLeadingStocks: [],
+    krLeadingStocks: [],
+    smallCapScanner: []
+  };
 }
 
 function mergeNewsHeadlines(baseItems: NewsHeadlineDto[], payloadItems: NewsHeadlineDto[]) {
@@ -282,15 +286,9 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
   );
   const providerPayloads = providerResults.map((result) => result.payload);
   const baseData: MarketBoardData = {
-    ...mockMarketBoardData,
+    ...withoutMockContent(mockMarketBoardData),
     providerStatuses: providerResults.map((result) => result.status)
   };
-
-  if (!hasLiveUsLeadingStocks(providerPayloads)) baseData.usLeadingStocks = [];
-  if (!hasLiveKrLeadingStocks(providerPayloads)) baseData.krLeadingStocks = [];
-  if (hasLiveCalendarItems(providerPayloads)) {
-    baseData.calendarItems = focusEarningsCalendarItems;
-  }
 
   const mergedData = attachDerivedThemeBriefs(providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData));
   const leaders = [...mergedData.krLeadingStocks, ...mergedData.usLeadingStocks];

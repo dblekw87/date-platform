@@ -13,7 +13,8 @@ body {
 }
 
 body {
-  background: #f7f7f7;
+  background:
+    linear-gradient(180deg, rgba(242, 245, 240, 0.96) 0%, rgba(248, 248, 244, 0.98) 42%, #f6f7f3 100%);
   color: #161616;
   font-family: Arial, Helvetica, sans-serif;
 }

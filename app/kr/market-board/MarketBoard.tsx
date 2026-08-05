@@ -252,6 +252,24 @@ function leaderChangeRate(stock: LeadingStock) {
   return match?.[0] ?? "확인";
 }
 
+function changeTone(value: string) {
+  const trimmed = value.trim();
+
+  if (trimmed.startsWith("+")) return "up";
+  if (trimmed.startsWith("-")) return "down";
+
+  return "flat";
+}
+
+function metricChangeTone(value: string, fallback?: "up" | "down" | "flat") {
+  const percentMatch = value.match(/[+-]\d+(?:\.\d+)?%/);
+
+  if (percentMatch) return changeTone(percentMatch[0]);
+  if (fallback) return fallback;
+
+  return "flat";
+}
+
 function leaderVolumeOnly(stock: LeadingStock) {
   return stock.burst
     .replace(/상한가 도달\s*·\s*/g, "")
@@ -539,7 +557,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
 
       <nav className={styles.tabs} aria-label="홈 탭">
         {liveBoard.tabs.map((tab) => (
-          <button aria-pressed={activeTab === tab.id} key={tab.id} onClick={() => setActiveTab(tab.id)} type="button">
+          <button aria-pressed={activeTab === tab.id} data-tab={tab.id} key={tab.id} onClick={() => setActiveTab(tab.id)} type="button">
             {tab.label}
           </button>
         ))}
@@ -550,7 +568,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
       <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "middle")?.label ?? "중단 광고 영역"} />
 
       {activeTab === "market" ? (
-        <section className={styles.tabPanel} aria-labelledby="market-panel-title">
+        <section className={styles.tabPanel} data-tab="market" aria-labelledby="market-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>시황</p>
             <h2 id="market-panel-title">개장 전후 참고할 시장 기준점입니다.</h2>
@@ -559,7 +577,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
             {liveBoard.macroSnapshot.map((item) => (
               <article data-tone={item.tone} key={item.id}>
                 <strong>{item.label}</strong>
-                <span>{item.value}</span>
+                <span data-change={metricChangeTone(item.value, item.tone)}>{item.value}</span>
                 <small>{item.note}</small>
                 <em>{displaySource(item.source)} · {formatDateTimeMinute(item.timestamp)}</em>
               </article>
@@ -580,7 +598,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
       ) : null}
 
       {activeTab === "news" ? (
-        <section className={styles.tabPanel} aria-labelledby="news-panel-title">
+        <section className={styles.tabPanel} data-tab="news" aria-labelledby="news-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>뉴스</p>
             <h2 id="news-panel-title">실시간으로 올라오는 헤드라인만 시간순으로 봅니다.</h2>
@@ -643,7 +661,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
       ) : null}
 
       {activeTab === "calendar" ? (
-        <section className={styles.tabPanel} aria-labelledby="calendar-panel-title">
+        <section className={styles.tabPanel} data-tab="calendar" aria-labelledby="calendar-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>일정</p>
             <h2 id="calendar-panel-title">날짜가 정해진 이벤트를 캘린더로 봅니다.</h2>
@@ -724,7 +742,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
       ) : null}
 
       {activeTab === "breaking" ? (
-        <section className={styles.tabPanel} aria-labelledby="breaking-panel-title">
+        <section className={styles.tabPanel} data-tab="breaking" aria-labelledby="breaking-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>속보·공시</p>
             <h2 id="breaking-panel-title">공시와 속보는 원문 확인용 참고 정보로만 봅니다.</h2>
@@ -779,7 +797,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
       ) : null}
 
       {activeTab === "flow" ? (
-        <section className={styles.tabPanel} aria-labelledby="flow-panel-title">
+        <section className={styles.tabPanel} data-tab="flow" aria-labelledby="flow-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>수급·차트</p>
             <h2 id="flow-panel-title">거래량과 거래대금은 참고 정보로만 확인합니다.</h2>
@@ -857,10 +875,12 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                     const rowThemeNews = relatedThemeNews(stock, sortedHeadlines);
                     const rowDisclosures = relatedDisclosures(stock, stock.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures);
                     const latestNews = rowNews[0] ?? rowThemeNews[0];
+                    const rate = leaderChangeRate(stock);
 
                     return (
                       <article
                         aria-selected={selectedLeader?.id === stock.id}
+                        data-change={changeTone(rate)}
                         key={stock.id}
                         onClick={() => setSelectedLeaderId(stock.id)}
                         role="row"
@@ -880,7 +900,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                         <span className={styles.leaderTheme}>{leaderTheme(stock)}</span>
                         <strong className={styles.leaderMetric}>{stock.turnover}</strong>
                         <span className={styles.leaderMetric}>{leaderVolumeOnly(stock)}</span>
-                        <strong className={styles.leaderRate}>{leaderChangeRate(stock)}</strong>
+                        <strong className={styles.leaderRate} data-change={changeTone(rate)}>{rate}</strong>
                         <div className={styles.leaderReason}>
                           <span>{leaderSignalForFilter(stock, leaderFilter)}</span>
                           <small>뉴스 {rowNews.length}건 · 테마 {rowThemeNews.length}건 · 공시 {rowDisclosures.length}건</small>
@@ -959,7 +979,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                         </div>
                         <div>
                           <dt>현재 위치</dt>
-                          <dd>{selectedLeader.intraday}</dd>
+                          <dd data-change={metricChangeTone(selectedLeader.intraday)}>{selectedLeader.intraday}</dd>
                         </div>
                       </dl>
                       <p>{selectedLeader.caution}</p>

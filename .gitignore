@@ -7,6 +7,7 @@ dist/
 
 .tmp-*.png
 .tmp/
+test-results/
 *.tsbuildinfo
 
 data/runtime/

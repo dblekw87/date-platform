@@ -211,17 +211,17 @@ function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   if (filterId === "gainers") {
     const rank = leaderRankFor(stock, "gainers");
 
-    return !etf && (rank !== null ? rank <= 30 : changeTone(leaderChangeRate(stock)) === "up");
+    return rank !== null && rank <= 30;
   }
   if (filterId === "turnover") {
     const rank = leaderRankFor(stock, "turnover");
 
-    return !etf && (rank !== null ? rank <= 30 : !/거래대금 확인 중|확인 중/i.test(stock.turnover));
+    return rank !== null && rank <= 30;
   }
   if (filterId === "volume") {
     const rank = leaderRankFor(stock, "volume");
 
-    return !etf && (rank !== null ? rank <= 30 : !/거래량 확인 중|확인 중/i.test(leaderVolumeOnly(stock)));
+    return rank !== null && rank <= 30;
   }
   if (filterId === "etf") return etf;
   if (filterId === "risk") return /거래정지|정리매매|관리종목|투자경고|투자위험|단기과열|상장폐지|상장상태|VI 발동|변동성완화/i.test(labelText);
@@ -254,7 +254,7 @@ function relatedHeadlineTags(item: Headline) {
 function leaderTheme(stock: LeadingStock) {
   const [theme] = stock.reason.split(" · ");
 
-  return theme || "개별 이슈";
+  return theme === "개별 이슈" ? "미분류" : theme || "미분류";
 }
 
 function isEtfLeader(stock: LeadingStock) {
@@ -375,7 +375,7 @@ function headlineMatchesTheme(item: Headline, stock: LeadingStock) {
   const theme = leaderTheme(stock);
 
   if (item.region !== stock.market && item.region !== "GLOBAL") return false;
-  if (!theme || theme === "개별 이슈" || theme === "ETF") return false;
+  if (!theme || theme === "미분류" || theme === "개별 이슈" || theme === "ETF") return false;
   if (isLikelyIndividualCompanyHeadline(item, stock)) return false;
   if (item.relatedThemes?.includes(theme)) return true;
 
@@ -456,15 +456,16 @@ function leaderSignalForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
 function leaderReasonForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   const theme = leaderTheme(stock);
   const rank = leaderRankSummaryForFilter(stock, filterId);
+  const themePrefix = theme === "미분류" ? "테마 미분류" : theme;
 
   if (filterId === "turnover" || filterId === "etf") {
-    return `${theme} · 토스증권 ${rank} · 거래대금 ${stock.turnover}`;
+    return `${themePrefix} · 토스증권 ${rank} · 거래대금 ${stock.turnover}`;
   }
   if (filterId === "gainers") {
-    return `${theme} · 토스증권 ${rank} · 상승률 ${leaderChangeRate(stock)}`;
+    return `${themePrefix} · 토스증권 ${rank} · 상승률 ${leaderChangeRate(stock)}`;
   }
   if (filterId === "volume") {
-    return `${theme} · 토스증권 ${rank} · 거래량 ${leaderVolumeOnly(stock)}`;
+    return `${themePrefix} · 토스증권 ${rank} · 거래량 ${leaderVolumeOnly(stock)}`;
   }
   if (filterId === "risk") {
     return `${rank} · ${stock.caution}`;
@@ -506,6 +507,7 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
   const selectedThemeNews = selectedLeader ? relatedThemeNews(selectedLeader, sortedHeadlines).filter((item) => !selectedLeaderNews.some((news) => news.id === item.id)).slice(0, 8) : [];
   const selectedDisclosures = selectedLeader ? relatedDisclosures(selectedLeader, activeLeaderDisclosures).slice(0, 8) : [];
   const selectedIntradayParts = selectedLeader ? intradayParts(selectedLeader.intraday) : null;
+  const selectedEvidenceCount = selectedLeaderNews.length + selectedThemeNews.length + selectedDisclosures.length;
   const calendarDays = useMemo(() => buildCalendarDays(selectedCalendarDate), [selectedCalendarDate]);
   const calendarToday = useMemo(() => todaySeoulDate(), []);
   const selectedCalendarItems = liveBoard.calendarItems
@@ -936,9 +938,9 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                         <strong className={styles.leaderRate} data-change={changeTone(rate)}>{rate}</strong>
                         <div className={styles.leaderReason}>
                           <span>{leaderSignalForFilter(stock, leaderFilter)}</span>
-                          <small>뉴스 {rowNews.length}건 · 테마 {rowThemeNews.length}건 · 공시 {rowDisclosures.length}건</small>
+                          <small>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? `뉴스 ${rowNews.length}건 · 테마 ${rowThemeNews.length}건 · 공시 ${rowDisclosures.length}건` : "토스증권 랭킹 데이터"}</small>
                           {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, leaderFilter)}</small>}
-                          <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "직접 뉴스와 같은 시장 테마 후보 확인" : stock.caution}</em>
+                          <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "뉴스·공시 원문 확인 가능" : "뉴스·공시 매칭 대기"}</em>
                         </div>
                       </article>
                     );
@@ -951,10 +953,10 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                   <header>
                     <div>
                       <span>{leaderSignalForFilter(selectedLeader, leaderFilter)}</span>
-                      <h3 id="leader-insight-title">{selectedLeader.name} 원인 후보</h3>
+                      <h3 id="leader-insight-title">{selectedLeader.name} 랭킹 근거</h3>
                       <p>{leaderReasonForFilter(selectedLeader, leaderFilter)}</p>
                     </div>
-                    <strong>뉴스 {selectedLeaderNews.length} · 테마 {selectedThemeNews.length} · 공시 {selectedDisclosures.length}</strong>
+                    <strong>{selectedEvidenceCount > 0 ? `뉴스 ${selectedLeaderNews.length} · 테마 ${selectedThemeNews.length} · 공시 ${selectedDisclosures.length}` : "토스 랭킹만 수신"}</strong>
                   </header>
                   <div className={styles.leaderInsightGrid}>
                     <article>

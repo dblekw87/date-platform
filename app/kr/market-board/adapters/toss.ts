@@ -304,7 +304,7 @@ function classifyTheme(symbol: string, name: string) {
   if (/화학|정유|석유|가스|lng|lpg|chemical|oil|crude|gas|refining/i.test(text)) return "화학·에너지";
   if (/해운|항공|물류|운송|shipping|airline|logistics|transport/i.test(text)) return "운송";
 
-  return "개별 이슈";
+  return "미분류";
 }
 
 function isSupportedSecurityType(stock?: TossStockInfo) {
@@ -700,8 +700,6 @@ function toLeadingStock(
   const theme = isEtfLikeSecurity(stock, name) ? "ETF" : classifyTheme(symbol, name);
 
   if (
-    !isSupportedSecurityType(stock) ||
-    isLikelyNonOperatingEquityName(name) ||
     rawTradingAmount <= 0 ||
     rawTradingVolume <= 0
   ) {
@@ -802,7 +800,7 @@ function topThemeScores(
   });
 
   return [...byTheme.values()]
-    .filter((score) => score.theme !== "개별 이슈" && score.theme !== "ETF" && score.turnover > 0)
+    .filter((score) => score.theme !== "미분류" && score.theme !== "ETF" && score.turnover > 0)
     .sort((left, right) => right.turnover - left.turnover)
     .slice(0, market === "KR" ? 4 : 3);
 }

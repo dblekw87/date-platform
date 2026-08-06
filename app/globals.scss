@@ -1,3 +1,5 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
 :root {
   color-scheme: light;
 }
@@ -15,7 +17,7 @@ body {
 body {
   background: #f6f7f9;
   color: #161616;
-  font-family: Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
 }
 
 button,

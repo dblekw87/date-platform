@@ -2513,8 +2513,9 @@
   gap: 24px;
   align-items: flex-start;
   color: #ffffff;
+  font-family: var(--font-bebas-neue), Arial, sans-serif;
   font-size: clamp(72px, 8vw, 120px);
-  font-weight: 900;
+  font-weight: 400;
   line-height: 0.92;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
@@ -2564,9 +2565,10 @@
   background: transparent;
   box-shadow: none;
   color: #ffffff;
+  font-family: var(--font-bebas-neue), Arial, sans-serif;
   content: counter(check-step) ".";
   font-size: 30px;
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .statusBox li:nth-child(2)::before,
@@ -2697,20 +2699,22 @@
 .macroGrid strong {
   color: #000000;
   font-size: 20px;
-  font-weight: 900;
-  line-height: 1.08;
+  font-weight: 800;
+  line-height: 1;
   word-break: keep-all;
 }
 
 .englishText {
-  font-family: var(--font-bebas-neue), Arial, sans-serif;
-  font-weight: 400;
+  font-family: inherit;
+  font-weight: inherit;
   letter-spacing: 0;
 }
 
 .macroGrid strong .englishText {
-  font-size: 1.08em;
-  line-height: 0.95;
+  font-family: var(--font-bebas-neue), Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
 }
 
 .macroGrid span[data-change] {
@@ -2721,10 +2725,10 @@
   min-width: 0;
   background: transparent;
   padding: 0;
-  font-family: "Arial Narrow", Impact, Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  font-size: clamp(28px, 1.8vw, 34px);
-  font-weight: 900;
-  line-height: 1.12;
+  font-family: var(--font-bebas-neue), Arial, sans-serif;
+  font-size: 46px;
+  font-weight: 400;
+  line-height: 0.96;
   letter-spacing: 0;
   overflow: visible;
   text-overflow: unset;
@@ -2736,14 +2740,14 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  gap: 5px;
+  gap: 4px;
   align-items: center;
 }
 
 .marketTrendIcon {
-  width: 14px;
-  height: 14px;
-  flex: 0 0 14px;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
   object-fit: contain;
 }
 
@@ -2753,9 +2757,9 @@
 
 .macroGrid article[data-pending="true"] span[data-change] {
   color: #8695aa;
-  font-family: Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 0;
 }
 
@@ -3095,18 +3099,6 @@
   font-weight: 800;
   line-height: 1.28;
   letter-spacing: 0;
-}
-
-.trendContent h3 .englishText,
-.themeSection h3 .englishText {
-  font-size: 1.14em;
-  line-height: 0.92;
-}
-
-.trendContent li .englishText,
-.themeSection li .englishText {
-  font-size: 1.08em;
-  line-height: 0.95;
 }
 
 .trendContent ul,

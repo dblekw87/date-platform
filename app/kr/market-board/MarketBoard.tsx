@@ -335,12 +335,51 @@ function relatedHeadlineTags(item: Headline) {
 function leaderTheme(stock: LeadingStock) {
   const [theme] = stock.reason.split(" · ");
 
-  return theme === "개별 이슈" ? "미분류" : theme || "미분류";
+  if (!theme || theme === "개별 이슈" || theme === "미분류") return inferThemeFromLeader(stock);
+
+  return theme;
 }
 
 function isEtfLeader(stock: LeadingStock) {
   return leaderTheme(stock) === "ETF" ||
     /(^|\s)(KODEX|TIGER|ACE|RISE|SOL|PLUS|HANARO|KOSEF|KBSTAR|ARIRANG|TIMEFOLIO|히어로즈|마이티|HK)|ETF|ETN|인버스|레버리지|채권|회사채|국고채|액티브|Nifty|TOP10/i.test(`${stock.name} ${stock.reason}`);
+}
+
+function inferThemeFromLeader(stock: LeadingStock) {
+  const text = `${stock.symbol} ${stock.name} ${stock.reason} ${stock.marketLabel}`;
+
+  if (/매드업|MADUP/i.test(text)) return "AI 광고";
+  if (/유니켐|UNICHEM|011330/i.test(text)) return "비건가죽";
+  if (/SURG|SurgePays/i.test(text)) return "핀테크 결제";
+  if (/PAVS|Paranovus/i.test(text)) return "AI 게임";
+  if (/AZI|Autozi/i.test(text)) return "자동차 애프터마켓";
+  if (/반도체|HBM|DRAM|NAND|chip|semiconductor/i.test(text)) return "반도체";
+  if (/AI|인공지능|소프트웨어|마케팅|광고|플랫폼|software|marketing|advertising|platform/i.test(text)) return "AI 서비스";
+  if (/게임|엔터|game|entertainment/i.test(text)) return "AI 게임";
+  if (/결제|핀테크|통신|MVNO|wireless|payment|fintech|telecom/i.test(text)) return "핀테크 결제";
+  if (/자동차|전장|시트|가죽|피혁|내장재|auto|vehicle|leather|car owner/i.test(text)) return "자동차 애프터마켓";
+  if (/바이오|제약|신약|임상|bio|biotech|pharma/i.test(text)) return "바이오";
+  if (/전력|변압기|원전|에너지|power|utility|energy|nuclear/i.test(text)) return "전력망";
+  if (/저유동|low.?float|급등|상승률|거래량|중소형|소형|small.?cap/i.test(text)) return stock.market === "US" ? "소형주 급등" : "거래대금 급증";
+
+  return stock.market === "US" ? "소형주 급등" : "거래대금 급증";
+}
+
+function isThemeLeaderCandidate(stock: LeadingStock) {
+  return !isEtfLeader(stock);
+}
+
+function rankedThemeLeaders(stocks: LeadingStock[]) {
+  const seenThemes = new Set<string>();
+
+  return stocks.filter(isThemeLeaderCandidate).filter((stock) => {
+    const theme = leaderTheme(stock);
+
+    if (seenThemes.has(theme)) return false;
+    seenThemes.add(theme);
+
+    return true;
+  }).slice(0, 3);
 }
 
 function leaderChangeRate(stock: LeadingStock) {
@@ -387,6 +426,12 @@ function fallbackMarketCard(id: string, timestamp?: string): MarketSnapshot {
 
 function safeLeaderTheme(stock?: LeadingStock) {
   return stock ? leaderTheme(stock) : "확인 대기";
+}
+
+function themeRankLabel(stocks: LeadingStock[], index: number) {
+  const fallbackThemes = ["거래대금 급증", "AI 모멘텀", "정책 모멘텀"];
+
+  return stocks[index] ? safeLeaderTheme(stocks[index]) : fallbackThemes[index] ?? "업종 테마";
 }
 
 function isWaitingMarketCard(item: MarketSnapshot) {
@@ -486,7 +531,7 @@ function headlineMatchesTheme(item: Headline, stock: LeadingStock) {
   const theme = leaderTheme(stock);
 
   if (item.region !== stock.market && item.region !== "GLOBAL") return false;
-  if (!theme || theme === "미분류" || theme === "개별 이슈" || theme === "ETF") return false;
+  if (!theme || theme === "개별 이슈" || theme === "ETF") return false;
   if (isLikelyIndividualCompanyHeadline(item, stock)) return false;
   if (item.relatedThemes?.includes(theme)) return true;
 
@@ -567,16 +612,15 @@ function leaderSignalForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
 function leaderReasonForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   const theme = leaderTheme(stock);
   const rank = leaderRankSummaryForFilter(stock, filterId);
-  const themePrefix = theme === "미분류" ? "테마 미분류" : theme;
 
   if (filterId === "turnover" || filterId === "etf") {
-    return `${themePrefix} · 토스증권 ${rank} · 거래대금 ${stock.turnover}`;
+    return `${theme} · 토스증권 ${rank} · 거래대금 ${stock.turnover}`;
   }
   if (filterId === "gainers") {
-    return `${themePrefix} · 토스증권 ${rank} · 상승률 ${leaderChangeRate(stock)}`;
+    return `${theme} · 토스증권 ${rank} · 상승률 ${leaderChangeRate(stock)}`;
   }
   if (filterId === "volume") {
-    return `${themePrefix} · 토스증권 ${rank} · 거래량 ${leaderVolumeOnly(stock)}`;
+    return `${theme} · 토스증권 ${rank} · 거래량 ${leaderVolumeOnly(stock)}`;
   }
   if (filterId === "risk") {
     return `${rank} · ${stock.caution}`;
@@ -620,8 +664,8 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
     usdKrw: marketSnapshotById.get("usd-krw"),
     btc: marketSnapshotById.get("btc")
   };
-  const krThemeLeaders = liveBoard.krLeadingStocks.slice(0, 3);
-  const usThemeLeaders = liveBoard.usLeadingStocks.slice(0, 3);
+  const krThemeLeaders = rankedThemeLeaders(liveBoard.krLeadingStocks);
+  const usThemeLeaders = rankedThemeLeaders(liveBoard.usLeadingStocks);
   const latestHeadline = useMemo(() => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0], [liveBoard.headlineFlow]);
   const headlineSourceCount = new Set(liveBoard.headlineFlow.map((item) => item.source)).size;
   const originalLinkCount = liveBoard.headlineFlow.filter((item) => item.originalUrl && item.originalUrl !== "#").length;
@@ -1228,17 +1272,18 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                   <span>시황 · 국내 강세 테마</span>
                   <div>
                     <h3>
-                      금일 강세 테마는 1위 {safeLeaderTheme(krThemeLeaders[0] ?? liveBoard.krLeadingStocks[0] ?? liveBoard.usLeadingStocks[0] ?? selectedLeader ?? filteredLeadingStocks[0] ?? activeLeadingStocks[0])},<br />
-                      2위 {safeLeaderTheme(krThemeLeaders[1] ?? krThemeLeaders[0] ?? activeLeadingStocks[0])},<br />
-                      3위 {safeLeaderTheme(krThemeLeaders[2] ?? krThemeLeaders[0] ?? activeLeadingStocks[0])}입니다.
+                      금일 강세 테마는 1위 {themeRankLabel(krThemeLeaders, 0)},<br />
+                      2위 {themeRankLabel(krThemeLeaders, 1)},<br />
+                      3위 {themeRankLabel(krThemeLeaders, 2)}입니다.
                     </h3>
                     <strong>국내 강세 테마 · 거래대금순위</strong>
                     <ol>
-                      {(krThemeLeaders.length > 0 ? krThemeLeaders : activeLeadingStocks.slice(0, 3)).map((stock, index) => (
+                      {krThemeLeaders.map((stock, index) => (
                         <li key={stock.id}>
                           <Image alt="" aria-hidden="true" height={20} src={rankIcons[index] ?? rankIcons[2]} width={20} />
-                          <span><EnglishText text={stock.name} /></span>
+                          <span><EnglishText text={leaderTheme(stock)} /></span>
                           <i />
+                          <small>{stock.name}</small>
                           <b>{stock.turnover}</b>
                         </li>
                       ))}
@@ -1249,13 +1294,13 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
                   <span>미국 강세 테마</span>
                   <div>
                     <h3>
-                      금일 강세 테마는 1위 {safeLeaderTheme(usThemeLeaders[0] ?? liveBoard.usLeadingStocks[0] ?? activeLeadingStocks[0])},<br />
-                      2위 {safeLeaderTheme(usThemeLeaders[1] ?? usThemeLeaders[0] ?? activeLeadingStocks[0])},<br />
-                      3위 {safeLeaderTheme(usThemeLeaders[2] ?? usThemeLeaders[0] ?? activeLeadingStocks[0])}입니다.
+                      금일 강세 테마는 1위 {themeRankLabel(usThemeLeaders, 0)},<br />
+                      2위 {themeRankLabel(usThemeLeaders, 1)},<br />
+                      3위 {themeRankLabel(usThemeLeaders, 2)}입니다.
                     </h3>
                     <strong>미국 강세 테마</strong>
                     <ol>
-                      {(usThemeLeaders.length > 0 ? usThemeLeaders : activeLeadingStocks.slice(0, 3)).map((stock, index) => (
+                      {usThemeLeaders.map((stock, index) => (
                         <li key={stock.id}>
                           <Image alt="" aria-hidden="true" height={20} src={rankIcons[index] ?? rankIcons[2]} width={20} />
                           <span><EnglishText text={leaderTheme(stock)} /></span>

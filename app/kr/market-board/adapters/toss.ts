@@ -237,12 +237,13 @@ const symbolThemeMap: Record<string, string> = {
   "036930": "반도체",
   "108860": "AI·소프트웨어",
   "011070": "전자부품·전장",
+  "011330": "비건가죽",
   "950160": "바이오",
   "034020": "원전",
   "298040": "전력기기",
   "010060": "화학·에너지",
   "336260": "수소·연료전지",
-  "402340": "인터넷·플랫폼",
+  "402340": "플랫폼 AI",
   AMD: "반도체",
   INTC: "반도체",
   MU: "반도체",
@@ -256,8 +257,8 @@ const symbolThemeMap: Record<string, string> = {
   MRVL: "광통신·네트워크",
   COHR: "광통신·네트워크",
   MSFT: "AI·소프트웨어",
-  GOOGL: "인터넷·플랫폼",
-  GOOG: "인터넷·플랫폼",
+  GOOGL: "AI 검색",
+  GOOG: "AI 검색",
   PLTR: "AI·방산",
   NBIS: "AI·소프트웨어",
   APP: "AI·소프트웨어",
@@ -268,7 +269,10 @@ const symbolThemeMap: Record<string, string> = {
   CEG: "원전",
   PLUG: "수소·연료전지",
   BE: "수소·연료전지",
-  SPCX: "항공우주"
+  SPCX: "민간 우주",
+  SURG: "핀테크 결제",
+  PAVS: "AI 게임",
+  AZI: "자동차 애프터마켓"
 };
 
 function classifyTheme(symbol: string, name: string) {
@@ -278,6 +282,8 @@ function classifyTheme(symbol: string, name: string) {
   if (isEtfLikeSecurity(undefined, name)) return "ETF";
   if (mappedTheme) return mappedTheme;
 
+  if (/매드업|MADUP/i.test(text)) return "AI 광고";
+  if (/유니켐|UNICHEM/i.test(text)) return "비건가죽";
   if (/반도체|메모리|비메모리|파운드리|hbm|ddr|dram|nand|wafer|웨이퍼|패키징|후공정|소부장|semiconductor|\bchips?\b/i.test(text)) return "반도체";
   if (/2차전지|배터리|전해액|양극재|음극재|분리막|리튬|니켈|battery|lithium|cathode|anode/i.test(text)) return "2차전지";
   if (/수소|연료전지|hydrogen|fuel cell/i.test(text)) return "수소·연료전지";
@@ -286,25 +292,32 @@ function classifyTheme(symbol: string, name: string) {
   if (/전력기기|전력|변압기|송전|배전|전선|초고압|전기설비|grid|transformer|power equipment|utility/i.test(text)) return "전력기기";
   if (/바이오|제약|신약|임상|항암|진단|의료기기|bio|biotech|pharma|medical|diagnostics|therapeutics|fda/i.test(text)) return "바이오";
   if (/ai defense|defense ai|military ai|국방 ai|방산 ai/i.test(text)) return "AI·방산";
-  if (/ai|인공지능|소프트웨어|클라우드|데이터센터|보안|cyber|software|cloud|data center|saas/i.test(text)) return "AI·소프트웨어";
+  if (/ai|인공지능|소프트웨어|클라우드|데이터센터|보안|cyber|software|cloud|data center|saas/i.test(text)) return "AI 서비스";
+  if (/게임|엔터|game|entertainment/i.test(text)) return "AI 게임";
+  if (/결제|핀테크|통신|MVNO|wireless|payment|fintech|telecom/i.test(text)) return "핀테크 결제";
   if (/로봇|자동화|robot|automation/i.test(text)) return "로봇";
   if (/항공우주|우주|위성|로켓|발사체|space|spacex|aerospace|satellite|rocket|launch/i.test(text)) return "항공우주";
   if (/조선|방산|함정|미사일|ship|shipbuilding|defense|missile/i.test(text)) return "조선·방산";
   if (/mlcc|적층세라믹|콘덴서|커패시터|capacitor|ceramic capacitor/i.test(text)) return "MLCC·전자부품";
-  if (/카메라모듈|기판|패키지기판|광학솔루션|전자부품|전장부품|camera module|substrate|optical solution|electronics component/i.test(text)) return "전자부품·전장";
+  if (/카메라모듈|기판|패키지기판|광학솔루션|전자부품|전장부품|camera module|substrate|optical solution|electronics component/i.test(text)) return "전장부품";
+  if (/자동차|전장|시트|가죽|피혁|내장재|auto|vehicle|leather|car owner/i.test(text)) return "자동차 애프터마켓";
   if (/자동차|전기차|자율주행|전장|타이어|vehicle|vehicles|ev\b|autonomous|mobility|auto parts/i.test(text)) return "자동차·전장";
   if (/광통신|광모듈|광부품|광네트워크|optical|photonics|coherent|networking|data infrastructure/i.test(text)) return "광통신·네트워크";
   if (/통신|5g|6g|네트워크|rf|telecom|network|wireless/i.test(text)) return "통신장비";
-  if (/인터넷|플랫폼|커머스|웹툰|핀테크|검색|portal|platform|commerce|fintech/i.test(text)) return "인터넷·플랫폼";
+  if (/검색|포털|portal|search/i.test(text)) return "AI 검색";
+  if (/커머스|commerce|shopping/i.test(text)) return "AI 커머스";
+  if (/웹툰|콘텐츠|content|webtoon/i.test(text)) return "콘텐츠 AI";
+  if (/인터넷|플랫폼|platform/i.test(text)) return "플랫폼 AI";
   if (/게임|엔터|음원|콘텐츠|미디어|드라마|웹소설|game|gaming|entertainment|media|content/i.test(text)) return "게임·엔터";
   if (/화장품|미용|의류|패션|소비재|cosmetic|beauty|fashion|consumer/i.test(text)) return "소비재";
-  if (/은행|보험|증권|금융|brokerage|bank|insurance|financial/i.test(text)) return "금융";
-  if (/건설|건자재|시멘트|인프라|철도|construction|cement|infrastructure/i.test(text)) return "건설·인프라";
-  if (/철강|비철|구리|알루미늄|소재|steel|copper|aluminum|materials/i.test(text)) return "소재";
-  if (/화학|정유|석유|가스|lng|lpg|chemical|oil|crude|gas|refining/i.test(text)) return "화학·에너지";
-  if (/해운|항공|물류|운송|shipping|airline|logistics|transport/i.test(text)) return "운송";
+  if (/은행|보험|증권|금융|brokerage|bank|insurance|financial/i.test(text)) return "금리 수혜";
+  if (/건설|건자재|시멘트|인프라|철도|construction|cement|infrastructure/i.test(text)) return "인프라 투자";
+  if (/철강|비철|구리|알루미늄|소재|steel|copper|aluminum|materials/i.test(text)) return "원자재";
+  if (/화학|정유|석유|가스|lng|lpg|chemical|oil|crude|gas|refining/i.test(text)) return "유가 민감";
+  if (/해운|항공|물류|운송|shipping|airline|logistics|transport/i.test(text)) return "운임 반등";
+  if (/저유동|low.?float|급등|상승률|거래량|중소형|소형|small.?cap/i.test(text)) return "소형주 급등";
 
-  return "미분류";
+  return "거래대금 급증";
 }
 
 function isSupportedSecurityType(stock?: TossStockInfo) {

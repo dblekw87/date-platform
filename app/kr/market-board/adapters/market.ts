@@ -72,6 +72,24 @@ const finnhubMacroQuotes: MarketQuoteConfig[] = [
     finnhubSymbol: "SOXX",
     note: "SOX 원지수 대체 확인용 반도체 ETF"
   },
+  // {
+  //   id: "russell-future",
+  //   label: "RUSSELL 2000 선물",
+  //   market: "US",
+  //   instrumentType: "future",
+  //   symbol: "IWM",
+  //   finnhubSymbol: "IWM",
+  //   note: "Russell 2000 대체 확인용 ETF"
+  // },
+  // {
+  //   id: "vix",
+  //   label: "VIX",
+  //   market: "US",
+  //   instrumentType: "index",
+  //   symbol: "VIX",
+  //   finnhubSymbol: "^VIX",
+  //   note: "위험 회피 참고지수"
+  // },
   {
     id: "gold",
     label: "금 ETF",

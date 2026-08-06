@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
+import { Bebas_Neue } from "next/font/google";
 import "./globals.scss";
+
+const bebasNeue = Bebas_Neue({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bebas-neue"
+});
 
 export const metadata: Metadata = {
   title: "DATE 시장 확인 보드",
@@ -12,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html className={bebasNeue.variable} lang="ko">
       <body>{children}</body>
     </html>
   );

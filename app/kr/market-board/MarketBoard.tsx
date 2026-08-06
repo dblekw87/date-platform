@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import styles from "../../page.module.scss";
 import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId } from "./types";
@@ -10,6 +11,7 @@ type DisclosureFilterId = "all" | "new" | "small-cap" | "ma" | "sale" | "issuanc
 type LeaderFilterId = "turnover" | "gainers" | "volume" | "etf" | "risk";
 type NewsFilterId = "all" | "us" | "kr" | "theme" | "macro";
 type LeadingStock = MarketBoardData["usLeadingStocks"][number];
+type MarketSnapshot = MarketBoardData["macroSnapshot"][number];
 type Headline = MarketBoardData["headlineFlow"][number];
 type Disclosure = MarketBoardData["usDisclosures"][number];
 type CalendarEvent = MarketBoardData["calendarItems"][number];
@@ -40,6 +42,65 @@ const newsFilters: Array<{ id: NewsFilterId; label: string }> = [
 ];
 
 const weekdayLabels = ["월", "화", "수", "목", "금", "토", "일"];
+const marketCardOrder = [
+  "nasdaq-future",
+  "sp500-future",
+  "phlx-sox",
+  "kospi-day-future",
+  "kospi-night-future",
+  "wti",
+  "kosdaq-night-future",
+  // "russell-future",
+  "gold",
+  "usd-krw",
+  "btc",
+  // "vix",
+  "us10y"
+];
+const trendIconByTone = {
+  up: "/market-board/trend-up.svg",
+  down: "/market-board/trend-down.svg",
+  flat: "/market-board/trend-flat.svg"
+} satisfies Record<MarketBoardData["macroSnapshot"][number]["tone"], string>;
+const rankIcons = ["/market-board/rank-a.svg", "/market-board/rank-b.svg", "/market-board/rank-c.svg"];
+const marketCardFallbacks: Record<string, Pick<MarketSnapshot, "label" | "market" | "instrumentType" | "symbol" | "note" | "source">> = {
+  "nasdaq-future": { label: "NASDAQ 100 ETF", market: "US", instrumentType: "future", symbol: "QQQ", note: "NASDAQ 선물 대체 확인용 ETF", source: "market" },
+  "sp500-future": { label: "S&P 500 ETF", market: "US", instrumentType: "future", symbol: "SPY", note: "S&P 500 선물 대체 확인용 ETF", source: "market" },
+  "phlx-sox": { label: "반도체 ETF", market: "US", instrumentType: "index", symbol: "SOXX", note: "SOX 원지수 대체 확인용 반도체 ETF", source: "market" },
+  "kospi-day-future": { label: "KOSPI", market: "KR", instrumentType: "index", symbol: "KOSPI", note: "KIS 국내업종 현재지수", source: "kis" },
+  "kospi-night-future": { label: "KOSPI200", market: "KR", instrumentType: "index", symbol: "KOSPI200", note: "KIS 국내업종 현재지수", source: "kis" },
+  wti: { label: "WTI ETF", market: "GLOBAL", instrumentType: "commodity", symbol: "USO", note: "WTI 선물 대체 확인용 ETF", source: "market" },
+  "kosdaq-night-future": { label: "KOSDAQ", market: "KR", instrumentType: "index", symbol: "KOSDAQ", note: "KIS 국내업종 현재지수", source: "kis" },
+  "russell-future": { label: "RUSSELL 2000 선물", market: "US", instrumentType: "future", symbol: "RTY", note: "미국 중소형주 기준", source: "market" },
+  gold: { label: "금 ETF", market: "GLOBAL", instrumentType: "commodity", symbol: "GLD", note: "금선물 대체 확인용 ETF", source: "market" },
+  "usd-krw": { label: "원/달러 환율", market: "KR", instrumentType: "fx", symbol: "USD/KRW", note: "Frankfurter 기준", source: "market" },
+  btc: { label: "BTC", market: "CRYPTO", instrumentType: "crypto", symbol: "BTC", note: "CoinGecko BTC/USD 24시간 변화", source: "market" },
+  vix: { label: "VIX", market: "US", instrumentType: "index", symbol: "VIX", note: "위험 회피 참고지수", source: "market" },
+  us10y: { label: "10Y 금리", market: "US", instrumentType: "rate", symbol: "US10Y", note: "U.S. Treasury Daily Yield Curve", source: "market" }
+};
+
+function DateLogo() {
+  return (
+    <svg aria-hidden="true" fill="none" height="28" viewBox="0 0 55 28" width="55" xmlns="http://www.w3.org/2000/svg">
+      <path d="M32.61 27.3V3.9H28.13V0H41.39V3.9H36.9V27.3H32.61Z" fill="black" />
+      <path d="M14.26 27.3L18.7 0H24.51L28.96 27.3H24.67L21.45 6.3L18.23 27.3H14.25H14.26Z" fill="black" />
+      <path d="M0 0H6.55C10.84 0 12.95 2.38 12.95 6.75V20.56C12.95 24.93 10.84 27.31 6.55 27.31H0V0ZM4.29 23.4H6.47C7.84 23.4 8.65 22.7 8.65 20.75V6.55C8.65 4.6 7.83 3.9 6.47 3.9H4.29V23.4Z" fill="black" />
+      <path d="M47.17 3.9H54.58V0H42.88V27.3H54.58V23.4H47.17V15.02H53.05V11.11H47.17V3.9Z" fill="black" />
+    </svg>
+  );
+}
+
+function EnglishText({ text }: { text: string }) {
+  const parts = text.split(/([A-Za-z0-9&.'+-]+(?:\s+[A-Za-z0-9&.'+-]+)*)/g);
+
+  return (
+    <>
+      {parts.map((part, index) => (
+        /[A-Za-z]/.test(part) ? <span className={styles.englishText} key={`${part}-${index}`}>{part}</span> : part
+      ))}
+    </>
+  );
+}
 
 function todaySeoulDate() {
   return new Intl.DateTimeFormat("sv-SE", {
@@ -144,16 +205,38 @@ function AdSlot({ label }: { label: string }) {
   );
 }
 
+function formatDateOnly(value?: string) {
+  const formatted = formatDateTimeMinute(value);
+
+  return formatted === "확인 대기" ? todaySeoulDate() : formatted.slice(0, 10);
+}
+
+function formatTimeOnly(value?: string) {
+  const formatted = formatDateTimeMinute(value);
+
+  return formatted === "확인 대기" ? "--:--" : formatted.slice(11, 16);
+}
+
 function OriginalLink({ href }: { href?: string }) {
-  return href && href !== "#" ? <a href={href} rel="noreferrer" target="_blank">원문</a> : <span>원문 대기</span>;
+  return href && href !== "#" ? (
+    <a href={href} rel="noreferrer" target="_blank">
+      링크
+      <span className={styles.linkIcon} aria-hidden="true">↗</span>
+    </a>
+  ) : <span>원문 대기</span>;
 }
 
 function displaySource(source?: string) {
   if (!source) return "출처 확인";
   if (source === "mock") return "참고값";
+  if (source === "kis") return "시장 데이터";
   if (source === "market") return "시장 데이터";
 
   return source;
+}
+
+function displayMarketNote(note: string) {
+  return note.replace(/^KIS\s+/i, "");
 }
 
 function displayProviderMessage(message: string) {
@@ -282,6 +365,36 @@ function metricChangeTone(value: string, fallback?: "up" | "down" | "flat") {
   if (fallback) return fallback;
 
   return "flat";
+}
+
+function marketChangeLabel(item?: MarketBoardData["macroSnapshot"][number]) {
+  if (!item) return "확인 중";
+
+  return item.changeRate ?? item.change ?? item.value;
+}
+
+function fallbackMarketCard(id: string, timestamp?: string): MarketSnapshot {
+  const fallback = marketCardFallbacks[id] ?? marketCardFallbacks["nasdaq-future"];
+
+  return {
+    id,
+    ...fallback,
+    value: "대기",
+    tone: "flat",
+    timestamp: timestamp ?? new Date().toISOString()
+  };
+}
+
+function safeLeaderTheme(stock?: LeadingStock) {
+  return stock ? leaderTheme(stock) : "확인 대기";
+}
+
+function isWaitingMarketCard(item: MarketSnapshot) {
+  return item.value === "대기" || item.value === "확인 대기";
+}
+
+function isLongMarketValue(item: MarketSnapshot) {
+  return item.value.length >= 7;
 }
 
 function intradayParts(value: string) {
@@ -489,6 +602,26 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
     [liveBoard.headlineFlow]
   );
   const filteredHeadlines = sortedHeadlines.filter((item) => matchesNewsFilter(item, newsFilter));
+  const marketCards = useMemo(() => {
+    const byId = new Map(liveBoard.macroSnapshot.map((item) => [item.id, item]));
+    const fallbackTimestamp = liveBoard.providerStatuses[0]?.checkedAt;
+
+    return marketCardOrder.map((id) => byId.get(id) ?? fallbackMarketCard(id, fallbackTimestamp));
+  }, [liveBoard.macroSnapshot, liveBoard.providerStatuses]);
+  const marketSnapshotById = useMemo(() => new Map(marketCards.map((item) => [item.id, item])), [marketCards]);
+  const marketTrendItems = {
+    qqq: marketSnapshotById.get("nasdaq-future"),
+    spy: marketSnapshotById.get("sp500-future"),
+    soxx: marketSnapshotById.get("phlx-sox"),
+    us10y: marketSnapshotById.get("us10y"),
+    kospi: marketSnapshotById.get("kospi-day-future"),
+    kosdaq: marketSnapshotById.get("kosdaq-night-future"),
+    kospi200: marketSnapshotById.get("kospi-night-future"),
+    usdKrw: marketSnapshotById.get("usd-krw"),
+    btc: marketSnapshotById.get("btc")
+  };
+  const krThemeLeaders = liveBoard.krLeadingStocks.slice(0, 3);
+  const usThemeLeaders = liveBoard.usLeadingStocks.slice(0, 3);
   const latestHeadline = useMemo(() => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0], [liveBoard.headlineFlow]);
   const headlineSourceCount = new Set(liveBoard.headlineFlow.map((item) => item.source)).size;
   const originalLinkCount = liveBoard.headlineFlow.filter((item) => item.originalUrl && item.originalUrl !== "#").length;
@@ -558,37 +691,33 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
     <main className={styles.page}>
       <header className={styles.siteHeader}>
         <strong aria-label="DATE" className={styles.siteLogo}>
-          <svg aria-hidden="true" fill="none" height="28" viewBox="0 0 55 28" width="55" xmlns="http://www.w3.org/2000/svg">
-            <path d="M32.61 27.3V3.9H28.13V0H41.39V3.9H36.9V27.3H32.61Z" fill="black" />
-            <path d="M14.26 27.3L18.7 0H24.51L28.96 27.3H24.67L21.45 6.3L18.23 27.3H14.25H14.26Z" fill="black" />
-            <path d="M0 0H6.55C10.84 0 12.95 2.38 12.95 6.75V20.56C12.95 24.93 10.84 27.31 6.55 27.31H0V0ZM4.29 23.4H6.47C7.84 23.4 8.65 22.7 8.65 20.75V6.55C8.65 4.6 7.83 3.9 6.47 3.9H4.29V23.4Z" fill="black" />
-            <path d="M47.17 3.9H54.58V0H42.88V27.3H54.58V23.4H47.17V15.02H53.05V11.11H47.17V3.9Z" fill="black" />
-          </svg>
+          <DateLogo />
         </strong>
         <span>{isRefreshing ? "시장 확인 보드 · Updating" : "시장 확인 보드"}</span>
       </header>
 
-      <ProviderStatusStrip board={liveBoard} />
-
       <section className={styles.summary} aria-labelledby="kr-home-title">
         <div>
-          <p className={styles.eyebrow}>오늘 확인할 것만 빠르게 보기</p>
-          <h1 id="kr-home-title">시황, 뉴스, 일정, 공시와 수급을 한 화면에서 봅니다.</h1>
-          <p>이 화면은 참고 정보를 정리합니다. 가격 변동 원인 단정이나 투자 행동 제안은 하지 않습니다.</p>
+          <p className={styles.eyebrow}>오늘 확인할 핵심 정보</p>
+          <h1 id="kr-home-title">시장의 흐름을 한 눈에 파악하세요</h1>
         </div>
         <aside className={styles.statusBox} aria-label="오늘 확인 순서">
-          <strong>확인 순서</strong>
-          <ol>
-            <li>시황</li>
-            <li>뉴스</li>
-            <li>일정</li>
-            <li>속보·공시</li>
-            <li>수급·차트</li>
-          </ol>
+          <div className={styles.currentTime}>
+            <strong>현재 시각</strong>
+            <time dateTime={liveBoard.providerStatuses[0]?.checkedAt ?? todaySeoulDate()}>
+              <span>{formatDateOnly(liveBoard.providerStatuses[0]?.checkedAt)}</span>
+              {formatTimeOnly(liveBoard.providerStatuses[0]?.checkedAt)}
+            </time>
+          </div>
+          <div className={styles.checkOrder}>
+            <strong>DATE 확인 순서</strong>
+            <p>시장 정보를 참고용으로 제공합니다. 투자 판단과 매매 의견은 포함하지 않습니다.</p>
+            <ol>
+              {liveBoard.tabs.map((tab) => <li key={tab.id}>{tab.label}</li>)}
+            </ol>
+          </div>
         </aside>
       </section>
-
-      <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "top")?.label ?? "상단 광고 영역"} />
 
       <nav className={styles.tabs} aria-label="홈 탭">
         {liveBoard.tabs.map((tab) => (
@@ -600,32 +729,25 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
 
       <p className={styles.tabDescription}>{activeDescription}</p>
 
-      <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "middle")?.label ?? "중단 광고 영역"} />
-
       {activeTab === "market" ? (
         <section className={styles.tabPanel} data-tab="market" aria-labelledby="market-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>시황</p>
-            <h2 id="market-panel-title">개장 전후 참고할 시장 기준점입니다.</h2>
+            <h2 id="market-panel-title">시황 : 개장 전 후 참고할 시장 기준점</h2>
+            <p className={styles.sectionLead}>미국 매크로와 국내 개장 기준점을 먼저 확인합니다.</p>
           </div>
           <div className={styles.macroGrid}>
-            {liveBoard.macroSnapshot.map((item) => (
-              <article data-tone={item.tone} key={item.id}>
-                <strong>{item.label}</strong>
-                <span data-change={metricChangeTone(item.value, item.tone)}>{item.value}</span>
-                <small>{item.note}</small>
+            {marketCards.map((item) => (
+              <article data-long-value={isLongMarketValue(item) ? "true" : undefined} data-pending={isWaitingMarketCard(item) ? "true" : undefined} data-tone={item.tone} key={item.id}>
+                <strong><EnglishText text={item.label} /></strong>
+                <div className={styles.marketMetricLine}>
+                  <span data-change={metricChangeTone(item.value, item.tone)}>{item.value}</span>
+                  {!isWaitingMarketCard(item) ? (
+                    <Image alt="" aria-hidden="true" className={styles.marketTrendIcon} height={16} src={trendIconByTone[item.tone]} width={16} />
+                  ) : null}
+                </div>
+                <small>{displayMarketNote(item.note)}</small>
                 <em>{displaySource(item.source)} · {formatDateTimeMinute(item.timestamp)}</em>
-              </article>
-            ))}
-          </div>
-          <div className={`${styles.briefGrid} ${styles.marketBriefGrid}`}>
-            {liveBoard.marketBrief.filter((brief) => brief.region.includes("시황") || brief.region.includes("매크로")).map((brief) => (
-              <article key={brief.id}>
-                <span>{brief.region}</span>
-                <h3>{brief.title}</h3>
-                <ul>
-                  {brief.points.map((point) => <li key={point}>{point}</li>)}
-                </ul>
               </article>
             ))}
           </div>
@@ -636,7 +758,8 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
         <section className={styles.tabPanel} data-tab="news" aria-labelledby="news-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>뉴스</p>
-            <h2 id="news-panel-title">실시간으로 올라오는 헤드라인만 시간순으로 봅니다.</h2>
+            <h2 id="news-panel-title">뉴스 : 시간순으로 확인하는 최신 헤드라인</h2>
+            <p className={styles.sectionLead}>미국 뉴스, 국내 뉴스, 테마 흐름, 헤드라인 흐름을 확인합니다.</p>
           </div>
           <section className={styles.newsSignalBar} aria-label="뉴스 확인 상태">
             <div>
@@ -1038,7 +1161,128 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
         </section>
       ) : null}
 
-      <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "bottom")?.label ?? "하단 광고 영역"} />
+      <div className={styles.adGrid}>
+        <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "top")?.label ?? "상단 광고 영역"} />
+        <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "middle")?.label ?? "중단 광고 영역"} />
+      </div>
+      {activeTab === "market" ? (
+        <>
+          <section className={`${styles.tabPanel} ${styles.marketFlowPanel}`} data-tab="market-flow" aria-labelledby="market-flow-title">
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>시황 흐름</p>
+              <h2 id="market-flow-title">시황 : 개장 전 후 참고할 흐름</h2>
+              <p className={styles.sectionLead}>미국 매크로와 국내 개장 기준점을 먼저 확인합니다.</p>
+            </div>
+            <div className={styles.marketTrendDetails}>
+              <div className={styles.trendSectionGrid}>
+                <article className={styles.trendContent}>
+                  <span>미국시황</span>
+                  <div>
+                    <h3>
+                      <EnglishText text={marketTrendItems.qqq?.label ?? "NASDAQ 100 ETF"} />{" "}
+                      <b data-tone={marketTrendItems.qqq?.tone}>{marketChangeLabel(marketTrendItems.qqq)}</b>
+                      <br />
+                      <EnglishText text={marketTrendItems.spy?.label ?? "S&P 500 ETF"} />{" "}
+                      <b data-tone={marketTrendItems.spy?.tone}>{marketChangeLabel(marketTrendItems.spy)}</b> 흐름입니다
+                    </h3>
+                    <ul>
+                      <li>반도체 기준 <EnglishText text={marketTrendItems.soxx?.symbol ?? "SOXX"} /> <b data-tone={marketTrendItems.soxx?.tone}>{marketChangeLabel(marketTrendItems.soxx)}</b></li>
+                      <li>10년물 {marketTrendItems.us10y?.value ?? "확인 중"} · <b data-tone={marketTrendItems.us10y?.tone}>{marketChangeLabel(marketTrendItems.us10y)}</b></li>
+                      <li>선물 원본이 아닌 <EnglishText text="ETF" />/공식 금리 기준으로 참고합니다.</li>
+                    </ul>
+                  </div>
+                </article>
+                <article className={styles.trendContent}>
+                  <span>국내시황</span>
+                  <div>
+                    <h3>
+                      <EnglishText text="KOSPI" /> <b data-tone={marketTrendItems.kospi?.tone}>{marketChangeLabel(marketTrendItems.kospi)}</b>
+                      <br />
+                      <EnglishText text="KOSDAQ" /> <b data-tone={marketTrendItems.kosdaq?.tone}>{marketChangeLabel(marketTrendItems.kosdaq)}</b> 흐름입니다
+                    </h3>
+                    <ul>
+                      <li><EnglishText text={marketTrendItems.kospi?.label ?? "KOSPI"} /> {marketTrendItems.kospi?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kospi?.tone}>{marketChangeLabel(marketTrendItems.kospi)}</b></li>
+                      <li><EnglishText text={marketTrendItems.kospi200?.label ?? "KOSPI200"} /> {marketTrendItems.kospi200?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kospi200?.tone}>{marketChangeLabel(marketTrendItems.kospi200)}</b></li>
+                      <li><EnglishText text={marketTrendItems.kosdaq?.label ?? "KOSDAQ"} /> {marketTrendItems.kosdaq?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kosdaq?.tone}>{marketChangeLabel(marketTrendItems.kosdaq)}</b></li>
+                    </ul>
+                  </div>
+                </article>
+                <article className={styles.trendContent}>
+                  <span>환율 시황</span>
+                  <div>
+                    <h3>
+                      원/달러 <b data-tone="flat">{marketTrendItems.usdKrw?.value ?? "확인 중"}</b>
+                      <br />
+                      <EnglishText text="BTC" /> <b data-tone={marketTrendItems.btc?.tone}>{marketChangeLabel(marketTrendItems.btc)}</b> 기준입니다
+                    </h3>
+                    <ul>
+                      <li>{marketTrendItems.usdKrw?.note ?? "Frankfurter 기준"}</li>
+                      <li><EnglishText text="CoinGecko BTC/USD" /> 24시간 변화</li>
+                      <li>국내 개장 전 수출주와 위험선호 참고값으로만 봅니다.</li>
+                    </ul>
+                  </div>
+                </article>
+              </div>
+              <div className={styles.themeAnalysisGrid}>
+                <article className={styles.themeSection}>
+                  <span>시황 · 국내 강세 테마</span>
+                  <div>
+                    <h3>
+                      금일 강세 테마는 1위 {safeLeaderTheme(krThemeLeaders[0] ?? liveBoard.krLeadingStocks[0] ?? liveBoard.usLeadingStocks[0] ?? selectedLeader ?? filteredLeadingStocks[0] ?? activeLeadingStocks[0])},<br />
+                      2위 {safeLeaderTheme(krThemeLeaders[1] ?? krThemeLeaders[0] ?? activeLeadingStocks[0])},<br />
+                      3위 {safeLeaderTheme(krThemeLeaders[2] ?? krThemeLeaders[0] ?? activeLeadingStocks[0])}입니다.
+                    </h3>
+                    <strong>국내 강세 테마 · 거래대금순위</strong>
+                    <ol>
+                      {(krThemeLeaders.length > 0 ? krThemeLeaders : activeLeadingStocks.slice(0, 3)).map((stock, index) => (
+                        <li key={stock.id}>
+                          <Image alt="" aria-hidden="true" height={20} src={rankIcons[index] ?? rankIcons[2]} width={20} />
+                          <span><EnglishText text={stock.name} /></span>
+                          <i />
+                          <b>{stock.turnover}</b>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </article>
+                <article className={styles.themeSection}>
+                  <span>미국 강세 테마</span>
+                  <div>
+                    <h3>
+                      금일 강세 테마는 1위 {safeLeaderTheme(usThemeLeaders[0] ?? liveBoard.usLeadingStocks[0] ?? activeLeadingStocks[0])},<br />
+                      2위 {safeLeaderTheme(usThemeLeaders[1] ?? usThemeLeaders[0] ?? activeLeadingStocks[0])},<br />
+                      3위 {safeLeaderTheme(usThemeLeaders[2] ?? usThemeLeaders[0] ?? activeLeadingStocks[0])}입니다.
+                    </h3>
+                    <strong>미국 강세 테마</strong>
+                    <ol>
+                      {(usThemeLeaders.length > 0 ? usThemeLeaders : activeLeadingStocks.slice(0, 3)).map((stock, index) => (
+                        <li key={stock.id}>
+                          <Image alt="" aria-hidden="true" height={20} src={rankIcons[index] ?? rankIcons[2]} width={20} />
+                          <span><EnglishText text={leaderTheme(stock)} /></span>
+                          <i />
+                          <small>{stock.symbol}</small>
+                          <b>{stock.turnover}</b>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </section>
+          <div className={styles.adGrid}>
+            <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "bottom")?.label ?? "하단 광고 영역"} />
+            <AdSlot label="말단 광고 영역" />
+          </div>
+        </>
+      ) : null}
+      <ProviderStatusStrip board={liveBoard} />
+      <footer className={styles.siteFooter}>
+        <strong aria-label="DATE">
+          <DateLogo />
+        </strong>
+        <span>copyright(c) DATE All rights reserved</span>
+      </footer>
     </main>
   );
 }

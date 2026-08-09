@@ -4089,7 +4089,8 @@
 }
 
 .calendarDetail h3,
-.calendarEvents {
+.calendarEvents,
+.emptyCalendar {
   padding-inline: 14px;
 }
 
@@ -4097,8 +4098,14 @@
   font-size: 21px;
 }
 
-.calendarEvents {
+.calendarEvents,
+.emptyCalendar {
   padding-bottom: 14px;
+}
+
+.emptyCalendar {
+  color: #526077;
+  font-weight: 700;
 }
 
 .calendarEvents article {

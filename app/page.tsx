@@ -2,20 +2,36 @@ import { Suspense } from "react";
 import { MarketBoard } from "./kr/market-board/MarketBoard";
 import { MarketBoardSkeleton } from "./kr/market-board/MarketBoardSkeleton";
 import { getMarketBoardData } from "./kr/market-board/providers";
+import type { MarketBoardTabId } from "./kr/market-board/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-async function MarketBoardContainer() {
-  const board = await getMarketBoardData();
+const tabIds = new Set<MarketBoardTabId>(["market", "news", "calendar", "breaking", "flow"]);
 
-  return <MarketBoard board={board} />;
+function parseInitialTab(value?: string | string[]) {
+  const tab = Array.isArray(value) ? value[0] : value;
+
+  return tab && tabIds.has(tab as MarketBoardTabId) ? tab as MarketBoardTabId : "market";
 }
 
-export default function Home() {
+async function MarketBoardContainer({ initialTab }: { initialTab: MarketBoardTabId }) {
+  const board = await getMarketBoardData();
+
+  return <MarketBoard board={board} initialTab={initialTab} />;
+}
+
+export default async function Home({
+  searchParams
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const initialTab = parseInitialTab(params?.tab);
+
   return (
     <Suspense fallback={<MarketBoardSkeleton />}>
-      <MarketBoardContainer />
+      <MarketBoardContainer initialTab={initialTab} />
     </Suspense>
   );
 }

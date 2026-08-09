@@ -629,10 +629,10 @@ function leaderReasonForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   return stock.reason;
 }
 
-export function MarketBoard({ board }: { board: MarketBoardData }) {
+export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoardData; initialTab?: MarketBoardTabId }) {
   const [liveBoard, setLiveBoard] = useState(board);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<MarketBoardTabId>("market");
+  const [activeTab, setActiveTab] = useState<MarketBoardTabId>(initialTab);
   const [newsFilter, setNewsFilter] = useState<NewsFilterId>("all");
   const [disclosureRegion, setDisclosureRegion] = useState<DisclosureRegion>("us");
   const [disclosureFilter, setDisclosureFilter] = useState<DisclosureFilterId>("all");
@@ -765,9 +765,20 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
 
       <nav className={styles.tabs} aria-label="홈 탭">
         {liveBoard.tabs.map((tab) => (
-          <button aria-pressed={activeTab === tab.id} data-tab={tab.id} key={tab.id} onClick={() => setActiveTab(tab.id)} type="button">
+          <a
+            aria-pressed={activeTab === tab.id}
+            data-tab={tab.id}
+            href={tab.id === "market" ? "/" : `/?tab=${tab.id}`}
+            key={tab.id}
+            onClick={(event) => {
+              event.preventDefault();
+              setActiveTab(tab.id);
+              window.history.replaceState(null, "", tab.id === "market" ? "/" : `/?tab=${tab.id}`);
+            }}
+            role="button"
+          >
             {tab.label}
-          </button>
+          </a>
         ))}
       </nav>
 
@@ -1014,19 +1025,19 @@ export function MarketBoard({ board }: { board: MarketBoardData }) {
             ))}
           </div>
           <section className={styles.chartBoard} aria-labelledby="chart-board-title">
-            <h3 id="chart-board-title">차트 확인 기준</h3>
+            <h3 id="chart-board-title">차트 참고 체크포인트</h3>
             <div>
-              <span>전일 고점</span>
-              <span>VWAP</span>
-              <span>첫 눌림</span>
-              <span>거래대금 유지</span>
-              <span>갭 상승 부담</span>
+              <span>추세 위치</span>
+              <span>거래대금</span>
+              <span>거래량 변화</span>
+              <span>뉴스·공시 근거</span>
+              <span>위험 구간</span>
             </div>
           </section>
           <section className={styles.leaderBoard} aria-labelledby="leader-board-title">
             <div className={styles.sectionHeader}>
               <p className={styles.eyebrow}>거래 집중 종목</p>
-              <h2 id="leader-board-title">상승률이 크고 거래량이 동반되는 급등주를 참고로 봅니다.</h2>
+              <h2 id="leader-board-title">거래가 집중된 종목을 뉴스·공시 근거와 함께 확인합니다.</h2>
             </div>
             <div className={styles.leaderTabs} role="group" aria-label="시장 선택">
               {liveBoard.leaderTabs.map((tab) => (

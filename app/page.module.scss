@@ -2862,7 +2862,7 @@
   max-width: 100%;
   grid-template-columns: 1fr;
   gap: 8px;
-  margin: -78px 0 24px auto;
+  margin: -70px 0 20px auto;
 }
 
 .newsSignalBar div,
@@ -2896,7 +2896,7 @@
   display: flex;
   gap: 4px;
   height: 48px;
-  margin: 0 0 32px;
+  margin: 0 0 24px;
   border: 1px solid #000000;
   padding: 0;
 }
@@ -2937,7 +2937,7 @@
 
 .newsTickerHeader,
 .realtimeNews li {
-  grid-template-columns: 140px 120px 120px minmax(0, 1fr) 120px;
+  grid-template-columns: 128px 112px 112px minmax(0, 1fr) 92px;
   gap: 0;
 }
 
@@ -2965,15 +2965,18 @@
 }
 
 .realtimeNews ol {
-  max-height: none;
+  max-height: 472px;
   margin: 0;
   border: 0;
   border-radius: 0;
   background: #ffffff;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .realtimeNews li {
-  min-height: 56px;
+  min-height: 46px;
   border-bottom: 1px solid #eeeeee;
   padding: 0;
 }
@@ -2989,7 +2992,7 @@
 .realtimeNews a,
 .realtimeNews li > span small {
   align-self: center;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .realtimeNews time,
@@ -3009,7 +3012,7 @@
   border: 1px solid #888888;
   background: #ffffff;
   color: #888888;
-  padding: 6px 17px;
+  padding: 5px 12px;
   font-size: 12px;
 }
 
@@ -3017,13 +3020,13 @@
   justify-self: center;
   background: #d5d9e2;
   color: #000000;
-  padding: 6px 17px;
+  padding: 5px 12px;
   font-size: 12px;
 }
 
 .realtimeNews li > span {
   display: block;
-  padding-inline: 16px;
+  padding-inline: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3388,11 +3391,16 @@
     display: none;
   }
 
+  .realtimeNews ol {
+    max-height: 62vh;
+    overflow-y: auto;
+  }
+
   .realtimeNews li {
     grid-template-columns: 1fr;
     gap: 8px;
     min-height: 0;
-    padding: 14px 0;
+    padding: 12px 0;
   }
 
   .realtimeNews time,
@@ -3412,5 +3420,895 @@
 
   .realtimeNews li > span {
     white-space: normal;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    width: min(100% - 24px, 1440px);
+    padding-bottom: 32px;
+    overflow-x: clip;
+  }
+
+  .siteHeader {
+    height: 52px;
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+
+  .summary {
+    gap: 20px;
+    padding-top: 32px;
+  }
+
+  .summary > div {
+    gap: 14px;
+  }
+
+  .eyebrow {
+    font-size: 14px;
+  }
+
+  .summary h1 {
+    max-width: 11em;
+    font-size: 27px;
+    line-height: 1.18;
+    word-break: keep-all;
+  }
+
+  .statusBox {
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .statusBox strong {
+    font-size: 17px;
+  }
+
+  .currentTime,
+  .checkOrder {
+    gap: 10px;
+  }
+
+  .currentTime time {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 14px;
+    align-items: end;
+    font-size: 56px;
+    line-height: 0.9;
+  }
+
+  .currentTime time span {
+    padding-top: 0;
+    font-size: 15px;
+  }
+
+  .checkOrder p {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .statusBox ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    align-self: start;
+  }
+
+  .statusBox li {
+    min-width: 0;
+    gap: 6px;
+    align-items: baseline;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .statusBox li::before {
+    font-size: 18px;
+  }
+
+  .statusBox li:not(:last-child)::after {
+    display: none;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    width: calc(100% + 24px);
+    height: 52px;
+    margin: 30px -12px 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar,
+  .newsFilters::-webkit-scrollbar,
+  .disclosureFilters::-webkit-scrollbar,
+  .leaderFilterTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs button {
+    flex: 0 0 auto;
+    min-width: 92px;
+    min-height: 52px;
+    padding-inline: 18px;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .tabs button[aria-pressed="true"] {
+    border-bottom: 1px solid #000000;
+  }
+
+  .tabPanel {
+    margin-inline: -1px;
+    padding: 26px 16px;
+  }
+
+  .sectionHeader {
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .sectionHeader h2,
+  .headlineFlow h3,
+  .realtimeNews h3,
+  .chartBoard h3 {
+    font-size: 22px;
+    line-height: 1.18;
+    word-break: keep-all;
+  }
+
+  .sectionLead {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .macroGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .macroGrid article {
+    min-height: 154px;
+    padding: 16px;
+  }
+
+  .macroGrid strong {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .macroGrid strong .englishText {
+    font-size: 19px;
+  }
+
+  .macroGrid span[data-change] {
+    font-size: 34px;
+  }
+
+  .macroGrid small {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .macroGrid em {
+    font-size: 11px;
+  }
+
+  .briefGrid,
+  .marketBriefGrid,
+  .calendarList,
+  .breakingList,
+  .flowGrid,
+  .scannerRows,
+  .adGrid,
+  .trendSectionGrid,
+  .themeAnalysisGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .briefGrid article {
+    min-height: 0;
+    gap: 12px;
+    padding: 0 18px 20px;
+  }
+
+  .briefGrid span {
+    margin-inline: -18px;
+  }
+
+  .briefGrid h3,
+  .calendarList h3,
+  .breakingList h3,
+  .scannerRows h3 {
+    font-size: 18px;
+    line-height: 1.28;
+  }
+
+  .newsSignalBar,
+  .liveDisclosureBar,
+  .leaderSignalBar {
+    width: 100%;
+    gap: 8px;
+    margin: 0 0 18px;
+  }
+
+  .newsSignalBar div,
+  .liveDisclosureBar div,
+  .leaderSignalBar div {
+    grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .newsSignalBar strong,
+  .liveDisclosureBar strong,
+  .leaderSignalBar strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .newsFilters,
+  .disclosureFilters,
+  .leaderFilterTabs {
+    flex-wrap: nowrap;
+    height: 44px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .newsFilters button,
+  .disclosureFilters button,
+  .leaderFilterTabs button {
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding-inline: 16px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .disclosureTabs,
+  .leaderTabs {
+    gap: 0;
+    height: 44px;
+    padding: 0;
+  }
+
+  .disclosureTabs button,
+  .leaderTabs button {
+    min-height: 42px;
+    border-radius: 0;
+    font-size: 14px;
+  }
+
+  .realtimeNews ol {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .realtimeNews li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    padding: 14px 0;
+  }
+
+  .realtimeNews time,
+  .realtimeNews b,
+  .realtimeNews strong,
+  .realtimeNews li > span,
+  .realtimeNews a {
+    max-width: 100%;
+  }
+
+  .realtimeNews li > span {
+    padding-inline: 0;
+    line-height: 1.45;
+  }
+
+  .calendarShell,
+  .calendarDetail,
+  .upcomingCalendar {
+    padding: 14px;
+  }
+
+  .upcomingCalendar ol {
+    border-radius: 0;
+  }
+
+  .upcomingCalendar li {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 10px;
+    align-items: start;
+    padding: 12px;
+  }
+
+  .upcomingCalendar time,
+  .upcomingCalendar span {
+    align-self: center;
+  }
+
+  .upcomingCalendar strong,
+  .upcomingCalendar small {
+    grid-column: 1 / -1;
+  }
+
+  .upcomingCalendar small {
+    width: auto;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .calendarShell header strong {
+    font-size: 18px;
+  }
+
+  .weekdays,
+  .monthGrid {
+    gap: 3px;
+  }
+
+  .weekdays span {
+    font-size: 11px;
+  }
+
+  .monthGrid button {
+    min-height: 58px;
+    grid-template-rows: auto 16px 16px;
+    gap: 3px;
+    border-radius: 0;
+    padding: 5px;
+  }
+
+  .monthGrid strong {
+    font-size: 12px;
+  }
+
+  .monthGrid span,
+  .monthGrid em {
+    max-width: 100%;
+    padding: 2px 4px;
+    font-size: 9px;
+  }
+
+  .calendarDetail h3,
+  .calendarEvents h4 {
+    font-size: 18px;
+  }
+
+  .calendarEvents dl {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderWorkspace {
+    gap: 18px;
+  }
+
+  .leaderRows article {
+    grid-template-columns: 44px minmax(0, max-content) minmax(0, 1fr);
+    gap: 8px 10px;
+    padding: 12px 0 12px 10px;
+  }
+
+  .leaderName {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0;
+  }
+
+  .leaderTheme {
+    align-self: start;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .leaderName strong {
+    font-size: 15px;
+  }
+
+  .leaderMetric,
+  .leaderRate {
+    grid-column: 2 / -1;
+    justify-self: start;
+    font-size: 18px;
+  }
+
+  .leaderReason {
+    grid-column: 2 / -1;
+    gap: 6px;
+  }
+
+  .leaderInsightPanel {
+    padding: 16px;
+  }
+
+  .leaderInsightPanel header,
+  .leaderInsightGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .trendContent,
+  .themeSection {
+    gap: 14px;
+    padding-bottom: 20px;
+  }
+
+  .trendContent > div,
+  .themeSection > div {
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  .trendContent h3,
+  .themeSection h3 {
+    font-size: 17px;
+    line-height: 1.32;
+  }
+
+  .themeSection li {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .themeSection li i {
+    display: none;
+  }
+
+  .themeSection li small,
+  .themeSection li b {
+    white-space: normal;
+  }
+
+  .adGrid {
+    margin-top: 32px;
+  }
+
+  .adSlot {
+    min-height: 120px;
+    margin-top: 24px;
+    padding: 18px;
+  }
+
+  .marketFlowPanel {
+    margin-top: 24px;
+  }
+
+  .siteFooter {
+    height: auto;
+    min-height: 56px;
+    margin-inline: -12px;
+    margin-top: 40px;
+    padding: 14px 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .summary h1 {
+    font-size: 24px;
+  }
+
+  .statusBox {
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .currentTime time {
+    font-size: 44px;
+  }
+
+  .checkOrder p {
+    font-size: 12px;
+  }
+
+  .statusBox ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px 10px;
+  }
+
+  .statusBox li {
+    font-size: 13px;
+  }
+
+  .statusBox li::before {
+    font-size: 16px;
+  }
+
+  .tabs button {
+    min-width: 84px;
+    padding-inline: 14px;
+  }
+
+  .tabPanel {
+    padding-inline: 12px;
+  }
+
+  .macroGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tabs a {
+  display: grid;
+  min-width: 0;
+  min-height: 68px;
+  place-items: center;
+  border: 0;
+  border-bottom: 1px solid #000000;
+  border-radius: 0;
+  color: #b1bbc8;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+}
+
+.tabs a[aria-pressed="true"] {
+  border: 1px solid #000000;
+  border-bottom: 0;
+  background: #000000;
+  color: #ffffff;
+}
+
+.tabs a:focus-visible {
+  outline: 2px solid #151515;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .tabs a {
+    flex: 0 0 auto;
+    min-width: 92px;
+    min-height: 52px;
+    padding-inline: 18px;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .tabs a[aria-pressed="true"] {
+    border-bottom: 1px solid #000000;
+  }
+}
+
+@media (max-width: 360px) {
+  .tabs a {
+    min-width: 84px;
+    padding-inline: 14px;
+  }
+}
+
+.tabPanel[data-tab="calendar"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: 24px;
+}
+
+.tabPanel[data-tab="calendar"] > .sectionHeader {
+  grid-column: 1 / -1;
+}
+
+.tabPanel[data-tab="calendar"] > .calendarShell {
+  align-self: start;
+  grid-row: span 2;
+}
+
+.tabPanel[data-tab="calendar"] > .upcomingCalendar,
+.tabPanel[data-tab="calendar"] > .calendarDetail {
+  align-self: start;
+  margin-top: 0;
+}
+
+.calendarShell,
+.calendarDetail,
+.upcomingCalendar {
+  border-color: #000000;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.calendarShell {
+  align-content: start;
+  gap: 18px;
+}
+
+.calendarShell header {
+  border-bottom: 1px solid #000000;
+  margin: -16px -16px 0;
+  padding: 18px 16px 14px;
+}
+
+.calendarShell header strong {
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.monthGrid button {
+  min-height: 108px;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.monthGrid button[aria-pressed="true"] {
+  border-color: #000000;
+  background: #fff5d9;
+  box-shadow: inset 0 0 0 1px #000000;
+}
+
+.monthGrid span,
+.monthGrid em {
+  border-radius: 0;
+  background: #fff3c4;
+  color: #000000;
+}
+
+.upcomingCalendar h3 {
+  border-bottom: 1px solid #000000;
+  margin: -14px -14px 0;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.upcomingCalendar ol {
+  border: 0;
+  border-radius: 0;
+}
+
+.upcomingCalendar li {
+  grid-template-columns: 72px 86px minmax(0, 1fr);
+  border-bottom: 1px solid #eeeeee;
+  background: #ffffff;
+}
+
+.upcomingCalendar li:last-child {
+  border-bottom: 0;
+}
+
+.upcomingCalendar small {
+  grid-column: 3;
+  overflow-wrap: anywhere;
+}
+
+.calendarDetail {
+  padding: 0;
+}
+
+.calendarDetail > span {
+  border-radius: 0;
+  background: #000000;
+  color: #ffffff;
+  margin: 0;
+  padding: 9px 14px;
+}
+
+.calendarDetail h3,
+.calendarEvents {
+  padding-inline: 14px;
+}
+
+.calendarDetail h3 {
+  font-size: 21px;
+}
+
+.calendarEvents {
+  padding-bottom: 14px;
+}
+
+.calendarEvents article {
+  border-top-color: #000000;
+}
+
+.tabPanel[data-tab="breaking"] {
+  display: grid;
+  gap: 18px;
+}
+
+.tabPanel[data-tab="breaking"] > .sectionHeader {
+  margin-bottom: 14px;
+}
+
+.disclosureTabs,
+.leaderTabs {
+  border-color: #000000;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.disclosureTabs button,
+.leaderTabs button {
+  border-radius: 0;
+}
+
+.disclosureTabs button[aria-pressed="true"],
+.leaderTabs button[aria-pressed="true"] {
+  border-color: #000000;
+  background: #000000;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+.disclosureDescription {
+  border-color: #000000;
+  border-radius: 0;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+}
+
+.liveDisclosureBar {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 4px;
+}
+
+.liveDisclosureBar div {
+  border-bottom: 1px solid #000000;
+}
+
+.disclosureFilters,
+.leaderFilterTabs {
+  border: 1px solid #000000;
+  gap: 0;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.disclosureFilters button,
+.leaderFilterTabs button {
+  border-radius: 0;
+}
+
+.breakingList {
+  gap: 14px;
+}
+
+.breakingList article {
+  border-color: #000000;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.breakingList header span,
+.breakingList header b,
+.breakingList header em {
+  border-radius: 0;
+}
+
+.breakingList h3 {
+  font-size: 19px;
+}
+
+.tabPanel[data-tab="flow"] {
+  display: grid;
+  gap: 28px;
+}
+
+.tabPanel[data-tab="flow"] > .sectionHeader {
+  margin-bottom: 0;
+}
+
+.flowGrid {
+  gap: 14px;
+}
+
+.flowGrid article {
+  min-height: 132px;
+  border-color: #000000;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: none;
+  padding: 20px;
+}
+
+.flowGrid strong {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.flowGrid span {
+  width: max-content;
+  max-width: 100%;
+  background: #e8f7fb;
+  color: #000000;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.chartBoard {
+  border-top-color: #000000;
+  padding-top: 24px;
+}
+
+.chartBoard div {
+  margin-top: 18px;
+  gap: 10px;
+}
+
+.chartBoard span {
+  border-color: #000000;
+  border-radius: 0;
+  background: #ffffff;
+  min-height: 42px;
+  padding: 10px 16px;
+}
+
+.leaderBoard {
+  border-top-color: #000000;
+  margin-top: 12px;
+  padding-top: 30px;
+}
+
+@media (max-width: 760px) {
+  .tabPanel[data-tab="calendar"] {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .tabPanel[data-tab="calendar"] > .sectionHeader,
+  .tabPanel[data-tab="calendar"] > .calendarShell,
+  .tabPanel[data-tab="calendar"] > .upcomingCalendar,
+  .tabPanel[data-tab="calendar"] > .calendarDetail {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .calendarShell header {
+    margin: -14px -14px 0;
+    padding: 14px;
+  }
+
+  .calendarShell header strong {
+    font-size: 18px;
+  }
+
+  .monthGrid button {
+    min-height: 58px;
+  }
+
+  .upcomingCalendar li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .upcomingCalendar small {
+    grid-column: 1 / -1;
+  }
+
+  .liveDisclosureBar {
+    grid-template-columns: 1fr;
+  }
+
+  .disclosureFilters,
+  .leaderFilterTabs {
+    margin-bottom: 14px;
+  }
+
+  .leaderFilterTabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+    overflow: visible;
+  }
+
+  .leaderFilterTabs button {
+    min-width: 0;
+    padding-inline: 0;
+    text-align: center;
+  }
+
+  .breakingList h3 {
+    font-size: 18px;
+  }
+
+  .flowGrid article {
+    min-height: 0;
+    padding: 18px;
   }
 }

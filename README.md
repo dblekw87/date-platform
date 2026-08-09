@@ -22,6 +22,106 @@
 
 ![DATE Market Board mobile preview](./public/portfolio/date-market-board-mobile.png)
 
+## Portfolio Screen Captures
+
+포트폴리오 검토자가 주요 화면을 빠르게 확인할 수 있도록 핵심 탭의 데스크톱 캡처를 정리했습니다.
+
+| 시황 | 뉴스 |
+| --- | --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-market.png" width="420" alt="DATE Market Board 시황 탭" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-news.png" width="420" alt="DATE Market Board 뉴스 탭" /> |
+
+| 일정 | 속보·공시 |
+| --- | --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-calendar.png" width="420" alt="DATE Market Board 일정 탭" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-breaking.png" width="420" alt="DATE Market Board 속보 공시 탭" /> |
+
+| 수급·차트 |
+| --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-flow.png" width="860" alt="DATE Market Board 수급 차트 탭" /> |
+
+## Responsive Frontend Review
+
+면접관이 프론트엔드 구현 품질을 빠르게 확인할 수 있도록 실제 로컬 실행 화면을 탭별로 캡처했습니다. 단순히 `@media`로 폭만 줄인 화면이 아니라, 금융 대시보드처럼 정보량이 많은 UI를 모바일과 태블릿에서 어떻게 재배치했는지 확인할 수 있습니다.
+
+### Verification Summary
+
+| Check | Result |
+| --- | --- |
+| 검증 일자 | 2026-08-08 |
+| 검증 방식 | Playwright full-page screenshot + DOM overflow scan |
+| 검증 뷰포트 | Desktop `1440x900`, Tablet `768x1024`, Mobile `390x844`, Narrow Mobile `320x568` |
+| 탭 범위 | 시황, 뉴스, 일정, 속보·공시, 수급·차트 |
+| 렌더링 상태 | 모든 탭 HTTP `200`, 콘솔 오류 `0` |
+| 반응형 상태 | 확인한 모든 뷰포트에서 문서 전체 가로 스크롤 없음 |
+
+### What To Look For
+
+- **HERO reflow**: 상단 DATE 로고, 핵심 문구, 현재 시각, 확인 순서가 화면 폭에 맞춰 축소되며 첫 화면의 정보 우선순위를 유지합니다.
+- **Tabbed information architecture**: 시황, 뉴스, 일정, 공시, 수급을 하나의 대시보드 안에서 분리해 사용자가 장중 확인 순서대로 이동할 수 있게 했습니다.
+- **Dense data layout**: 데스크톱에서는 표와 상세 패널을 함께 보여주고, 모바일에서는 카드/리스트 중심으로 세로 흐름을 만들어 좁은 화면에서도 정보가 겹치지 않게 했습니다.
+- **Overflow handling**: 모바일 탭 바와 필터칩은 의도적으로 가로 스크롤을 허용하지만, 페이지 자체에는 가로 스크롤이 생기지 않도록 `minmax`, `overflow-wrap`, 고정 컬럼 전환을 적용했습니다.
+- **Failure-tolerant UI**: 외부 API가 비활성 또는 지연되어도 레이아웃은 유지되고, provider 상태와 fallback 데이터를 통해 화면이 빈 상태로 깨지지 않게 구성했습니다.
+
+<details>
+<summary><strong>1. 시황 탭 - 시장 기준점 요약</strong></summary>
+
+시황 탭은 사용자가 가장 먼저 확인하는 기준 화면입니다. 모바일에서는 핵심 지표 카드가 2열로 압축되고, 태블릿에서는 3열 카드 그리드와 시황 흐름 카드가 유지됩니다. 상승/하락 색상, 지표명, 출처 메타가 카드 안에서 잘리지 않도록 텍스트 줄바꿈과 숫자 크기를 분리했습니다.
+
+| Mobile 390x844 | Tablet 768x1024 |
+| --- | --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-market.png" width="260" alt="DATE Market Board mobile market tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-market.png" width="360" alt="DATE Market Board tablet market tab" /> |
+
+</details>
+
+<details>
+<summary><strong>2. 뉴스 탭 - 최신 헤드라인 타임라인</strong></summary>
+
+뉴스 탭은 데이터가 가장 많이 늘어나는 화면입니다. 태블릿에서는 표 형태의 스캔 구조를 유지하고, 모바일에서는 각 뉴스가 세로 리스트로 풀리도록 구성했습니다. 필터 버튼은 모바일에서 가로 스크롤 영역으로 유지해 버튼 크기를 과도하게 줄이지 않았습니다.
+
+| Mobile 390x844 | Tablet 768x1024 |
+| --- | --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-news.png" width="260" alt="DATE Market Board mobile news tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-news.png" width="360" alt="DATE Market Board tablet news tab" /> |
+
+</details>
+
+<details>
+<summary><strong>3. 일정 탭 - 이벤트 캘린더</strong></summary>
+
+일정 탭은 월간 캘린더와 다가오는 일정을 함께 보여줍니다. 모바일에서는 캘린더, 주요 일정, 선택 날짜 상세가 한 컬럼으로 쌓이고, 태블릿에서는 캘린더와 주요 일정이 나란히 배치됩니다. 날짜 셀 내부 배지는 작은 화면에서도 넘치지 않도록 축약 스타일을 적용했습니다.
+
+| Mobile 390x844 | Tablet 768x1024 |
+| --- | --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-calendar.png" width="260" alt="DATE Market Board mobile calendar tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-calendar.png" width="360" alt="DATE Market Board tablet calendar tab" /> |
+
+</details>
+
+<details>
+<summary><strong>4. 속보·공시 탭 - 원문 확인 중심 리스트</strong></summary>
+
+속보·공시 탭은 SEC/DART/KRX 이벤트를 빠르게 훑고 원문으로 이동하는 화면입니다. 모바일에서는 공시 카드가 1열로 전환되고, 태블릿에서는 2열 카드 그리드를 유지합니다. 공시 유형, 긴 기업명, 접수번호, 원문 링크가 카드 안에서 깨지지 않도록 `overflow-wrap`과 카드 최소 폭을 조정했습니다.
+
+| Mobile 390x844 | Tablet 768x1024 |
+| --- | --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-breaking.png" width="260" alt="DATE Market Board mobile breaking disclosure tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-breaking.png" width="360" alt="DATE Market Board tablet breaking disclosure tab" /> |
+
+</details>
+
+<details>
+<summary><strong>5. 수급·차트 탭 - 고밀도 랭킹과 근거 패널</strong></summary>
+
+수급·차트 탭은 가장 정보 밀도가 높은 화면입니다. 데스크톱/태블릿에서는 랭킹 리스트와 선택 종목 근거 패널을 함께 보여주고, 모바일에서는 종목 행을 세로 카드처럼 재배치해 순위, 테마, 거래대금, 상승률, 뉴스 근거를 한 흐름으로 읽게 했습니다. 이 탭은 정보량이 많아 가장 긴 페이지가 되지만, 문서 전체 가로 스크롤 없이 렌더링됩니다.
+
+| Mobile 390x844 | Tablet 768x1024 |
+| --- | --- |
+| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-flow.png" width="260" alt="DATE Market Board mobile flow chart tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-flow.png" width="360" alt="DATE Market Board tablet flow chart tab" /> |
+
+</details>
+
+Full responsive audit artifacts:
+
+- Report: [`docs/date/implementation/responsive-audit-2026-08-08/README.md`](./docs/date/implementation/responsive-audit-2026-08-08/README.md)
+- Raw diagnostics: [`responsive-audit-results.json`](./docs/date/implementation/responsive-audit-2026-08-08/responsive-audit-results.json)
+- Screenshots: [`docs/date/implementation/responsive-audit-2026-08-08/screenshots/`](./docs/date/implementation/responsive-audit-2026-08-08/screenshots/)
+
 ## Project Summary
 
 | Item | Description |

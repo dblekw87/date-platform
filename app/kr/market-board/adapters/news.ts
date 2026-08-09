@@ -7,10 +7,10 @@ import type { MarketBoardProviderPayload } from "./types";
 import type { CalendarEventDto, LeadingStockDto, NewsHeadlineDto } from "../types";
 
 const requiredEnv = ["MARKET_BOARD_NEWS_FEED_URL", "NAVER_API_HUB_KEY", "NEWSAPI_KEY", "FINNHUB_API_KEY", "BENZINGA_API_KEY"];
-const naverNewsQueries = ["국내 증시", "코스피 코스닥", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산", "로봇 원전", "자동차 은행", "인수합병 공시"];
-const koreanNewsQueries = ["국내 증시", "금리 환율", "반도체 2차전지", "바이오 제약", "조선 방산"];
-const koreanRssQueries = ["국내 증시", "코스피 코스닥", "반도체 주식", "2차전지 주식", "바이오 제약 주식", "조선 방산 주식", "로봇 원전 주식", "수소 연료전지 주식", "재생에너지 태양광 풍력 주식", "국내 공시 인수합병"];
-const globalNewsQueries = ["stock market", "earnings", "interest rates", "semiconductor stocks", "energy oil", "hydrogen fuel cell stocks", "renewable energy solar wind stocks", "banks", "biotech stocks", "small cap stocks", "merger acquisition"];
+const naverNewsQueries = ["국내 증시", "코스피 코스닥", "미국 증시", "금리 환율", "원달러 환율", "반도체 2차전지", "AI 데이터센터", "전력 설비", "바이오 제약", "조선 방산", "방산 수출", "로봇 원전", "우주 항공", "자동차 은행", "정책 수혜", "인수합병 공시"];
+const koreanNewsQueries = ["국내 증시", "미국 증시", "금리 환율", "반도체 2차전지", "AI 데이터센터", "바이오 제약", "조선 방산", "정책 수혜"];
+const koreanRssQueries = ["국내 증시", "코스피 코스닥", "미국 증시", "반도체 주식", "AI 데이터센터 주식", "전력 설비 주식", "2차전지 주식", "바이오 제약 주식", "조선 방산 주식", "방산 수출 주식", "로봇 원전 주식", "우주 항공 주식", "수소 연료전지 주식", "재생에너지 태양광 풍력 주식", "정책 수혜주", "국내 공시 인수합병"];
+const globalNewsQueries = ["stock market", "earnings", "interest rates", "fed rate cuts", "inflation data", "semiconductor stocks", "ai stocks", "data center power", "energy oil", "nuclear energy stocks", "hydrogen fuel cell stocks", "renewable energy solar wind stocks", "defense stocks", "aerospace stocks", "banks", "biotech stocks", "small cap stocks", "tariff stocks", "merger acquisition"];
 
 type LeaderNewsQuery = {
   query: string;
@@ -172,7 +172,7 @@ function loadNaverNewsFeed(query: string, credentials: ReturnType<typeof getNews
 
     const url = buildQueryUrl("https://naverapihub.apigw.ntruss.com/search/v1/news", {
       query,
-      display: 10,
+      display: 15,
       start: 1,
       sort: "date",
       format: "json"
@@ -205,7 +205,7 @@ function loadNaverDevelopersNewsFeed(query: string, credentials: ReturnType<type
 
     const url = buildQueryUrl("https://openapi.naver.com/v1/search/news.json", {
       query,
-      display: 10,
+      display: 15,
       start: 1,
       sort: "date"
     });
@@ -243,7 +243,7 @@ function loadGoogleNewsRssFeed(query: string, options?: { region?: "KR" | "US"; 
     });
     const xml = await fetchText(url, { timeoutMs: 3500 });
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
-      .slice(0, 12)
+      .slice(0, 16)
       .map((match) => {
         const itemXml = match[1];
         const source = firstXmlValue(itemXml, "source");
@@ -274,7 +274,7 @@ function loadNewsApiFeed(query: string, credentials: ReturnType<typeof getNewsCr
       q: query,
       language: options.language,
       sortBy: "publishedAt",
-      pageSize: 12,
+      pageSize: 16,
       apiKey: credentials.newsApiKey
     }), { timeoutMs: 1800 });
 
@@ -304,7 +304,7 @@ function loadBenzingaFeed(credentials: ReturnType<typeof getNewsCredentials>) {
 
     const response = await fetchJson<Array<RawNewsItem & { author?: string; created?: string; updated?: string }>>(
       buildQueryUrl("https://api.benzinga.com/api/v2/news", {
-        pageSize: 40,
+        pageSize: 60,
         displayOutput: "headline"
       }),
       {
@@ -375,9 +375,9 @@ async function translateUsHeadlines<T extends Array<{ region: string; text: stri
 
 function balanceHeadlinesByRegion<T extends Array<{ region: string; publishedAt: string }>>(items: T) {
   const sorted = [...items].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
-  const krHeadlines = sorted.filter((item) => item.region === "KR").slice(0, 30);
-  const usHeadlines = sorted.filter((item) => item.region === "US").slice(0, 40);
-  const globalHeadlines = sorted.filter((item) => item.region === "GLOBAL").slice(0, 10);
+  const krHeadlines = sorted.filter((item) => item.region === "KR").slice(0, 45);
+  const usHeadlines = sorted.filter((item) => item.region === "US").slice(0, 55);
+  const globalHeadlines = sorted.filter((item) => item.region === "GLOBAL").slice(0, 15);
 
   return [...krHeadlines, ...usHeadlines, ...globalHeadlines]
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)) as T;
@@ -390,7 +390,7 @@ function limitDominantLabels<T extends Array<{ label: string; region: string; pu
   return sorted.filter((item) => {
     const key = `${item.region}:${item.label}`;
     const nextCount = (counts.get(key) ?? 0) + 1;
-    const limit = item.label === "헤드라인" || item.label === "general" ? 8 : 12;
+    const limit = item.label === "헤드라인" || item.label === "general" ? 10 : 16;
 
     if (nextCount > limit) return false;
 
@@ -550,7 +550,7 @@ export async function loadLeaderNewsHeadlines(leaders: LeadingStockDto[]) {
 }
 
 async function loadNewsHeadlines(): Promise<MarketBoardProviderPayload> {
-  return readThroughCache("market-board:news:headlines:v3", marketBoardCacheTtl.news, async () => {
+  return readThroughCache("market-board:news:headlines:v4", marketBoardCacheTtl.news, async () => {
     const credentials = getNewsCredentials();
 
     if (
@@ -612,7 +612,7 @@ export const newsMarketBoardAdapter = createMockFallbackAdapter(
   "news",
   "뉴스 공급자",
   requiredEnv,
-  { credentialStrategy: "any", timeoutMs: 6500 }
+  { credentialStrategy: "any", timeoutMs: 8500 }
 );
 
 newsMarketBoardAdapter.load = loadNewsHeadlines;

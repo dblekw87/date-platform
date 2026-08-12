@@ -16,9 +16,14 @@ export default async function LoginPage({
   const params = await searchParams;
   const nextParam = Array.isArray(params?.next) ? params?.next[0] : params?.next;
   const errorParam = Array.isArray(params?.error) ? params?.error[0] : params?.error;
+  const detailParam = Array.isArray(params?.detail) ? params?.detail[0] : params?.detail;
   const nextPath = nextParam?.startsWith("/") ? nextParam : "/community";
   const errorMessage = errorParam?.startsWith("missing_")
     ? "로그인 API 키 설정이 필요합니다."
+    : errorParam === "kakao_token_failed"
+      ? "카카오 토큰 발급에 실패했습니다. Client Secret 설정 또는 Redirect URI를 확인해주세요."
+      : errorParam === "kakao_profile_failed"
+        ? "카카오 사용자 정보 조회에 실패했습니다. 동의항목 설정을 확인해주세요."
     : errorParam
       ? "로그인을 완료하지 못했습니다. 다시 시도해주세요."
       : null;
@@ -42,7 +47,12 @@ export default async function LoginPage({
         </Link>
         <h1>로그인</h1>
         <p>DATE 커뮤니티에 오신 것을 환영합니다.</p>
-        {errorMessage ? <p className={styles.errorMessage}>{errorMessage}</p> : null}
+        {errorMessage ? (
+          <p className={styles.errorMessage}>
+            {errorMessage}
+            {detailParam ? <small>{detailParam}</small> : null}
+          </p>
+        ) : null}
         <div className={styles.providers}>
           {providers.map((provider) => (
             <Link data-provider={provider.key} href={`/auth/${provider.key}?next=${encodeURIComponent(nextPath)}`} key={provider.key}>

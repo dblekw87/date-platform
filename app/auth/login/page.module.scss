@@ -128,12 +128,20 @@
 }
 
 .errorMessage {
+  display: grid;
+  gap: 4px;
   border: 1px solid rgba(202, 59, 59, 0.24);
   border-radius: 8px;
   background: #fff2f2;
   color: #b42318 !important;
   padding: 10px 12px;
   font-size: 13px;
+}
+
+.errorMessage small {
+  color: #7a271a;
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .providers {

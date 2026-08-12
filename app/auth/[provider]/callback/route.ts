@@ -9,6 +9,27 @@ type OAuthTokenResponse = {
   error_description?: string;
 };
 
+class OAuthCallbackError extends Error {
+  constructor(
+    readonly code: string,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+function errorRedirect(request: NextRequest, nextPath: string, error: string, detail?: string) {
+  const url = new URL("/auth/login", request.url);
+
+  url.searchParams.set("error", error);
+  url.searchParams.set("next", nextPath);
+  if (process.env.NODE_ENV !== "production" && detail) {
+    url.searchParams.set("detail", detail.slice(0, 180));
+  }
+
+  return NextResponse.redirect(url);
+}
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ provider: string }> }
@@ -37,11 +58,11 @@ export async function GET(
   const nextPath = safeNextPath(storedState.nextPath ?? null);
 
   if (!code || !state || state !== storedState.state) {
-    return NextResponse.redirect(new URL(`/auth/login?error=invalid_oauth_state&next=${encodeURIComponent(nextPath)}`, request.url));
+    return errorRedirect(request, nextPath, "invalid_oauth_state");
   }
 
   if (!config.clientId || (config.clientSecretRequired && !config.clientSecret)) {
-    return NextResponse.redirect(new URL(`/auth/login?error=missing_${provider}_config&next=${encodeURIComponent(nextPath)}`, request.url));
+    return errorRedirect(request, nextPath, `missing_${provider}_config`);
   }
 
   const redirectUri = new URL(`/auth/${provider}/callback`, request.nextUrl.origin).toString();
@@ -68,10 +89,17 @@ export async function GET(
     const token = await tokenResponse.json() as OAuthTokenResponse;
 
     if (!tokenResponse.ok || !token.access_token) {
-      throw new Error(token.error_description || token.error || "oauth_token_failed");
+      throw new OAuthCallbackError(`${provider}_token_failed`, token.error_description || token.error || `HTTP ${tokenResponse.status}`);
     }
 
-    const user = await config.getProfile(token.access_token);
+    let user;
+
+    try {
+      user = await config.getProfile(token.access_token);
+    } catch (error) {
+      throw new OAuthCallbackError(`${provider}_profile_failed`, error instanceof Error ? error.message : "profile_failed");
+    }
+
     const response = NextResponse.redirect(new URL(nextPath, request.url));
 
     response.cookies.set("date_session", createSessionValue(user), {
@@ -85,7 +113,13 @@ export async function GET(
     response.cookies.delete("date_mock_signed_out");
 
     return response;
-  } catch {
-    return NextResponse.redirect(new URL(`/auth/login?error=oauth_failed&next=${encodeURIComponent(nextPath)}`, request.url));
+  } catch (error) {
+    const callbackError = error instanceof OAuthCallbackError
+      ? error
+      : new OAuthCallbackError(`${provider}_oauth_failed`, error instanceof Error ? error.message : "oauth_failed");
+
+    console.error(`[oauth:${provider}] ${callbackError.code}`, callbackError.message);
+
+    return errorRedirect(request, nextPath, callbackError.code, callbackError.message);
   }
 }

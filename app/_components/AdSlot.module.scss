@@ -1,0 +1,54 @@
+.adSlot {
+  display: grid;
+  min-height: 96px;
+  place-items: center;
+  border: 1px dashed #9ca3af;
+  background: #ffffff;
+  margin: 24px 0;
+  color: #526077;
+}
+
+.adSlot span {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sideAdRails {
+  pointer-events: none;
+}
+
+.sideAdRails aside {
+  position: fixed;
+  top: 112px;
+  bottom: 28px;
+  z-index: 10;
+  display: grid;
+  width: 148px;
+  max-height: 620px;
+  place-items: center;
+  border: 1px dashed #9ca3af;
+  background: rgba(255, 255, 255, 0.92);
+  color: #526077;
+  pointer-events: auto;
+}
+
+.sideAdRails aside:first-child {
+  left: max(28px, calc((100vw - 1900px) / 2 + 28px));
+}
+
+.sideAdRails aside:last-child {
+  right: max(28px, calc((100vw - 1900px) / 2 + 28px));
+}
+
+.sideAdRails span {
+  writing-mode: vertical-rl;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+@media (max-width: 1900px) {
+  .sideAdRails {
+    display: none;
+  }
+}

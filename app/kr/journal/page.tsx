@@ -39,7 +39,7 @@ export default function KoreanJournalPage() {
       <section className={styles.hero} aria-labelledby="journal-title">
         <p>기록</p>
         <h1 id="journal-title">판단의 근거와 다시 볼 조건을 남깁니다.</h1>
-        <span>수익률 중심 매매일지가 아니라, 당시 어떤 데이터와 원문을 봤는지 보존하는 화면입니다.</span>
+        <span>수익률 중심 매매 복기가 아니라, 당시 어떤 데이터와 원문을 봤는지 보존하는 화면입니다.</span>
         <div>
           <Link href="/">시장 보드</Link>
           <Link href="/kr/theme">테마 점검</Link>

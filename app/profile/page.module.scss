@@ -1,0 +1,116 @@
+.page {
+  width: min(100% - 48px, 1440px);
+  margin: 0 auto;
+  color: #111111;
+  padding-bottom: 72px;
+}
+
+.hero {
+  border-bottom: 1px solid #111111;
+  padding: 56px 0 30px;
+}
+
+.hero span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.hero h1 {
+  margin: 12px 0;
+  font-size: clamp(36px, 6vw, 64px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.hero p {
+  max-width: 680px;
+  margin: 0;
+  color: #526077;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+  padding-top: 24px;
+}
+
+.avatarPanel,
+.form label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.avatarPanel {
+  grid-row: span 4;
+  align-content: start;
+  border: 1px solid #111111;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.avatarPanel div {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid #111111;
+  background: #eef2ff;
+  font-size: 72px;
+  font-weight: 900;
+  overflow: hidden;
+}
+
+.avatarPanel img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.form input,
+.form textarea {
+  min-width: 0;
+  border: 1px solid #111111;
+  background: #ffffff;
+  padding: 12px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.form textarea {
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+.actions button {
+  border: 1px solid #111111;
+  background: #111111;
+  color: #ffffff;
+  padding: 12px 14px;
+  font: inherit;
+  font-weight: 900;
+}
+
+@media (max-width: 720px) {
+  .page {
+    width: min(100% - 28px, 1440px);
+  }
+
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .avatarPanel {
+    grid-row: auto;
+  }
+}

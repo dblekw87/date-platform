@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import styles from "./layout.module.scss";
 
 const desktopNavigation = [
@@ -13,7 +14,9 @@ const desktopNavigation = [
 const mobileNavigation = [
   { label: "홈", href: "/kr" },
   { label: "시장", href: "/kr/market" },
-  { label: "기록", href: "/kr/journal" }
+  { label: "기록", href: "/kr/journal" },
+  { label: "커뮤니티", href: "/community" },
+  { label: "매매 복기", href: "/journal/trades" }
 ];
 
 const secondaryRoutes = [
@@ -32,6 +35,7 @@ function isActive(pathname: string, href: string) {
 export default function KoreanLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const isHome = pathname === "/kr";
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className={`${styles.shell} ${isHome ? styles.homeShell : ""}`}>
@@ -39,7 +43,6 @@ export default function KoreanLayout({ children }: Readonly<{ children: React.Re
         <Link className={styles.logo} href="/kr" aria-label="DATE 한국형 홈">
           DATE
         </Link>
-        {isHome ? <span className={styles.homeMeta}>시장 확인 보드</span> : null}
         {!isHome ? (
           <>
             <nav className={styles.desktopNav} aria-label="주요 메뉴">
@@ -49,8 +52,22 @@ export default function KoreanLayout({ children }: Readonly<{ children: React.Re
                 </Link>
               ))}
             </nav>
-            <div className={styles.headerActions}>
-              <Link href="/">시장 보드</Link>
+            <button
+              className={styles.menuButton}
+              type="button"
+              aria-expanded={isMenuOpen}
+              aria-controls="kr-mobile-header-menu"
+              onClick={() => setIsMenuOpen((current) => !current)}
+            >
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+              <b>메뉴</b>
+            </button>
+            <div className={styles.headerActions} id="kr-mobile-header-menu" data-open={isMenuOpen ? "true" : undefined}>
+              <Link href="/auth/login">로그인</Link>
+              <Link href="/community">커뮤니티</Link>
+              <Link href="/journal/trades">매매 복기</Link>
               <Link href="/kr/settings">내 정보</Link>
             </div>
           </>

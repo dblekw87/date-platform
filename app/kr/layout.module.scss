@@ -66,6 +66,7 @@
 
 .desktopNav {
   flex: 1 1 auto;
+  justify-content: flex-end;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -97,6 +98,10 @@
 
 .headerActions {
   flex: 0 0 auto;
+}
+
+.menuButton {
+  display: none;
 }
 
 .headerActions a {
@@ -181,8 +186,57 @@
     display: none;
   }
 
-  .headerActions a:last-child {
+  .menuButton {
+    display: inline-grid;
+    width: 38px;
+    height: 38px;
+    margin-left: auto;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #c7c7c2;
+    background: #ffffff;
+    color: #151515;
+    cursor: pointer;
+  }
+
+  .menuButton span {
+    display: block;
+    width: 17px;
+    height: 2px;
+    background: #151515;
+  }
+
+  .menuButton b {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .headerActions {
     display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    border: 1px solid #151515;
+    background: #ffffff;
+    padding: 6px;
+  }
+
+  .headerActions[data-open="true"] {
+    display: flex;
+  }
+
+  .headerActions a {
+    justify-content: center;
+    border-color: transparent;
+    min-height: 40px;
+  }
+
+  .headerActions a + a {
+    border-top: 1px solid #eeeeee;
   }
 
   .routeMap,

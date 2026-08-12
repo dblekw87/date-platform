@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { SiteHeader } from "../../_components/SiteHeader";
 import styles from "../../page.module.scss";
 import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId } from "./types";
 
@@ -226,6 +227,19 @@ function OriginalLink({ href }: { href?: string }) {
   ) : <span>원문 대기</span>;
 }
 
+function HeadlineLink({ item }: { item: Headline }) {
+  if (!item.originalUrl || item.originalUrl === "#") {
+    return <span>{item.text}</span>;
+  }
+
+  return (
+    <a href={item.originalUrl} rel="noreferrer" target="_blank">
+      {item.text}
+      <span className={styles.linkIcon} aria-hidden="true">↗</span>
+    </a>
+  );
+}
+
 function displaySource(source?: string) {
   if (!source) return "출처 확인";
   if (source === "mock") return "참고값";
@@ -335,7 +349,12 @@ function relatedHeadlineTags(item: Headline) {
 function leaderTheme(stock: LeadingStock) {
   const [theme] = stock.reason.split(" · ");
 
-  if (!theme || theme === "개별 이슈" || theme === "미분류") return inferThemeFromLeader(stock);
+  if (
+    !theme ||
+    theme === "개별 이슈" ||
+    theme === "미분류" ||
+    /KIS|토스증권|거래대금|거래량|상승률|순위|표시순위/i.test(theme)
+  ) return inferThemeFromLeader(stock);
 
   return theme;
 }
@@ -429,9 +448,25 @@ function safeLeaderTheme(stock?: LeadingStock) {
 }
 
 function themeRankLabel(stocks: LeadingStock[], index: number) {
-  const fallbackThemes = ["거래대금 급증", "AI 모멘텀", "정책 모멘텀"];
+  return stocks[index] ? safeLeaderTheme(stocks[index]) : "확인 대기";
+}
 
-  return stocks[index] ? safeLeaderTheme(stocks[index]) : fallbackThemes[index] ?? "업종 테마";
+function providerStatusFor(board: MarketBoardData, providerId: MarketBoardData["providerStatuses"][number]["id"]) {
+  return board.providerStatuses.find((provider) => provider.id === providerId);
+}
+
+function themeUnavailableMessage(board: MarketBoardData, region: "KR" | "US") {
+  const provider = region === "US" ? providerStatusFor(board, "toss") : providerStatusFor(board, "kis");
+
+  if (provider?.status === "error") {
+    return `${provider.label} 오류로 강세 테마 데이터를 표시하지 못했습니다.`;
+  }
+
+  if (provider?.status === "mock") {
+    return `${provider.label} 환경변수가 없어 강세 테마 provider가 비활성 상태입니다.`;
+  }
+
+  return "강세 테마 후보가 아직 수신되지 않았습니다.";
 }
 
 function isWaitingMarketCard(item: MarketSnapshot) {
@@ -629,7 +664,15 @@ function leaderReasonForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   return stock.reason;
 }
 
-export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoardData; initialTab?: MarketBoardTabId }) {
+export function MarketBoard({
+  board,
+  initialTab = "market",
+  userLabel
+}: {
+  board: MarketBoardData;
+  initialTab?: MarketBoardTabId;
+  userLabel?: string;
+}) {
   const [liveBoard, setLiveBoard] = useState(board);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<MarketBoardTabId>(initialTab);
@@ -733,12 +776,7 @@ export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoa
 
   return (
     <main className={styles.page}>
-      <header className={styles.siteHeader}>
-        <strong aria-label="DATE" className={styles.siteLogo}>
-          <DateLogo />
-        </strong>
-        <span>{isRefreshing ? "시장 확인 보드 · Updating" : "시장 확인 보드"}</span>
-      </header>
+      <SiteHeader active="market" userLabel={userLabel} />
 
       <section className={styles.summary} aria-labelledby="kr-home-title">
         <div>
@@ -848,23 +886,21 @@ export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoa
             </header>
             <div className={styles.newsTickerHeader} aria-hidden="true">
               <span>시간</span>
-              <span>구분</span>
               <span>키워드</span>
               <span>헤드라인</span>
-              <span>원문</span>
+              <span>출처</span>
             </div>
             <ol>
               {filteredHeadlines.map((item) => (
                 <li data-new={item.isNew ? "true" : undefined} key={item.id}>
                   <time>{formatDateTimeMinute(item.publishedAt)}</time>
-                  <b>{item.source}{item.sourceDetail ? ` · ${item.sourceDetail}` : ""}{item.isNew ? " · NEW" : ""}</b>
                   <strong>{item.label}</strong>
                   <span>
-                    {item.text}
+                    <HeadlineLink item={item} />
                     {item.originalText ? <small>{item.originalText}</small> : null}
                     {relatedHeadlineTags(item).length > 0 ? <small>{relatedHeadlineTags(item).join(" · ")}</small> : null}
                   </span>
-                  <OriginalLink href={item.originalUrl} />
+                  <span>{displaySource(item.source)}</span>
                 </li>
               ))}
             </ol>
@@ -1148,8 +1184,7 @@ export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoa
                           {selectedLeaderNews.slice(0, 4).map((item) => (
                             <li key={item.id}>
                               <b>{headlineCauseLabel(item)} · {item.source} · {formatDateTimeMinute(item.publishedAt)}</b>
-                              <span>{item.text}</span>
-                              <OriginalLink href={item.originalUrl} />
+                              <HeadlineLink item={item} />
                             </li>
                           ))}
                         </ol>
@@ -1176,8 +1211,7 @@ export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoa
                           {selectedThemeNews.slice(0, 4).map((item) => (
                             <li key={item.id}>
                               <b>{item.source} · {formatDateTimeMinute(item.publishedAt)}</b>
-                              <span>{item.text}</span>
-                              <OriginalLink href={item.originalUrl} />
+                              <HeadlineLink item={item} />
                             </li>
                           ))}
                         </ol>
@@ -1299,6 +1333,7 @@ export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoa
                         </li>
                       ))}
                     </ol>
+                    {krThemeLeaders.length === 0 ? <p className={styles.emptyDisclosure}>{themeUnavailableMessage(liveBoard, "KR")}</p> : null}
                   </div>
                 </article>
                 <article className={styles.themeSection}>
@@ -1321,6 +1356,7 @@ export function MarketBoard({ board, initialTab = "market" }: { board: MarketBoa
                         </li>
                       ))}
                     </ol>
+                    {usThemeLeaders.length === 0 ? <p className={styles.emptyDisclosure}>{themeUnavailableMessage(liveBoard, "US")}</p> : null}
                   </div>
                 </article>
               </div>

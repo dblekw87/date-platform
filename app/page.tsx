@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { MarketBoard } from "./kr/market-board/MarketBoard";
 import { MarketBoardSkeleton } from "./kr/market-board/MarketBoardSkeleton";
+import { getCurrentUser } from "./auth/session";
 import { getMarketBoardData } from "./kr/market-board/providers";
 import type { MarketBoardTabId } from "./kr/market-board/types";
 
@@ -16,9 +17,13 @@ function parseInitialTab(value?: string | string[]) {
 }
 
 async function MarketBoardContainer({ initialTab }: { initialTab: MarketBoardTabId }) {
-  const board = await getMarketBoardData();
+  const [board, user] = await Promise.all([
+    getMarketBoardData(),
+    getCurrentUser()
+  ]);
+  const userLabel = user ? user.provider === "mock" ? `${user.name} · 개발 로그인` : user.name : undefined;
 
-  return <MarketBoard board={board} initialTab={initialTab} />;
+  return <MarketBoard board={board} initialTab={initialTab} userLabel={userLabel} />;
 }
 
 export default async function Home({

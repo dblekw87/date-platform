@@ -1,3 +1,4 @@
+import { SiteHeader } from "../../_components/SiteHeader";
 import styles from "../../page.module.scss";
 
 const skeletonCards = Array.from({ length: 12 }, (_, index) => `market-card-${index}`);
@@ -9,13 +10,10 @@ function SkeletonLine({ className }: { className?: string }) {
   return <span aria-hidden="true" className={`${styles.skeletonLine} ${className ?? ""}`} />;
 }
 
-export function MarketBoardSkeleton() {
+export function MarketBoardSkeleton({ showHeader = true }: { showHeader?: boolean }) {
   return (
-    <main className={`${styles.page} ${styles.skeletonPage}`} aria-busy="true" aria-label="시장 확인 보드 로딩 중">
-      <header className={styles.siteHeader}>
-        <strong>DATE</strong>
-        <span>시장 확인 보드 · Loading</span>
-      </header>
+    <main className={`${styles.page} ${styles.skeletonPage}`} aria-busy="true" aria-label="DATE 로딩 중">
+      {showHeader ? <SiteHeader active="market" hideAuthNav /> : null}
 
       <section className={styles.providerStrip} aria-label="데이터 연결 상태 확인 중">
         <strong>데이터 연결 상태</strong>

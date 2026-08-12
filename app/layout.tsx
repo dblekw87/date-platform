@@ -9,7 +9,7 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "DATE 시장 확인 보드",
+  title: "DATE",
   description: "미국장 시황, 국내 뉴스, 일정, 속보, 수급과 차트를 빠르게 확인하는 시장 보드."
 };
 

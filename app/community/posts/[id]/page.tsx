@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AdSlot, SideAdRails } from "../../../_components/AdSlot";
 import { SiteHeader } from "../../../_components/SiteHeader";
 import { currentUserAuthorId, requireCurrentUser } from "../../../auth/session";
+import { fetchBackendJson } from "../../../_lib/backend";
 import styles from "./page.module.scss";
 
 const posts = [
@@ -98,10 +99,47 @@ const comments = [
   }
 ];
 
+type BackendCommunityPost = {
+  id: string;
+  category: string;
+  title: string;
+  author_id: string;
+  created_at: string;
+  content_html: string;
+  view_count: number;
+};
+
+function formatTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function fromBackendPost(post: BackendCommunityPost) {
+  return {
+    id: post.id,
+    type: post.category,
+    title: post.title,
+    author: post.author_id,
+    time: formatTime(post.created_at),
+    content: post.content_html,
+    views: post.view_count
+  };
+}
+
 export default async function CommunityPostPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireCurrentUser("/community");
   const { id } = await params;
-  const post = posts.find((item) => item.id === id);
+  const post = posts.find((item) => item.id === id) ?? (
+    await fetchBackendJson<BackendCommunityPost>(`/api/community/posts/${id}`).then((item) => item ? fromBackendPost(item) : null)
+  );
 
   if (!post) notFound();
 
@@ -122,10 +160,10 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
           <footer>
             <b>{post.author}</b>
             <time>{post.time}</time>
-            <small>조회 328</small>
+            <small>조회 {"views" in post ? (post as { views: number }).views : 328}</small>
             <small>댓글 {comments.length}</small>
           </footer>
-          <p>{post.content}</p>
+          <div className={styles.postContent} dangerouslySetInnerHTML={{ __html: post.content }} />
         </article>
 
         <aside className={styles.sidebar} aria-label="관련 글">

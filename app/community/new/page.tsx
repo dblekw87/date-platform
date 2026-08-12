@@ -2,10 +2,8 @@ import Link from "next/link";
 import { AdSlot, SideAdRails } from "../../_components/AdSlot";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { requireCurrentUser } from "../../auth/session";
-import { CommunityPostEditor } from "./CommunityPostEditor";
+import { CommunityPostForm } from "./CommunityPostForm";
 import styles from "./page.module.scss";
-
-const categories = ["질문", "조언", "시황", "뉴스", "테마", "잡담"];
 
 export default async function NewCommunityPostPage() {
   const user = await requireCurrentUser("/community/new");
@@ -23,29 +21,7 @@ export default async function NewCommunityPostPage() {
 
       <AdSlot label="커뮤니티 글쓰기 상단 광고" />
 
-      <form className={styles.form}>
-        <fieldset>
-          <legend>게시판 선택</legend>
-          {categories.map((category, index) => (
-            <label key={category}>
-              <input defaultChecked={index === 0} name="category" type="radio" value={category} />
-              {category}
-            </label>
-          ))}
-        </fieldset>
-
-        <label>
-          제목
-          <input placeholder="제목을 입력하세요" />
-        </label>
-
-        <CommunityPostEditor />
-
-        <div className={styles.actions}>
-          <Link href="/community">취소</Link>
-          <button type="button">게시글 등록</button>
-        </div>
-      </form>
+      <CommunityPostForm />
     </main>
   );
 }

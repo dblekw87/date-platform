@@ -3,10 +3,9 @@ import { notFound } from "next/navigation";
 import { AdSlot, SideAdRails } from "../../../../_components/AdSlot";
 import { SiteHeader } from "../../../../_components/SiteHeader";
 import { currentUserAuthorId, requireCurrentUser } from "../../../../auth/session";
-import { CommunityPostEditor } from "../../../new/CommunityPostEditor";
+import { CommunityPostForm } from "../../../new/CommunityPostForm";
+import { fetchBackendJson } from "../../../../_lib/backend";
 import styles from "../../../new/page.module.scss";
-
-const categories = ["질문", "조언", "시황", "뉴스", "테마", "잡담"];
 
 const posts = [
   {
@@ -18,10 +17,30 @@ const posts = [
   }
 ];
 
+type BackendCommunityPost = {
+  id: string;
+  category: string;
+  title: string;
+  author_id: string;
+  content_html: string;
+};
+
+function fromBackendPost(post: BackendCommunityPost) {
+  return {
+    id: post.id,
+    type: post.category,
+    title: post.title,
+    author: post.author_id,
+    content: post.content_html
+  };
+}
+
 export default async function EditCommunityPostPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireCurrentUser("/community");
   const { id } = await params;
-  const post = posts.find((item) => item.id === id);
+  const post = posts.find((item) => item.id === id) ?? (
+    await fetchBackendJson<BackendCommunityPost>(`/api/community/posts/${id}`).then((item) => item ? fromBackendPost(item) : null)
+  );
 
   if (!post || currentUserAuthorId(user) !== post.author) notFound();
 
@@ -38,29 +57,7 @@ export default async function EditCommunityPostPage({ params }: { params: Promis
 
       <AdSlot label="커뮤니티 수정 상단 광고" />
 
-      <form className={styles.form}>
-        <fieldset>
-          <legend>게시판 선택</legend>
-          {categories.map((category) => (
-            <label key={category}>
-              <input defaultChecked={category === post.type} name="category" type="radio" value={category} />
-              {category}
-            </label>
-          ))}
-        </fieldset>
-
-        <label>
-          제목
-          <input defaultValue={post.title} placeholder="제목을 입력하세요" />
-        </label>
-
-        <CommunityPostEditor initialContent={post.content} />
-
-        <div className={styles.actions}>
-          <Link href={`/community/posts/${post.id}`}>취소</Link>
-          <button type="button">수정 저장</button>
-        </div>
-      </form>
+      <CommunityPostForm initialPost={post} />
     </main>
   );
 }

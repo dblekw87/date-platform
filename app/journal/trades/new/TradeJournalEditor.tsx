@@ -162,6 +162,7 @@ export function TradeJournalEditor({ initialValues = {} }: { initialValues?: Par
           <div
             className={styles.notionEditor}
             contentEditable
+            data-section-id={section.id}
             data-placeholder={section.placeholder}
             ref={(node) => {
               editorRefs.current[section.id] = node;

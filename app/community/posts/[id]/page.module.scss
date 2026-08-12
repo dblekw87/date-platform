@@ -64,12 +64,17 @@
   color: #526077;
 }
 
-.post p {
+.post p,
+.postContent {
   margin: 0;
   color: #263044;
   font-size: 18px;
   font-weight: 700;
   line-height: 1.7;
+}
+
+.postContent img {
+  max-width: 100%;
 }
 
 .sidebar {

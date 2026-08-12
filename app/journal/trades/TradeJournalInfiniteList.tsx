@@ -6,14 +6,99 @@ import styles from "./page.module.scss";
 import type { tradeJournals } from "./trade-journals";
 
 type TradeJournal = typeof tradeJournals[number];
+type BackendTradeJournal = {
+  id: string;
+  trade_date: string;
+  title: string;
+  result: string;
+  visibility: "public" | "private";
+  buy_html: string;
+  sell_html: string;
+  good_html: string;
+  bad_html: string;
+  author_id: string;
+};
+
+type BackendTradeJournalPage = {
+  items?: BackendTradeJournal[];
+  nextCursor?: string | null;
+};
 
 const pageSize = 4;
+
+function fromBackendJournal(journal: BackendTradeJournal): TradeJournal {
+  return {
+    id: journal.id,
+    date: journal.trade_date,
+    symbol: "",
+    name: "",
+    title: journal.title,
+    visibility: journal.visibility === "public" ? "공개" : "비공개",
+    author: journal.author_id,
+    result: journal.result,
+    buy: journal.buy_html,
+    sell: journal.sell_html,
+    good: journal.good_html,
+    bad: journal.bad_html
+  };
+}
 
 export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[] }) {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [visibleCount, setVisibleCount] = useState(pageSize);
-  const visibleJournals = journals.slice(0, visibleCount);
-  const hasMore = visibleCount < journals.length;
+  const [loadedJournals, setLoadedJournals] = useState<TradeJournal[]>(journals);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [usesBackend, setUsesBackend] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const visibleJournals = usesBackend ? loadedJournals : loadedJournals.slice(0, visibleCount);
+  const hasMore = usesBackend ? Boolean(nextCursor) : visibleCount < loadedJournals.length;
+
+  async function loadBackendPage(cursor?: string | null, replace = false) {
+    setIsLoading(true);
+
+    try {
+      const params = new URLSearchParams({
+        limit: String(pageSize)
+      });
+
+      if (cursor) params.set("cursor", cursor);
+
+      const response = await fetch(`/api/backend/trade-journals?${params.toString()}`, {
+        cache: "no-store"
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json() as BackendTradeJournalPage;
+      const items = (data.items ?? []).map(fromBackendJournal);
+
+      if (items.length === 0 && replace) {
+        setUsesBackend(false);
+        setLoadedJournals(journals);
+        setNextCursor(null);
+        return;
+      }
+
+      if (items.length > 0 || data.nextCursor) {
+        setUsesBackend(true);
+        setLoadedJournals((current) => replace ? items : [...current, ...items]);
+        setNextCursor(data.nextCursor ?? null);
+      }
+    } catch {
+      if (replace) {
+        setUsesBackend(false);
+        setLoadedJournals(journals);
+        setNextCursor(null);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadBackendPage(null, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -22,14 +107,19 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
 
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
-        setVisibleCount((current) => Math.min(current + pageSize, journals.length));
+        if (usesBackend) {
+          if (!isLoading && nextCursor) void loadBackendPage(nextCursor);
+          return;
+        }
+
+        setVisibleCount((current) => Math.min(current + pageSize, loadedJournals.length));
       }
     }, { rootMargin: "240px 0px" });
 
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasMore, journals.length]);
+  }, [hasMore, isLoading, loadedJournals.length, nextCursor, usesBackend]);
 
   return (
     <section className={styles.list} aria-label="유저 매매 복기 목록">
@@ -65,7 +155,7 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
         </Link>
       ))}
       <div className={styles.scrollSentinel} ref={sentinelRef} aria-live="polite">
-        {hasMore ? "더 불러오는 중" : "마지막 복기입니다"}
+        {isLoading ? "불러오는 중" : hasMore ? "더 불러오는 중" : "마지막 복기입니다"}
       </div>
     </section>
   );

@@ -1,7 +1,7 @@
 import { AdSlot, SideAdRails } from "../../../_components/AdSlot";
 import { SiteHeader } from "../../../_components/SiteHeader";
 import { requireCurrentUser } from "../../../auth/session";
-import { TradeJournalEditor } from "./TradeJournalEditor";
+import { TradeJournalForm } from "./TradeJournalForm";
 import styles from "./page.module.scss";
 
 export default async function NewTradeJournalPage() {
@@ -20,36 +20,7 @@ export default async function NewTradeJournalPage() {
 
       <AdSlot label="매매 복기 글쓰기 상단 광고" />
 
-      <form className={styles.form}>
-        <label>
-          매매 일자
-          <input type="date" />
-        </label>
-        <label>
-          손익
-          <input placeholder="예: +1.8% 또는 -0.6%" />
-        </label>
-        <label className={styles.full}>
-          제목
-          <input placeholder="복기 제목을 입력하세요" />
-        </label>
-        <fieldset className={styles.full}>
-          <legend>공개 설정</legend>
-          <label>
-            <input defaultChecked name="visibility" type="radio" value="public" />
-            공개
-          </label>
-          <label>
-            <input name="visibility" type="radio" value="private" />
-            비공개
-          </label>
-        </fieldset>
-        <TradeJournalEditor />
-        <div className={styles.actions}>
-          <button type="button">임시 저장</button>
-          <button type="button">매매 복기 저장</button>
-        </div>
-      </form>
+      <TradeJournalForm />
     </main>
   );
 }

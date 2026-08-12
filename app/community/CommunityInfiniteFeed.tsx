@@ -14,22 +14,111 @@ export type CommunityListPost = {
   time: string;
 };
 
+type BackendCommunityPost = {
+  id: string;
+  category: string;
+  title: string;
+  author_id: string;
+  reply_count: number;
+  view_count: number;
+  created_at: string;
+};
+
+type BackendCommunityPage = {
+  items?: BackendCommunityPost[];
+  nextCursor?: string | null;
+};
+
 const categories = ["전체", "질문", "조언", "시황", "뉴스", "테마", "잡담"];
 const pageSize = 6;
+
+function formatTime(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function fromBackendPost(post: BackendCommunityPost): CommunityListPost {
+  return {
+    id: post.id,
+    type: post.category,
+    title: post.title,
+    author: post.author_id,
+    replies: post.reply_count,
+    views: post.view_count,
+    time: formatTime(post.created_at)
+  };
+}
 
 export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] }) {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [category, setCategory] = useState("전체");
   const [visibleCount, setVisibleCount] = useState(pageSize);
+  const [loadedPosts, setLoadedPosts] = useState<CommunityListPost[]>(posts);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [usesBackend, setUsesBackend] = useState(false);
   const filteredPosts = useMemo(
-    () => category === "전체" ? posts : posts.filter((post) => post.type === category),
-    [category, posts]
+    () => category === "전체" ? loadedPosts : loadedPosts.filter((post) => post.type === category),
+    [category, loadedPosts]
   );
-  const visiblePosts = filteredPosts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredPosts.length;
+  const visiblePosts = usesBackend ? filteredPosts : filteredPosts.slice(0, visibleCount);
+  const hasMore = usesBackend ? Boolean(nextCursor) : visibleCount < filteredPosts.length;
+
+  async function loadBackendPage(cursor?: string | null, replace = false) {
+    setIsLoading(true);
+
+    try {
+      const params = new URLSearchParams({
+        limit: String(pageSize)
+      });
+
+      if (category !== "전체") params.set("category", category);
+      if (cursor) params.set("cursor", cursor);
+
+      const response = await fetch(`/api/backend/community/posts?${params.toString()}`, {
+        cache: "no-store"
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json() as BackendCommunityPage;
+      const items = (data.items ?? []).map(fromBackendPost);
+
+      if (items.length === 0 && replace) {
+        setUsesBackend(false);
+        setLoadedPosts(posts);
+        setNextCursor(null);
+        return;
+      }
+
+      if (items.length > 0 || data.nextCursor) {
+        setUsesBackend(true);
+        setLoadedPosts((current) => replace ? items : [...current, ...items]);
+        setNextCursor(data.nextCursor ?? null);
+      }
+    } catch {
+      if (replace) {
+        setUsesBackend(false);
+        setLoadedPosts(posts);
+        setNextCursor(null);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     setVisibleCount(pageSize);
+    void loadBackendPage(null, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
   useEffect(() => {
@@ -39,6 +128,11 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
 
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
+        if (usesBackend) {
+          if (!isLoading && nextCursor) void loadBackendPage(nextCursor);
+          return;
+        }
+
         setVisibleCount((current) => Math.min(current + pageSize, filteredPosts.length));
       }
     }, { rootMargin: "240px 0px" });
@@ -46,7 +140,7 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [filteredPosts.length, hasMore]);
+  }, [filteredPosts.length, hasMore, isLoading, nextCursor, usesBackend]);
 
   return (
     <div className={styles.feed}>
@@ -72,7 +166,7 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
         ))}
       </div>
       <div className={styles.scrollSentinel} ref={sentinelRef} aria-live="polite">
-        {hasMore ? "더 불러오는 중" : "마지막 글입니다"}
+        {isLoading ? "불러오는 중" : hasMore ? "더 불러오는 중" : "마지막 글입니다"}
       </div>
     </div>
   );

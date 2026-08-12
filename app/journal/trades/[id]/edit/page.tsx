@@ -3,14 +3,47 @@ import { notFound } from "next/navigation";
 import { AdSlot, SideAdRails } from "../../../../_components/AdSlot";
 import { SiteHeader } from "../../../../_components/SiteHeader";
 import { currentUserAuthorId, requireCurrentUser } from "../../../../auth/session";
+import { fetchBackendJson } from "../../../../_lib/backend";
 import { tradeJournals } from "../../trade-journals";
-import { TradeJournalEditor } from "../../new/TradeJournalEditor";
+import { TradeJournalForm } from "../../new/TradeJournalForm";
 import styles from "../../new/page.module.scss";
+
+type BackendTradeJournal = {
+  id: string;
+  trade_date: string;
+  title: string;
+  result: string;
+  visibility: "public" | "private";
+  buy_html: string;
+  sell_html: string;
+  good_html: string;
+  bad_html: string;
+  author_id: string;
+};
+
+function fromBackendJournal(journal: BackendTradeJournal) {
+  return {
+    id: journal.id,
+    date: journal.trade_date,
+    symbol: "",
+    name: "",
+    title: journal.title,
+    visibility: journal.visibility === "public" ? "공개" : "비공개",
+    author: journal.author_id,
+    result: journal.result,
+    buy: journal.buy_html,
+    sell: journal.sell_html,
+    good: journal.good_html,
+    bad: journal.bad_html
+  };
+}
 
 export default async function EditTradeJournalPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireCurrentUser("/journal/trades");
   const { id } = await params;
-  const journal = tradeJournals.find((item) => item.id === id);
+  const journal = tradeJournals.find((item) => item.id === id) ?? (
+    await fetchBackendJson<BackendTradeJournal>(`/api/trade-journals/${id}`).then((item) => item ? fromBackendJournal(item) : null)
+  );
 
   if (!journal || currentUserAuthorId(user) !== journal.author) notFound();
 
@@ -27,41 +60,7 @@ export default async function EditTradeJournalPage({ params }: { params: Promise
 
       <AdSlot label="매매 복기 수정 상단 광고" />
 
-      <form className={styles.form}>
-        <label>
-          매매 일자
-          <input defaultValue={journal.date} type="date" />
-        </label>
-        <label>
-          손익
-          <input defaultValue={journal.result} placeholder="예: +1.8% 또는 -0.6%" />
-        </label>
-        <label className={styles.full}>
-          제목
-          <input defaultValue={journal.title} placeholder="복기 제목을 입력하세요" />
-        </label>
-        <fieldset className={styles.full}>
-          <legend>공개 설정</legend>
-          <label>
-            <input defaultChecked={journal.visibility === "공개"} name="visibility" type="radio" value="public" />
-            공개
-          </label>
-          <label>
-            <input defaultChecked={journal.visibility !== "공개"} name="visibility" type="radio" value="private" />
-            비공개
-          </label>
-        </fieldset>
-        <TradeJournalEditor initialValues={{
-          buy: journal.buy,
-          sell: journal.sell,
-          good: journal.good,
-          bad: journal.bad
-        }} />
-        <div className={styles.actions}>
-          <Link href={`/journal/trades/${journal.id}`}>취소</Link>
-          <button type="button">수정 저장</button>
-        </div>
-      </form>
+      <TradeJournalForm initialJournal={journal} />
     </main>
   );
 }

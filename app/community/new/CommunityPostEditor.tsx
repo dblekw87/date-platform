@@ -77,7 +77,7 @@ function insertNodeAtSelection(editor: HTMLElement, node: HTMLElement) {
   selection?.addRange(range);
 }
 
-export function CommunityPostEditor({ initialContent }: { initialContent?: string }) {
+export function CommunityPostEditor({ editorId = "community-post-editor", initialContent }: { editorId?: string; initialContent?: string }) {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
@@ -123,7 +123,7 @@ export function CommunityPostEditor({ initialContent }: { initialContent?: strin
   return (
     <section className={styles.editorSection}>
       <header>
-        <label htmlFor="community-post-editor">내용</label>
+        <label htmlFor={editorId}>내용</label>
         <div>
           <button type="button" onClick={() => fileInputRef.current?.click()}>
             이미지 추가
@@ -149,7 +149,7 @@ export function CommunityPostEditor({ initialContent }: { initialContent?: strin
         }}
       />
       <div
-        id="community-post-editor"
+        id={editorId}
         ref={editorRef}
         className={styles.notionEditor}
         contentEditable

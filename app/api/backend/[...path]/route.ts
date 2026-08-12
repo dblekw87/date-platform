@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { currentUserAuthorId, getCurrentUser } from "../../../auth/session";
+import { getBackendIdentityHeaders } from "../../../_lib/backend";
 
 const backendUrl = process.env.DATE_BACKEND_URL ?? "http://localhost:4010";
 
@@ -9,16 +9,9 @@ async function proxyRequest(request: Request, context: { params: Promise<{ path:
   const targetUrl = new URL(`/api/${path.join("/")}${sourceUrl.search}`, backendUrl);
   const method = request.method;
   const body = method === "GET" || method === "HEAD" ? undefined : await request.text();
-  const user = await getCurrentUser();
-  const headers = new Headers({
-    "Content-Type": request.headers.get("Content-Type") ?? "application/json"
-  });
+  const headers = await getBackendIdentityHeaders();
 
-  if (user) {
-    headers.set("X-Date-User-Provider", user.provider);
-    headers.set("X-Date-User-Id", currentUserAuthorId(user));
-    headers.set("X-Date-User-Name", user.name);
-  }
+  headers.set("Content-Type", request.headers.get("Content-Type") ?? "application/json");
 
   const response = await fetch(targetUrl, {
     method,

@@ -10,6 +10,7 @@ export async function getBackendIdentityHeaders() {
     headers.set("X-Date-User-Provider", user.provider);
     headers.set("X-Date-User-Id", currentUserAuthorId(user));
     headers.set("X-Date-User-Name", user.name);
+    if (user.email) headers.set("X-Date-User-Email", user.email);
   }
 
   return headers;

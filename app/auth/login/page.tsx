@@ -15,7 +15,13 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const nextParam = Array.isArray(params?.next) ? params?.next[0] : params?.next;
+  const errorParam = Array.isArray(params?.error) ? params?.error[0] : params?.error;
   const nextPath = nextParam?.startsWith("/") ? nextParam : "/community";
+  const errorMessage = errorParam?.startsWith("missing_")
+    ? "로그인 API 키 설정이 필요합니다."
+    : errorParam
+      ? "로그인을 완료하지 못했습니다. 다시 시도해주세요."
+      : null;
 
   return (
     <main className={styles.page}>
@@ -36,9 +42,10 @@ export default async function LoginPage({
         </Link>
         <h1>로그인</h1>
         <p>DATE 커뮤니티에 오신 것을 환영합니다.</p>
+        {errorMessage ? <p className={styles.errorMessage}>{errorMessage}</p> : null}
         <div className={styles.providers}>
           {providers.map((provider) => (
-            <Link data-provider={provider.key} href={`/auth/mock?provider=${provider.key}&next=${encodeURIComponent(nextPath)}`} key={provider.key}>
+            <Link data-provider={provider.key} href={`/auth/${provider.key}?next=${encodeURIComponent(nextPath)}`} key={provider.key}>
               {provider.label}
             </Link>
           ))}
@@ -46,7 +53,7 @@ export default async function LoginPage({
         <p className={styles.notice}>
           계속 진행하면 <Link href="/terms">이용약관</Link>과 <Link href="/privacy">개인정보처리방침</Link>에 동의한 것으로 봅니다.
         </p>
-        <footer>개발 중에는 mock 로그인으로 이동하고, 운영 전 OAuth 앱 키를 연결합니다.</footer>
+        <footer>OAuth 앱 키를 연결하면 실제 SNS 로그인으로 전환됩니다.</footer>
       </section>
     </main>
   );

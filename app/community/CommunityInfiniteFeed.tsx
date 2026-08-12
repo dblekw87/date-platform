@@ -116,8 +116,9 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
   }
 
   useEffect(() => {
-    setVisibleCount(pageSize);
-    void loadBackendPage(null, true);
+    queueMicrotask(() => {
+      void loadBackendPage(null, true);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
@@ -146,7 +147,15 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
     <div className={styles.feed}>
       <div className={styles.tabs} aria-label="게시판 분류">
         {categories.map((item) => (
-          <button aria-pressed={category === item} key={item} onClick={() => setCategory(item)} type="button">
+          <button
+            aria-pressed={category === item}
+            key={item}
+            onClick={() => {
+              setVisibleCount(pageSize);
+              setCategory(item);
+            }}
+            type="button"
+          >
             {item}
           </button>
         ))}

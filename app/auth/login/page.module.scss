@@ -127,6 +127,15 @@
   text-align: center;
 }
 
+.errorMessage {
+  border: 1px solid rgba(202, 59, 59, 0.24);
+  border-radius: 8px;
+  background: #fff2f2;
+  color: #b42318 !important;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
 .providers {
   display: grid;
   gap: 10px;

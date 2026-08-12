@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import type { CurrentUser } from "../session";
+import { createSessionValue, type CurrentUser } from "../session";
 
 const supportedProviders = new Set<CurrentUser["provider"]>(["mock", "google", "naver", "kakao"]);
 
@@ -15,7 +15,11 @@ export async function GET(request: NextRequest) {
     : "mock";
   const response = NextResponse.redirect(new URL(safeNextPath(request.nextUrl.searchParams.get("next")), request.url));
 
-  response.cookies.set("date_session", provider, {
+  response.cookies.set("date_session", createSessionValue({
+    name: provider === "mock" ? "Mock Trader" : "DATE 회원",
+    provider,
+    providerUserId: provider === "mock" ? "mock-trader" : provider
+  }), {
     httpOnly: true,
     sameSite: "lax",
     path: "/"

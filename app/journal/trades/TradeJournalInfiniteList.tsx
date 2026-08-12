@@ -96,7 +96,9 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
   }
 
   useEffect(() => {
-    void loadBackendPage(null, true);
+    queueMicrotask(() => {
+      void loadBackendPage(null, true);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

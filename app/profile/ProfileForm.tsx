@@ -26,7 +26,9 @@ export function ProfileForm({
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    setPreviewUrl(defaultAvatarUrl ?? localStorage.getItem(profileImageStorageKey));
+    queueMicrotask(() => {
+      setPreviewUrl(defaultAvatarUrl ?? localStorage.getItem(profileImageStorageKey));
+    });
   }, [defaultAvatarUrl]);
 
   async function saveProfile(formData: FormData) {

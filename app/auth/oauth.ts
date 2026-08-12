@@ -106,7 +106,7 @@ export function getOAuthConfig(provider: OAuthProvider): OAuthConfig {
     authorizationUrl: "https://kauth.kakao.com/oauth/authorize",
     clientId: requiredString(process.env.KAKAO_OAUTH_CLIENT_ID ?? process.env.KAKAO_REST_API_KEY),
     clientSecret: requiredString(process.env.KAKAO_OAUTH_CLIENT_SECRET),
-    scope: "profile_nickname profile_image account_email",
+    scope: "profile_nickname profile_image",
     tokenUrl: "https://kauth.kakao.com/oauth/token",
     async getProfile(accessToken) {
       const profile = await fetchJson<{

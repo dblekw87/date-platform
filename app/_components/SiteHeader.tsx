@@ -40,17 +40,40 @@ export function SiteHeader({ active = "market", hideAuthNav = false, statusLabel
   });
 
   useEffect(() => {
-    function syncProfileImage() {
+    async function syncProfileImage() {
+      try {
+        const response = await fetch("/api/backend/me", {
+          cache: "no-store"
+        });
+
+        if (response.ok) {
+          const data = await response.json() as { profile?: { avatar_url?: string | null } | null };
+
+          if (data.profile?.avatar_url) {
+            localStorage.setItem(profileImageStorageKey, data.profile.avatar_url);
+            setProfileImage(data.profile.avatar_url);
+            return;
+          }
+        }
+      } catch {
+        // Local preview remains available before the backend is running.
+      }
+
       setProfileImage(localStorage.getItem(profileImageStorageKey));
     }
 
-    syncProfileImage();
-    window.addEventListener("storage", syncProfileImage);
-    window.addEventListener(profileUpdatedEvent, syncProfileImage);
+    void syncProfileImage();
+
+    function handleProfileUpdate() {
+      void syncProfileImage();
+    }
+
+    window.addEventListener("storage", handleProfileUpdate);
+    window.addEventListener(profileUpdatedEvent, handleProfileUpdate);
 
     return () => {
-      window.removeEventListener("storage", syncProfileImage);
-      window.removeEventListener(profileUpdatedEvent, syncProfileImage);
+      window.removeEventListener("storage", handleProfileUpdate);
+      window.removeEventListener(profileUpdatedEvent, handleProfileUpdate);
     };
   }, []);
 

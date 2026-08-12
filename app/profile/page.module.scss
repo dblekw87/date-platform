@@ -88,8 +88,16 @@
 
 .actions {
   display: flex;
+  gap: 12px;
+  align-items: center;
   grid-column: 1 / -1;
   justify-content: flex-end;
+}
+
+.actions span {
+  color: #526077;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .actions button {

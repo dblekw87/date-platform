@@ -8,7 +8,7 @@ async function proxyRequest(request: Request, context: { params: Promise<{ path:
   const sourceUrl = new URL(request.url);
   const targetUrl = new URL(`/api/${path.join("/")}${sourceUrl.search}`, backendUrl);
   const method = request.method;
-  const body = method === "GET" || method === "HEAD" ? undefined : await request.text();
+  const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
   const headers = await getBackendIdentityHeaders();
 
   headers.set("Content-Type", request.headers.get("Content-Type") ?? "application/json");

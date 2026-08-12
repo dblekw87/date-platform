@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { uploadMedia } from "../../_lib/upload-media";
 import styles from "./page.module.scss";
 
 type SelectedImage = {
@@ -77,10 +78,28 @@ function insertNodeAtSelection(editor: HTMLElement, node: HTMLElement) {
   selection?.addRange(range);
 }
 
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("invalid_file_reader_result"));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("file_read_failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function CommunityPostEditor({ editorId = "community-post-editor", initialContent }: { editorId?: string; initialContent?: string }) {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
 
   function clearImageSelection() {
     editorRef.current?.querySelectorAll("[data-selected='true']").forEach((node) => {
@@ -100,7 +119,7 @@ export function CommunityPostEditor({ editorId = "community-post-editor", initia
     setSelectedImage(null);
   }
 
-  function insertImages(files: FileList | File[]) {
+  async function insertImages(files: FileList | File[]) {
     const editor = editorRef.current;
     const images = imageFiles(files);
 
@@ -108,16 +127,23 @@ export function CommunityPostEditor({ editorId = "community-post-editor", initia
 
     clearImageSelection();
     editor.focus();
+    setUploadStatus("이미지 업로드 중");
 
-    images.forEach((file) => {
-      const reader = new FileReader();
+    for (const file of images) {
+      try {
+        const imageUrl = await uploadMedia(file, "community");
 
-      reader.onload = () => {
-        if (typeof reader.result !== "string") return;
-        insertNodeAtSelection(editor, createImageNode(reader.result, file.name));
-      };
-      reader.readAsDataURL(file);
-    });
+        insertNodeAtSelection(editor, createImageNode(imageUrl, file.name));
+      } catch {
+        const localPreviewUrl = await readFileAsDataUrl(file);
+
+        insertNodeAtSelection(editor, createImageNode(localPreviewUrl, file.name));
+        setUploadStatus("백엔드 업로드 실패로 임시 이미지가 삽입됐습니다");
+        return;
+      }
+    }
+
+    setUploadStatus(null);
   }
 
   return (
@@ -126,7 +152,7 @@ export function CommunityPostEditor({ editorId = "community-post-editor", initia
         <label htmlFor={editorId}>내용</label>
         <div>
           <button type="button" onClick={() => fileInputRef.current?.click()}>
-            이미지 추가
+            {uploadStatus ?? "이미지 추가"}
           </button>
           {selectedImage ? (
             <button type="button" onClick={deleteSelectedImage}>
@@ -143,7 +169,7 @@ export function CommunityPostEditor({ editorId = "community-post-editor", initia
         multiple
         onChange={(event) => {
           if (event.target.files) {
-            insertImages(event.target.files);
+            void insertImages(event.target.files);
           }
           event.target.value = "";
         }}
@@ -176,14 +202,14 @@ export function CommunityPostEditor({ editorId = "community-post-editor", initia
           if (editor) {
             setCaretFromPoint(event, editor);
           }
-          insertImages(event.dataTransfer.files);
+          void insertImages(event.dataTransfer.files);
         }}
         onPaste={(event) => {
           const images = imageFiles(event.clipboardData.files);
 
           if (images.length === 0) return;
           event.preventDefault();
-          insertImages(images);
+          void insertImages(images);
         }}
         onKeyDown={(event) => {
           if ((event.key === "Backspace" || event.key === "Delete") && selectedImage) {

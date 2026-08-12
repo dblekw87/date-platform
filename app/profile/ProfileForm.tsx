@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { uploadMedia } from "../_lib/upload-media";
 import styles from "./page.module.scss";
 
 const profileImageStorageKey = "date_profile_image";
@@ -22,7 +23,7 @@ export function ProfileForm({
   defaultPublicMemo
 }: ProfileFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(defaultAvatarUrl ?? null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,10 +33,18 @@ export function ProfileForm({
   }, [defaultAvatarUrl]);
 
   async function saveProfile(formData: FormData) {
-    const avatarUrl = selectedImage ?? previewUrl;
+    let avatarUrl = previewUrl;
+
     setStatus("저장 중");
 
     try {
+      if (selectedImageFile) {
+        setStatus("이미지 업로드 중");
+        avatarUrl = await uploadMedia(selectedImageFile, "profile");
+      }
+
+      setStatus("프로필 저장 중");
+
       const response = await fetch("/api/backend/me/profile", {
         method: "PATCH",
         headers: {
@@ -56,6 +65,7 @@ export function ProfileForm({
 
       if (avatarUrl) {
         localStorage.setItem(profileImageStorageKey, avatarUrl);
+        setPreviewUrl(avatarUrl);
       }
 
       window.dispatchEvent(new Event(profileUpdatedEvent));
@@ -90,7 +100,7 @@ export function ProfileForm({
 
               reader.onload = () => {
                 if (typeof reader.result !== "string") return;
-                setSelectedImage(reader.result);
+                setSelectedImageFile(file);
                 setPreviewUrl(reader.result);
               };
               reader.readAsDataURL(file);

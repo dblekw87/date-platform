@@ -471,26 +471,21 @@ function ThemeGroupRow({
   nameOf: (stock: LeadingStock) => string;
   rankIndex: number;
 }) {
-  const [lead, ...rest] = group.members;
-  // The count sits beside the theme so the turnover figures stay right-aligned
-  // across rows whether or not a theme can expand.
-  const row = (badge?: React.ReactNode) => (
-    <>
-      <Image alt="" aria-hidden="true" height={20} src={rankIcons[rankIndex] ?? rankIcons[2]} width={20} />
-      <span><EnglishText text={group.theme} /></span>
-      {badge}
-      <i />
-      <small>{nameOf(lead)}</small>
-      <b>{lead.turnover}</b>
-    </>
-  );
+  const [lead] = group.members;
 
-  if (rest.length === 0) return row();
-
+  // Every ranked theme opens, including one holding a single name: a row that
+  // looks the same as its neighbours but does nothing when clicked reads as
+  // broken.
   return (
     <details className={styles.themeGroup}>
       <summary>
-        {row(<em>{group.members.length}종목</em>)}
+        <Image alt="" aria-hidden="true" height={20} src={rankIcons[rankIndex] ?? rankIcons[2]} width={20} />
+        <span><EnglishText text={group.theme} /></span>
+        {/* Beside the theme, so turnover stays right-aligned down the column. */}
+        <em>{group.members.length}종목</em>
+        <i />
+        <small>{nameOf(lead)}</small>
+        <b>{lead.turnover}</b>
       </summary>
       <ol className={styles.themeMembers}>
         {group.members.map((stock, index) => (

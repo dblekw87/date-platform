@@ -228,7 +228,110 @@ function attachDerivedThemeBriefs(data: MarketBoardData): MarketBoardData {
   };
 }
 
+async function getBackendMarketBoardData(): Promise<MarketBoardData | null> {
+  const backendUrl = process.env.DATE_BACKEND_URL;
+
+  if (!backendUrl) return null;
+
+  try {
+    const response = await fetch(new URL("/api/market-board", backendUrl), {
+      cache: "no-store"
+    });
+
+    if (!response.ok) return null;
+
+    return await response.json() as MarketBoardData;
+  } catch {
+    return null;
+  }
+}
+
+// The backend answers 200 with an empty board when its providers are disabled
+// (MARKET_DATA_MODE=demo) or not migrated yet. Treating that as authoritative
+// would blank the screen, so only a board with real content wins. Calendar items
+// are excluded because the backend always ships the same hardcoded entries.
+function hasMarketContent(data: MarketBoardData) {
+  return data.macroSnapshot.length > 0
+    || data.marketBrief.length > 0
+    || data.headlineFlow.length > 0
+    || data.usDisclosures.length > 0
+    || data.krDisclosures.length > 0
+    || data.flowItems.length > 0
+    || data.krLeadingStocks.length > 0
+    || data.usLeadingStocks.length > 0
+    || data.smallCapScanner.length > 0;
+}
+
+// Toss and KIS credentials live only in the backend, so the local adapters can
+// never speak for them. Keep the backend's explanation for those two.
+const backendOwnedProviders = new Set<ProviderStatusDto["id"]>(["kis", "toss"]);
+
+function withBackendProviderStatuses(data: MarketBoardData, backendData: MarketBoardData | null): MarketBoardData {
+  const backendStatuses = backendData?.providerStatuses.filter((status) => backendOwnedProviders.has(status.id));
+
+  if (!backendStatuses?.length) return data;
+
+  const byId = new Map(data.providerStatuses.map((status) => [status.id, status]));
+
+  backendStatuses.forEach((status) => byId.set(status.id, status));
+
+  return {
+    ...data,
+    providerStatuses: [...byId.values()]
+  };
+}
+
+// The backend owns Toss and KIS; KRX, DART, SEC, news, and market data are still
+// served by the local adapters. Taking only the populated backend collections
+// lets both halves combine instead of one blanking the other.
+function backendContentPayload(data: MarketBoardData): Partial<MarketBoardData> {
+  const payload: Partial<MarketBoardData> = {};
+
+  if (data.macroSnapshot.length) payload.macroSnapshot = data.macroSnapshot;
+  if (data.marketBrief.length) payload.marketBrief = data.marketBrief;
+  if (data.headlineFlow.length) payload.headlineFlow = data.headlineFlow;
+  if (data.calendarItems.length) payload.calendarItems = data.calendarItems;
+  if (data.usDisclosures.length) payload.usDisclosures = data.usDisclosures;
+  if (data.krDisclosures.length) payload.krDisclosures = data.krDisclosures;
+  if (data.flowItems.length) payload.flowItems = data.flowItems;
+  if (data.krLeadingStocks.length) payload.krLeadingStocks = data.krLeadingStocks;
+  if (data.usLeadingStocks.length) payload.usLeadingStocks = data.usLeadingStocks;
+  if (data.smallCapScanner.length) payload.smallCapScanner = data.smallCapScanner;
+
+  return payload;
+}
+
+// Runs after the merge so leaders sourced from the backend also get theme briefs
+// and matching news attached.
+async function attachLeaderContext(data: MarketBoardData): Promise<MarketBoardData> {
+  const withThemes = attachDerivedThemeBriefs(data);
+  const leaders = [...withThemes.krLeadingStocks, ...withThemes.usLeadingStocks];
+
+  if (leaders.length === 0) return withThemes;
+
+  const taggedHeadlines = attachLeaderNewsTags(withThemes.headlineFlow, leaders);
+  const leaderNewsResult = await withTimeout(loadLeaderNewsHeadlines(leaders), 4500);
+  const leaderHeadlines = leaderNewsResult === timeoutSymbol ? [] : leaderNewsResult;
+
+  return {
+    ...withThemes,
+    headlineFlow: mergeNewsHeadlines(taggedHeadlines, leaderHeadlines)
+  };
+}
+
 export async function getMarketBoardData(): Promise<MarketBoardData> {
+  const [backendData, localData] = await Promise.all([
+    getBackendMarketBoardData(),
+    loadLocalMarketBoardData()
+  ]);
+  const merged = backendData && hasMarketContent(backendData)
+    ? mergeMarketBoardData(localData, backendContentPayload(backendData))
+    : localData;
+
+  return withBackendProviderStatuses(await attachLeaderContext(merged), backendData);
+}
+
+async function loadLocalMarketBoardData(): Promise<MarketBoardData> {
   const checkedAt = new Date().toISOString();
   const providerResults = await Promise.all(
     marketBoardProviderAdapters.map(async (adapter) => {
@@ -293,17 +396,5 @@ export async function getMarketBoardData(): Promise<MarketBoardData> {
     providerStatuses: providerResults.map((result) => result.status)
   };
 
-  const mergedData = attachDerivedThemeBriefs(providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData));
-  const leaders = [...mergedData.krLeadingStocks, ...mergedData.usLeadingStocks];
-
-  if (leaders.length === 0) return mergedData;
-
-  const taggedHeadlines = attachLeaderNewsTags(mergedData.headlineFlow, leaders);
-  const leaderNewsResult = await withTimeout(loadLeaderNewsHeadlines(leaders), 4500);
-  const leaderHeadlines = leaderNewsResult === timeoutSymbol ? [] : leaderNewsResult;
-
-  return {
-    ...mergedData,
-    headlineFlow: mergeNewsHeadlines(taggedHeadlines, leaderHeadlines)
-  };
+  return providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData);
 }

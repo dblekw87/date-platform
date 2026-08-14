@@ -113,7 +113,6 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
             inputMode="numeric"
             maxLength={5}
             onInput={formatTimeInput}
-            placeholder="09:15"
           />
         </label>
         <label>
@@ -124,10 +123,9 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
             inputMode="numeric"
             maxLength={5}
             onInput={formatTimeInput}
-            placeholder="15:20"
           />
         </label>
-        <small>24시간제로 입력합니다. 숫자만 눌러도 콜론이 붙습니다. 비워두어도 저장됩니다.</small>
+        <small>한 종목을 기록할 때만 채우세요. 여러 종목을 함께 적는 복기라면 비워둡니다. 24시간제이고, 숫자만 눌러도 콜론이 붙습니다.</small>
       </div>
       <label className={styles.full}>
         제목

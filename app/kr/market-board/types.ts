@@ -138,6 +138,41 @@ export type LeadingStockDto = {
   source: SourceProvider;
 };
 
+/** Why a stock concentrated, not what it belongs to. */
+export type DayLeaderKind = "거래대금 집중" | "거래량 급증" | "순간 쏠림";
+
+/** Whether a 2등주 exists behind this leader. */
+export type DayLeaderPairing = "단독 주도" | "테마 주도";
+
+/**
+ * A stock the day's money concentrated on, ranked apart from themes.
+ * A leader can lead alone; a theme needs several names moving together.
+ */
+export type DayLeaderDto = {
+  id: string;
+  rank: number;
+  symbol: string;
+  name: string;
+  market: "US" | "KR";
+  /** "개별 종목" when the backend found no theme to place it in. */
+  theme: string;
+  kind: DayLeaderKind;
+  pairTrade: DayLeaderPairing;
+  /** Other rising stocks in the same theme — the 짝꿍 candidates. */
+  peerCount: number;
+  /** Share of the leader pool's turnover, 0 to 1. */
+  turnoverShare: number;
+  recentTurnoverShare: number;
+  changeRateValue: number;
+  turnover: string;
+  intraday: string;
+  /** Measured figures behind the ranking, in the order worth checking. */
+  evidence: string[];
+  caution: string;
+  timestamp: string;
+  source: SourceProvider;
+};
+
 export type ReactionCandidateDto = {
   id: string;
   group: string;
@@ -177,5 +212,7 @@ export type MarketBoardData = {
   flowItems: FlowItemDto[];
   usLeadingStocks: LeadingStockDto[];
   krLeadingStocks: LeadingStockDto[];
+  usDayLeaders: DayLeaderDto[];
+  krDayLeaders: DayLeaderDto[];
   smallCapScanner: ReactionCandidateDto[];
 };

@@ -3307,6 +3307,98 @@
   font-weight: 800;
 }
 
+// A day leader row, opening onto the figures that put it on the list.
+.dayLeader {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.dayLeader summary {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.dayLeader summary::-webkit-details-marker {
+  display: none;
+}
+
+.dayLeader summary em {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  color: #ffffff;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.dayLeader summary i {
+  height: 1px;
+  min-width: 16px;
+  flex: 1 1 auto;
+  background: #d5d9e2;
+}
+
+.dayLeaderDetail {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 4px;
+  border-left: 2px solid #000000;
+  padding: 0 0 0 12px;
+}
+
+.dayLeaderDetail p {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0;
+  color: #526077;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dayLeaderDetail mark {
+  background: none;
+  border: 1px solid #d5d9e2;
+  color: #707070;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+// A leader with followers is the one worth pairing into, so it carries the
+// filled badge and a solo leader stays outlined.
+.dayLeaderDetail mark[data-pairing="theme"] {
+  border-color: #000000;
+  background: #000000;
+  color: #ffffff;
+}
+
+.dayLeaderDetail ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 16px;
+  color: #526077;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dayLeaderDetail small {
+  color: #707070;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 // Turnover arriving in a burst rather than at an even pace through the session.
 .themeMembers mark {
   flex: 0 0 auto;

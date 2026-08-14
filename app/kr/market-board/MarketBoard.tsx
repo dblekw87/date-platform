@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { DayLeaders } from "./DayLeaders";
 import styles from "../../page.module.scss";
 import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId } from "./types";
 
@@ -554,6 +555,20 @@ function themeUnavailableMessage(board: MarketBoardData, region: "KR" | "US") {
   }
 
   return "강세 테마 후보가 아직 수신되지 않았습니다.";
+}
+
+function leaderUnavailableMessage(board: MarketBoardData, region: "KR" | "US") {
+  const provider = region === "US" ? providerStatusFor(board, "market") : providerStatusFor(board, "kis");
+
+  if (provider?.status === "error") {
+    return `${provider.label} 오류로 주도주를 집계하지 못했습니다.`;
+  }
+
+  if (provider?.status === "mock") {
+    return `${provider.label} 환경변수가 없어 주도주 provider가 비활성 상태입니다.`;
+  }
+
+  return "거래대금이 한쪽으로 쏠린 종목이 아직 없습니다.";
 }
 
 function isWaitingMarketCard(item: MarketSnapshot) {
@@ -1376,6 +1391,20 @@ export function MarketBoard({
                     </ul>
                   </div>
                 </article>
+              </div>
+              {/* 주도주 comes before 강세 테마: the day's concentration is read
+                  first, and the theme list answers what moved with it. */}
+              <div className={styles.themeAnalysisGrid}>
+                <DayLeaders
+                  emptyMessage={leaderUnavailableMessage(liveBoard, "KR")}
+                  label="시황 · 국내 주도주"
+                  leaders={liveBoard.krDayLeaders ?? []}
+                />
+                <DayLeaders
+                  emptyMessage={leaderUnavailableMessage(liveBoard, "US")}
+                  label="미국 주도주"
+                  leaders={liveBoard.usDayLeaders ?? []}
+                />
               </div>
               <div className={styles.themeAnalysisGrid}>
                 <article className={styles.themeSection}>

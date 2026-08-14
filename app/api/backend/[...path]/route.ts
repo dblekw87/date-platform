@@ -8,7 +8,7 @@ async function proxyRequest(request: Request, context: { params: Promise<{ path:
   const sourceUrl = new URL(request.url);
   const targetUrl = new URL(`/api/${path.join("/")}${sourceUrl.search}`, backendUrl);
   const method = request.method;
-  const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
+  const body = method === "GET" || method === "HEAD" || method === "DELETE" ? undefined : await request.arrayBuffer();
   const headers = await getBackendIdentityHeaders();
 
   headers.set("Content-Type", request.headers.get("Content-Type") ?? "application/json");
@@ -38,5 +38,9 @@ export async function POST(request: Request, context: { params: Promise<{ path: 
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ path: string[] }> }) {
+  return proxyRequest(request, context);
+}
+
+export async function DELETE(request: Request, context: { params: Promise<{ path: string[] }> }) {
   return proxyRequest(request, context);
 }

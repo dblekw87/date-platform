@@ -61,6 +61,8 @@ function fromBackendPost(post: BackendCommunityPost): CommunityListPost {
 export function CommunityInfiniteFeed() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [category, setCategory] = useState("전체");
+  const [searchDraft, setSearchDraft] = useState("");
+  const [search, setSearch] = useState("");
   const [posts, setPosts] = useState<CommunityListPost[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,6 +75,7 @@ export function CommunityInfiniteFeed() {
       const params = new URLSearchParams({ limit: String(pageSize) });
 
       if (category !== "전체") params.set("category", category);
+      if (search) params.set("q", search);
       if (cursor) params.set("cursor", cursor);
 
       const response = await fetch(`/api/backend/community/posts?${params.toString()}`, {
@@ -96,7 +99,7 @@ export function CommunityInfiniteFeed() {
     } finally {
       setIsLoading(false);
     }
-  }, [category]);
+  }, [category, search]);
 
   useEffect(() => {
     // Deferred so the loading flag is not set during the effect itself.
@@ -124,7 +127,7 @@ export function CommunityInfiniteFeed() {
   function statusMessage() {
     if (isLoading) return "불러오는 중";
     if (hasFailed) return "글을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.";
-    if (posts.length === 0) return "아직 글이 없습니다. 첫 글을 남겨보세요.";
+    if (posts.length === 0) return search ? `"${search}" 검색 결과가 없습니다.` : "아직 글이 없습니다. 첫 글을 남겨보세요.";
     if (nextCursor) return "더 불러오는 중";
 
     return "마지막 글입니다";
@@ -132,6 +135,33 @@ export function CommunityInfiniteFeed() {
 
   return (
     <div className={styles.feed}>
+      <form
+        className={styles.searchPanel}
+        aria-label="커뮤니티 검색"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setSearch(searchDraft.trim());
+        }}
+      >
+        <input
+          aria-label="커뮤니티 검색어"
+          onChange={(event) => setSearchDraft(event.target.value)}
+          placeholder="제목으로 검색하세요"
+          value={searchDraft}
+        />
+        <button type="submit">검색</button>
+        {search ? (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchDraft("");
+              setSearch("");
+            }}
+          >
+            초기화
+          </button>
+        ) : null}
+      </form>
       <div className={styles.tabs} aria-label="게시판 분류">
         {categories.map((item) => (
           <button

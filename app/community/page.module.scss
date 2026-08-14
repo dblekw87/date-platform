@@ -107,14 +107,17 @@
   padding: 20px;
 }
 
+// Flex rather than fixed columns so the reset button can appear beside the
+// search button only while a query is active.
 .searchPanel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(132px, auto);
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 24px 0;
 }
 
 .searchPanel input {
+  flex: 1 1 220px;
   min-width: 0;
   border: 1px solid #111111;
   background: #ffffff;
@@ -296,8 +299,8 @@
     font-size: 40px;
   }
 
-  .searchPanel {
-    grid-template-columns: 1fr;
+  .searchPanel button {
+    flex: 1 1 auto;
   }
 
   .postList {

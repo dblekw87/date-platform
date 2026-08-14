@@ -26,11 +26,6 @@ export default async function CommunityPage() {
         </aside>
       </section>
 
-      <section className={styles.searchPanel} aria-label="커뮤니티 검색">
-        <input aria-label="커뮤니티 검색어" placeholder="종목명, 테마, 질문, 잡담 키워드를 검색하세요" />
-        <button type="button">검색</button>
-      </section>
-
       <AdSlot label="커뮤니티 목록 상단 광고" />
 
       <section className={styles.layout}>

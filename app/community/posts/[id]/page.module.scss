@@ -177,6 +177,23 @@
   align-items: baseline;
 }
 
+.commentList article header button {
+  margin-left: auto;
+  border: 1px solid #c9ced6;
+  background: #ffffff;
+  color: #526077;
+  padding: 3px 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.commentList article header button:hover {
+  border-color: #b42318;
+  color: #b42318;
+}
+
 .commentList p {
   margin: 8px 0 0;
   color: #263044;

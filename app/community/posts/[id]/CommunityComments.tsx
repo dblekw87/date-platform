@@ -9,6 +9,7 @@ type BackendComment = {
   created_at: string;
   author_id: string;
   nickname?: string | null;
+  is_owner: boolean;
 };
 
 function formatTime(value: string) {
@@ -88,6 +89,21 @@ export function CommunityComments({ canWrite, postId }: { canWrite: boolean; pos
     }
   }
 
+  async function deleteComment(commentId: string) {
+    try {
+      const response = await fetch(`/api/backend/community/comments/${commentId}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) throw new Error(`backend ${response.status}`);
+
+      setComments((current) => current.filter((comment) => comment.id !== commentId));
+      setError(null);
+    } catch {
+      setError("댓글을 삭제하지 못했습니다.");
+    }
+  }
+
   return (
     <section className={styles.comments} aria-labelledby="comments-title">
       <header>
@@ -116,6 +132,9 @@ export function CommunityComments({ canWrite, postId }: { canWrite: boolean; pos
             <header>
               <b>{comment.nickname || comment.author_id}</b>
               <time>{formatTime(comment.created_at)}</time>
+              {comment.is_owner ? (
+                <button type="button" onClick={() => void deleteComment(comment.id)}>삭제</button>
+              ) : null}
             </header>
             <p>{comment.body}</p>
           </article>

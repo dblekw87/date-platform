@@ -19,41 +19,29 @@
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(16, 18, 19, 0.42)),
-    linear-gradient(135deg, #eef1ee 0%, #d9dedb 45%, #f8f8f2 100%);
+  background: #efe6da;
 }
 
 .roomVisual {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.46) 0 16%, transparent 16%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0 28%, transparent 28%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(208, 216, 215, 0.3));
+  background-image: url("/auth/trading-desk.svg");
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
-.roomVisual::before {
-  position: absolute;
-  right: 13%;
-  bottom: 18%;
-  width: 320px;
-  height: 128px;
-  border: 1px solid rgba(20, 20, 20, 0.16);
-  border-radius: 18px 18px 4px 4px;
-  background: rgba(255, 255, 255, 0.42);
-  box-shadow: 0 44px 80px rgba(0, 0, 0, 0.18);
-  content: "";
-}
-
+// The copy sits in white over a light illustration, so the bottom needs a scrim
+// to stay readable. Keep it heavy enough for the caption line, not just the heading.
 .roomVisual::after {
   position: absolute;
-  left: 10%;
-  top: 30%;
-  width: 110px;
-  height: 300px;
-  border: 1px solid rgba(20, 20, 20, 0.12);
-  background: rgba(255, 255, 255, 0.5);
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 18, 19, 0) 42%,
+    rgba(16, 18, 19, 0.42) 68%,
+    rgba(16, 18, 19, 0.76) 100%
+  );
   content: "";
 }
 

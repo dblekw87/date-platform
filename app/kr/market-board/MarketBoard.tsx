@@ -384,8 +384,13 @@ function inferThemeFromLeader(stock: LeadingStock) {
   return stock.market === "US" ? "소형주 급등" : "거래대금 급증";
 }
 
+// Labels that describe how a stock surfaced rather than what it belongs to.
+// Grouping under one of these invents a theme — "거래대금 급증" is not a sector,
+// and a row of unrelated names beneath it reads as a finding when it is not.
+const nonThemeLabels = new Set(["ETF", "미분류", "개별 이슈", "거래대금 급증", "소형주 급등"]);
+
 function isThemeLeaderCandidate(stock: LeadingStock) {
-  return !isEtfLeader(stock);
+  return !isEtfLeader(stock) && !nonThemeLabels.has(leaderTheme(stock));
 }
 
 /**

@@ -145,6 +145,24 @@ export type DayLeaderKind = "거래대금 집중" | "거래량 급증" | "순간
 export type DayLeaderPairing = "단독 주도" | "테마 주도";
 
 /**
+ * Whether the reason belongs to one company or to everyone in its business.
+ * 고유 means no 짝꿍 follows from it, however strong the theme looks.
+ */
+export type CatalystKind = "고유" | "공유";
+
+/** The headline the backend read the leader's reason from. */
+export type DayLeaderCatalystDto = {
+  /** Set when the reason is a negative one, kept only if nothing better matched. */
+  adverse?: boolean;
+  kind: CatalystKind;
+  label: string;
+  headline: string;
+  originalUrl: string;
+  publishedAt: string;
+  source: string;
+};
+
+/**
  * A stock the day's money concentrated on, ranked apart from themes.
  * A leader can lead alone; a theme needs several names moving together.
  */
@@ -168,6 +186,8 @@ export type DayLeaderDto = {
   intraday: string;
   /** Measured figures behind the ranking, in the order worth checking. */
   evidence: string[];
+  /** Absent when no headline explained the move — shown as 이유 미확인. */
+  catalyst?: DayLeaderCatalystDto;
   caution: string;
   timestamp: string;
   source: SourceProvider;

@@ -3399,6 +3399,61 @@
   font-weight: 700;
 }
 
+// The headline the reason was read from, linked so the original is one click away.
+.dayLeaderCatalyst {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  border: 1px solid #d5d9e2;
+  padding: 6px 8px;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.38;
+  text-decoration: none;
+}
+
+.dayLeaderCatalyst:hover {
+  border-color: #000000;
+}
+
+.dayLeaderCatalyst mark {
+  flex: 0 0 auto;
+  background: none;
+  border: 1px solid #d5d9e2;
+  color: #707070;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+// A shared reason is the one a 짝꿍 can be traded on, so it reads as the
+// positive case and a company-only reason stays muted.
+.dayLeaderCatalyst[data-kind="shared"] mark {
+  border-color: #000000;
+  background: #000000;
+  color: #ffffff;
+}
+
+.dayLeaderCatalyst b {
+  flex: 0 0 auto;
+  font-weight: 900;
+}
+
+.dayLeaderCatalyst span {
+  min-width: 0;
+  color: #526077;
+  font-weight: 600;
+}
+
+.dayLeaderNoCatalyst {
+  margin: 0;
+  color: #707070;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 // Turnover arriving in a burst rather than at an even pace through the session.
 .themeMembers mark {
   flex: 0 0 auto;

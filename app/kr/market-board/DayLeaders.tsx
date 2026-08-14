@@ -44,6 +44,21 @@ function DayLeaderRow({ leader }: { leader: DayLeaderDto }) {
         <ul>
           {leader.evidence.map((line) => <li key={line}>{line}</li>)}
         </ul>
+        {leader.catalyst ? (
+          <a
+            className={styles.dayLeaderCatalyst}
+            data-kind={leader.catalyst.kind === "공유" ? "shared" : "own"}
+            href={leader.catalyst.originalUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <mark>{leader.catalyst.kind === "공유" ? "업종 공유 재료" : "종목 고유 재료"}</mark>
+            <b>{leader.catalyst.label}</b>
+            <span>{leader.catalyst.headline}</span>
+          </a>
+        ) : (
+          <p className={styles.dayLeaderNoCatalyst}>오른 이유를 설명하는 뉴스를 찾지 못했습니다.</p>
+        )}
         <small>{leader.caution}</small>
       </div>
     </details>

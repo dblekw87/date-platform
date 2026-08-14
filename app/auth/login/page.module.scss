@@ -63,11 +63,14 @@
   line-height: 0;
 }
 
+// keep-all stops Korean from breaking mid-word, which the narrow panel would
+// otherwise do to the headline.
 .visualCopy h2 {
   max-width: 480px;
   margin: 0 0 10px;
   font-size: 32px;
-  line-height: 1.15;
+  line-height: 1.25;
+  word-break: keep-all;
 }
 
 .visualCopy p {
@@ -76,6 +79,7 @@
   color: rgba(255, 255, 255, 0.86);
   font-weight: 800;
   line-height: 1.6;
+  word-break: keep-all;
 }
 
 .logo,

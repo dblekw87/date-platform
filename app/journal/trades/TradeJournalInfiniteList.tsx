@@ -39,8 +39,11 @@ type TradeJournalCard = {
 const pageSize = 8;
 
 // Card previews show plain text, so the stored rich text is flattened here.
+// Image blocks are dropped rather than flattened: their caption is the uploaded
+// file name, which would otherwise read as part of the sentence.
 function toPreviewText(html: string) {
   return html
+    .replace(/<figure[\s\S]*?<\/figure>/gi, " ")
     .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")

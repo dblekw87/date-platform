@@ -254,15 +254,20 @@
   grid-column: 1 / -1;
 }
 
+// The cancel control is a link, so it needs the same box as the submit button
+// to read as a paired choice rather than stray text.
+.actions a,
 .actions button {
   border: 1px solid #111111;
   background: #ffffff;
+  color: inherit;
   padding: 12px 14px;
   font: inherit;
   font-weight: 900;
+  text-decoration: none;
 }
 
-.actions button:last-child {
+.actions button[type="submit"] {
   background: #111111;
   color: #ffffff;
 }
@@ -288,5 +293,14 @@
 
   .form {
     grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions a,
+  .actions button {
+    text-align: center;
   }
 }

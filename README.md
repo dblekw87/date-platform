@@ -1,26 +1,70 @@
-# DATE Market Board
+# DATE
 
-미국 시황, 국내 시황, 뉴스, 일정, 속보 공시, 수급과 차트 확인 루틴을 한 화면에서 볼 수 있도록 만든 **Next.js 기반 금융 시장 대시보드**입니다.
+장중 시장을 확인하고, 그 판단을 기록하고, 다른 사람과 나누는 **트레이딩 커뮤니티 플랫폼**입니다.
 
-이 프로젝트는 단순히 데이터를 나열하는 화면이 아니라, 장중 시장을 확인하는 사용자가 “무엇을 먼저 보고, 어떤 원문을 확인해야 하는지” 빠르게 판단할 수 있도록 정보 구조와 UI 밀도를 설계한 프론트엔드 포트폴리오 프로젝트입니다.
+세 가지 화면이 하나의 흐름으로 이어집니다.
 
-> 매수/매도 추천을 제공하는 서비스가 아니라, 여러 시장 데이터와 원문 링크를 정리해 투자 판단 전 확인 흐름을 돕는 정보 보드입니다.
+1. **시장 보드** — 시황, 뉴스, 일정, 공시, 수급을 한 화면에서 확인
+2. **매매 복기** — 그날의 매수/매도 판단과 잘한 점·못한 점을 기록
+3. **커뮤니티** — 판단 근거를 질문하고 서로의 복기를 읽음
+
+> 매수/매도 추천 서비스가 아니라, 시장 데이터와 원문 링크를 정리해 투자 판단 전 확인 흐름을 돕고 그 판단을 기록으로 남기는 도구입니다.
+
+## Repository Layout
+
+**프론트엔드와 백엔드가 분리된 두 저장소**로 구성됩니다.
+
+| 저장소 | 역할 | 스택 |
+| --- | --- | --- |
+| [`date-platform`](https://github.com/dblekw87/date-platform) (이 저장소) | 화면, 세션, 라우팅 | Next.js 16 · React 19 · TypeScript |
+| [`date-platform-backend`](https://github.com/dblekw87/date-platform-backend) | API, DB, 외부 데이터 provider | Node.js · PostgreSQL |
+
+**설계 원칙: 프론트엔드는 데이터를 만들지 않습니다.** 증권사 API 시크릿과 외부 호출은 전부 백엔드에 있고, 프론트엔드는 정규화된 DTO를 받아 표시만 합니다. 브라우저를 향한 프로세스에 provider 키가 존재하지 않습니다.
 
 ## Live Demo
 
 - Production: [https://date-platform.vercel.app](https://date-platform.vercel.app)
 - Deployment: Vercel Production
-- Latest verified status: `Ready`
 
-## Preview
+## Screens
 
-### Desktop
+### 로그인 — SNS OAuth
 
-![DATE Market Board desktop preview](./public/portfolio/date-market-board-desktop.png)
+Google, Naver, Kakao OAuth 2.0 Authorization Code 흐름을 직접 구현했습니다. NextAuth 같은 라이브러리 없이 state 검증, 토큰 교환, 프로필 조회, 세션 서명까지 처리합니다.
 
-### Mobile
+![로그인 화면](./public/portfolio/login.png)
 
-![DATE Market Board mobile preview](./public/portfolio/date-market-board-mobile.png)
+### 커뮤니티
+
+카테고리 분류, 제목 검색, 커서 기반 무한 스크롤, 댓글, 조회수를 제공합니다.
+
+![커뮤니티 목록](./public/portfolio/community.png)
+
+![커뮤니티 상세와 댓글](./public/portfolio/community-post.png)
+
+### 매매 복기
+
+매수한 점, 매도한 점, 잘한 점, 못한 점을 나눠 기록합니다. 이미지 첨부가 가능한 에디터를 직접 구현했고, 공개/비공개를 선택할 수 있습니다.
+
+![매매 복기 목록](./public/portfolio/trade-journal.png)
+
+### 프로필과 내가 쓴 글
+
+![프로필](./public/portfolio/profile.png)
+
+![내가 쓴 글](./public/portfolio/my-posts.png)
+
+### 시장 보드
+
+![시장 보드 데스크톱](./public/portfolio/date-market-board-desktop.png)
+
+### 모바일
+
+정보량이 많은 화면을 좁은 폭에서 어떻게 재배치했는지 확인할 수 있습니다.
+
+| 커뮤니티 | 매매 복기 |
+| --- | --- |
+| <img src="./public/portfolio/community-mobile.png" width="260" alt="커뮤니티 모바일" /> | <img src="./public/portfolio/trade-journal-mobile.png" width="260" alt="매매 복기 모바일" /> |
 
 ## Portfolio Screen Captures
 
@@ -126,13 +170,33 @@ Full responsive audit artifacts:
 
 | Item | Description |
 | --- | --- |
-| 프로젝트명 | DATE Market Board |
-| 목적 | 시황, 뉴스, 일정, 공시, 수급 데이터를 한 화면에서 빠르게 확인하는 시장 모니터링 보드 |
-| 주요 사용자 | 국내/미국 주식 시장을 함께 확인하는 개인 투자자, 리서치 사용자 |
-| 핵심 가치 | 여러 API와 원문 데이터를 탭별로 정리하고, 외부 API 실패에도 UI가 유지되는 안정적인 대시보드 |
-| 구현 형태 | Next.js App Router 기반 서버/클라이언트 혼합 대시보드 |
+| 프로젝트명 | DATE |
+| 목적 | 시장을 확인하고, 그 판단을 기록하고, 다른 사람과 나누는 트레이딩 커뮤니티 |
+| 주요 사용자 | 국내/미국 주식 시장을 함께 확인하는 개인 투자자 |
+| 핵심 가치 | 외부 API 실패에도 유지되는 대시보드 + 판단을 남기는 기록 도구 + 근거를 나누는 커뮤니티 |
+| 구현 형태 | Next.js App Router 프론트엔드 + Node.js/PostgreSQL 백엔드 (저장소 분리) |
 
 ## Main Features
+
+### 0. 인증과 계정
+
+- Google, Naver, Kakao **OAuth 2.0 Authorization Code** 흐름을 라이브러리 없이 직접 구현했습니다.
+- CSRF 방어를 위해 `state`를 httpOnly 쿠키에 저장하고 콜백에서 대조합니다.
+- 세션은 `v1.<base64url payload>.<HMAC-SHA256>` 형식으로 서명하고 `timingSafeEqual`로 검증합니다.
+- 프로필 닉네임, 소개, 관심 분야, 대표 이미지를 수정할 수 있습니다.
+
+### 0-1. 커뮤니티
+
+- 질문, 조언, 시황, 뉴스, 테마, 잡담 6개 분류와 제목 검색.
+- **커서 기반 무한 스크롤** — `(created_at, id)` 튜플 비교로 offset 방식의 중복·누락을 없앴습니다.
+- 댓글 작성/수정/삭제, 조회수 집계(작성자 본인 조회는 제외).
+- 이미지 업로드가 가능한 리치 텍스트 에디터를 `contenteditable` 기반으로 직접 구현했습니다.
+
+### 0-2. 매매 복기
+
+- 매수한 점, 매도한 점, 잘한 점, 못한 점을 나눠 기록합니다.
+- 공개/비공개 선택. 비공개 복기는 목록과 상세 모두에서 작성자에게만 보입니다.
+- 매매 일자와 손익률을 함께 남겨 카드에서 바로 비교할 수 있습니다.
 
 ### 1. 시황 보드
 
@@ -188,37 +252,84 @@ Full responsive audit artifacts:
 | CoinGecko API | BTC 가격 fallback | public |
 | U.S. Treasury XML | 미국 10년물 금리 fallback | public |
 
-프론트엔드는 `DATE_BACKEND_URL`의 `/api/market-board`에서 정규화된 데이터를 먼저 읽습니다. Toss/KIS 같은 provider 비밀키는 `date-platform-backend` 환경변수로만 설정하고, 프론트에는 직접 두지 않습니다. 백엔드가 꺼져 있거나 응답하지 않으면 프론트의 기존 fallback adapter로 화면을 유지합니다.
+**모든 provider는 백엔드에서 실행됩니다.** 프론트엔드는 `DATE_BACKEND_URL`의 `/api/market-board`가 내려주는 정규화된 DTO를 읽어 표시만 하고, 자체 데이터 소스를 갖지 않습니다. 백엔드가 응답하지 않으면 탭·광고 슬롯 같은 고정 구조만 담긴 보드를 반환해 화면이 깨지지 않게 합니다.
 
-## Production Data Health
+`MARKET_DATA_MODE=demo`가 기본값이며, 시세 표시·재배포 권리가 확보된 환경에서만 `licensed-live`로 전환합니다.
 
-Vercel Production 기준으로 `/api/market-board`의 provider 상태를 점검했습니다.
+### Provider 상태 표시
 
-| Provider | Production Status | Note |
+보드 상단 스트립이 provider별 `ready` / `mock` / `error` 상태와 사유를 그대로 보여줍니다.
+
+- `ready` — live 데이터 수신 중
+- `mock` — 키 미설정 또는 `MARKET_DATA_MODE=demo`로 차단
+- `error` — timeout, 인증 실패, 레이트 리밋 등. 사유 문자열을 함께 표시
+
+개별 provider가 실패해도 보드는 렌더링을 유지합니다. 실패한 provider의 데이터만 제외하고 나머지를 병합합니다.
+
+### 데이터 정확성 검증
+
+당일 누적 거래대금이 실제 시장값과 맞는지 외부 서비스와 대조했습니다.
+
+| 종목 | DATE (KIS) | 대조군 |
 | --- | --- | --- |
-| 한국투자증권 Open API | `ready` | 국내 지수/수급 후보 데이터 adapter 활성화 |
-| KRX Open API / KIND | `ready` | 일정 데이터 adapter 활성화 |
-| 시장 데이터 | `ready` | 환율, 금리, ETF, BTC 등 public/fallback market adapter 활성화 |
-| DART Open API | `ready` | 국내 공시 adapter 활성화 |
-| SEC EDGAR | `ready` | 미국 공시 public adapter 활성화 |
-| 뉴스 공급자 | `ready` | 뉴스 정규화 adapter 활성화 |
-| Toss Invest API | `ready` | 국내/미국 랭킹, 환율, 시장 지표 adapter 활성화 |
+| 현대무벡스 | 2,557억 | 2,557억 |
+| 현대차 | 3,922억 | 3,926억 |
+| 한라캐스트 | 2,023억 | 2,024억 |
+| SK텔레콤 | 2,017억 | 2,021억 |
 
-개별 adapter가 실패해도 보드는 전체 렌더링을 유지합니다. 실패한 provider의 콘텐츠는 제외하고, 정상 수신된 provider 데이터만 병합해 사용자가 나머지 시장 정보를 계속 확인할 수 있게 설계했습니다.
+`거래대금`은 서비스마다 정의가 달라 비교 시 주의가 필요합니다. 이 프로젝트는 **당일 누적 거래대금**(장 시작 이후 합계)을 사용하며, 일부 서비스가 표시하는 "실시간 거래대금"(최근 구간 합계)과는 자릿수가 다릅니다.
 
-## Frontend Tech Stack
+## Tech Stack
+
+### Frontend — `date-platform`
 
 | Area | Stack |
 | --- | --- |
 | Framework | Next.js 16 App Router |
 | UI Library | React 19 |
-| Language | TypeScript |
+| Language | TypeScript 6 (strict) |
 | Styling | SCSS Modules, CSS custom properties |
-| Rendering | Server Component container + Client Component dashboard |
-| Data Fetching | Next.js Route Handlers, server-side provider orchestration |
-| State | React `useState`, `useMemo`, `useEffect` |
-| Validation | TypeScript DTO, ESLint |
-| Build | Next.js Turbopack build |
+| Rendering | Server Component 컨테이너 + Client Component 인터랙션 |
+| Routing | App Router, Route Handlers, `proxy.ts` 미들웨어 |
+| Auth | OAuth 2.0 직접 구현, HMAC-SHA256 서명 세션 쿠키 |
+| Editor | `contenteditable` 기반 리치 텍스트 + 이미지 업로드 |
+| State | React `useState`, `useMemo`, `useCallback`, `IntersectionObserver` |
+| Build | Next.js Turbopack |
+| Tooling | ESLint (core-web-vitals + typescript), Playwright (캡처 스크립트) |
+
+**의존성은 4개(`next`, `react`, `react-dom`, `sass`)입니다.** UI 프레임워크, 상태관리 라이브러리, 인증 라이브러리 없이 구현했습니다.
+
+### Backend — `date-platform-backend`
+
+| Area | Stack |
+| --- | --- |
+| Runtime | Node.js 20+ (ESM, `.mjs`) |
+| HTTP | `node:http` — 프레임워크 없음 |
+| Database | PostgreSQL 16 (Docker) |
+| DB Driver | `pg` Pool |
+| Auth | 프론트 발급 HS256 토큰 검증 (`node:crypto`) |
+| Security | 허용목록 HTML sanitizer, 요청 검증, 매직바이트 업로드 판정 |
+| Caching | 인메모리 TTL 캐시 + in-flight 중복 제거, 토큰 디스크 보존 |
+| Migration | SQL 파일 기반 순차 마이그레이션 |
+| Testing | sanitizer 테스트 스위트 (`npm test`) |
+
+**의존성은 `pg` 하나입니다.** Express, ORM, JWT 라이브러리, sanitize 라이브러리를 쓰지 않고 표준 라이브러리로 구현했습니다.
+
+### 직접 구현한 것들
+
+포트폴리오 관점에서 라이브러리로 대체하지 않고 직접 만든 부분입니다.
+
+| 구현 | 위치 | 왜 |
+| --- | --- | --- |
+| OAuth 2.0 클라이언트 | `app/auth/` | 3개 provider의 scope 구분자·응답 형태 차이를 직접 처리 |
+| 세션 서명·검증 | `app/auth/session.ts` | HMAC + `timingSafeEqual` |
+| 서비스 간 인증 토큰 | `_lib/backend.ts` ↔ `src/auth/` | HS256 서명·검증, `alg: none` 차단 |
+| HTML sanitizer | `src/sanitize/html.mjs` | 파싱 후 허용목록으로 재직렬화 (45개 테스트) |
+| multipart 파서 | `src/routes/media.mjs` | 업로드 처리, 경로 탈출 방어 |
+| HTML 테이블 파서 | `src/providers/krx.mjs` | KIND에 JSON API가 없어 XHR 응답을 직접 파싱 |
+| 뉴스 정규화·중복 제거 | `src/providers/news-normalizer.mjs` | 5개 공급자의 서로 다른 스키마를 하나로 |
+| 테마 분류기 | `src/providers/themes.mjs` | 종목코드 맵 130여 개 + 종목명 규칙 30개 |
+| 커서 페이지네이션 | `src/db/repositories.mjs` | 튜플 비교 기반 |
 
 ## Architecture
 
@@ -368,53 +479,73 @@ External APIs
 
 ## Running Locally
 
+두 저장소를 형제 디렉터리로 두고 백엔드부터 실행합니다.
+
 ```bash
+# 1) 백엔드 — date-platform-backend
+cp .env.example .env
+docker compose -f docker-compose.example.yml up -d postgres
 npm install
-npm run dev
+npm run db:migrate
+npm run dev            # http://localhost:4010
+
+# 2) 프론트엔드 — date-platform
+cp .env.example .env.local
+npm install
+npm run dev            # http://localhost:3000
 ```
 
-Open:
-
-```text
-http://localhost:3000
-```
+`INTERNAL_JWT_SECRET`은 두 `.env`에 **같은 값**이어야 합니다. OAuth 앱 키가 없다면 `DATE_MOCK_AUTH=true`로 로그인 화면을 건너뛸 수 있습니다.
 
 ## Environment Variables
 
-프론트는 백엔드 주소와 OAuth/뉴스 fallback 설정만 필요합니다. Toss/KIS 같은 시장 데이터 provider 비밀키는 `date-platform-backend/.env`에 설정합니다.
+프론트에 남는 것은 백엔드 주소, 세션 시크릿, 서비스 간 토큰, OAuth 키뿐입니다.
+**외부 데이터 provider 키는 전부 백엔드에 있습니다.**
 
 ```bash
+# date-platform/.env.local
 DATE_BACKEND_URL=http://localhost:4010
-AUTH_SESSION_SECRET=
+INTERNAL_JWT_SECRET=          # 백엔드와 동일한 값
+AUTH_SESSION_SECRET=          # 프로덕션에서 없으면 기동 실패
 DATE_MOCK_AUTH=false
 
-DART_API_KEY=
-SEC_USER_AGENT=
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+NAVER_OAUTH_CLIENT_ID=
+NAVER_OAUTH_CLIENT_SECRET=
+KAKAO_REST_API_KEY=
+KAKAO_OAUTH_CLIENT_SECRET=
+```
 
-KRX_CALENDAR_FEED_URL=
+```bash
+# date-platform-backend/.env
+PORT=4010
+FRONTEND_ORIGIN=http://localhost:3000
+DATABASE_URL=postgres://date_user:date_password@localhost:5432/date_platform
+INTERNAL_JWT_SECRET=          # 프론트와 동일한 값
+MARKET_DATA_MODE=demo         # licensed-live는 시세 표시 권리 확보 후에만
 
-NEWSAPI_KEY=
-FINNHUB_API_KEY=
-BENZINGA_API_KEY=
-MARKET_BOARD_NEWS_FEED_URL=
-
-NAVER_CLIENT_ID=
-NAVER_CLIENT_SECRET=
-NAVER_SEARCH_CLIENT_ID=
-NAVER_SEARCH_CLIENT_SECRET=
-NAVER_API_HUB_KEY_ID=
-NAVER_API_HUB_KEY=
-NAVER_PAPAGO_CLIENT_ID=
-NAVER_PAPAGO_CLIENT_SECRET=
+TOSS_INVEST_CLIENT_ID=        KIS_APP_KEY=
+TOSS_INVEST_CLIENT_SECRET=    KIS_APP_SECRET=
+FINNHUB_API_KEY=              DART_API_KEY=
+NEWSAPI_KEY=                  SEC_USER_AGENT=
+NAVER_API_HUB_KEY_ID=         NAVER_API_HUB_KEY=
 ```
 
 ## Scripts
 
 ```bash
-npm run dev        # local development
-npm run build      # production build
-npm run start      # production server
+# date-platform
+npm run dev        # 개발 서버
+npm run build      # 프로덕션 빌드
 npm run lint       # ESLint
+node scripts/capture-portfolio.mjs   # README 캡처 갱신 (playwright 필요)
+
+# date-platform-backend
+npm run dev        # node --watch
+npm run db:migrate # 마이그레이션 적용
+npm run db:check   # DB 연결/테이블 확인
+npm test           # HTML sanitizer 테스트
 ```
 
 ## Verification
@@ -433,24 +564,36 @@ Production deployment was verified with Vercel CLI:
 vercel inspect https://date-platform.vercel.app
 ```
 
+## Security
+
+포트폴리오 프로젝트지만 실제 사용자 데이터를 다루는 만큼 다음을 구현했습니다.
+
+| 항목 | 구현 |
+| --- | --- |
+| 세션 위조 | HMAC-SHA256 서명 + `timingSafeEqual` 검증. 서명 없는 쿠키는 거부 |
+| CSRF (OAuth) | `state`를 httpOnly 쿠키에 저장하고 콜백에서 대조, 실패 시 쿠키 정리 |
+| 서비스 간 신뢰 | 프론트가 서명한 2분 만료 HS256 토큰을 백엔드가 검증. `alg: none` 차단 |
+| 저장형 XSS | 허용목록 sanitizer가 파싱 후 재직렬화. `script`/`iframe`/`svg`는 자식까지 제거, `href`/`src`는 허용 패턴 매칭 |
+| 권한 | 소유권을 백엔드가 판정(`is_owner`). 타인 글 수정·삭제는 404 |
+| 업로드 | 매직바이트로 타입 판정, 경로 탈출 방어, `nosniff` 응답 |
+| SQL | 전 구간 파라미터 바인딩, 검색어의 `%`·`_` 이스케이프 |
+| Open redirect | `next` 파라미터가 `//host` 형태면 거부 |
+
 ## Portfolio Review Points
 
 면접관이나 리뷰어가 확인하면 좋은 포인트입니다.
 
-- Next.js App Router에서 서버 데이터 로딩과 클라이언트 인터랙션을 분리한 방식
-- 여러 외부 API를 adapter pattern으로 관리한 구조
-- TypeScript DTO를 중심으로 화면과 데이터 계층을 연결한 방식
+- **프론트/백엔드 저장소 분리와 시크릿 경계** — 브라우저를 향한 프로세스에 provider 키가 없음
+- **라이브러리 없이 구현한 OAuth 2.0과 세션 서명** (`app/auth/`)
+- **파싱 후 재직렬화 방식의 HTML sanitizer**와 45개 테스트 (`src/sanitize/`)
+- **커서 기반 페이지네이션** — 튜플 비교로 offset의 중복·누락 제거
+- **외부 API 실패를 전제한 설계** — provider별 timeout, 토큰 디스크 보존, in-flight 중복 제거, 429 백오프
+- **테마 분류와 강세 판정** — 거래대금 총액이 아닌 거래대금 가중 등락률로 순위를 매겨, 대형주가 항상 1위가 되는 문제를 해결
 - 금융 정보 UI에 맞춘 고밀도 반응형 레이아웃
-- API 실패를 고려한 timeout, fallback, provider status 설계
-- 뉴스 정규화, 원문 링크, 공시 이벤트 등 실제 서비스에 가까운 데이터 흐름
 
 ## Limitations and Next Steps
 
-추가로 확장할 수 있는 부분입니다.
-
-- 투자자별 수급 데이터 세분화
-- 차트 캔들 시각화 고도화
-- 사용자별 관심 종목 저장
-- 뉴스/공시 중요도 점수 모델 개선
-- 실시간 WebSocket 기반 가격 업데이트
-- 대시보드 개인화 설정
+- 토스 랭킹 API가 계정 쿼터로 429를 반환해 미국 주도주가 비어 있습니다. 코드 측 완화(토큰 보존·중복 제거·백오프)는 적용된 상태입니다.
+- 커뮤니티 검색이 제목만 대상입니다.
+- 조회수에 세션 단위 중복 방지가 없습니다.
+- 실시간 WebSocket 기반 가격 업데이트, 관심 종목 저장, 대시보드 개인화가 남아 있습니다.

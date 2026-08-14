@@ -116,6 +116,8 @@ export type LeadingStockDto = {
   name: string;
   market: "US" | "KR";
   marketLabel: string;
+  /** Exchange the figures came from. NXT before the KRX bell, KRX after it. */
+  venue?: "KRX" | "NXT";
   /** Sector the backend classified this stock into, "미분류" when it could not. */
   theme?: string;
   /** Raw figures behind the formatted strings, for ranking without re-parsing. */

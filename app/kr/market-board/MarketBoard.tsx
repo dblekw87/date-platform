@@ -388,17 +388,25 @@ function isThemeLeaderCandidate(stock: LeadingStock) {
   return !isEtfLeader(stock);
 }
 
-function rankedThemeLeaders(stocks: LeadingStock[]) {
-  const seenThemes = new Set<string>();
+/**
+ * Groups the leaders by theme instead of keeping one stock per theme.
+ *
+ * A theme usually leads with more than one name, and which names those are is
+ * the point — so each theme carries its full membership, ordered by the ranking
+ * it arrived in, for the accordion to reveal.
+ */
+function rankedThemeGroups(stocks: LeadingStock[]) {
+  const byTheme = new Map<string, LeadingStock[]>();
 
-  return stocks.filter(isThemeLeaderCandidate).filter((stock) => {
+  stocks.filter(isThemeLeaderCandidate).forEach((stock) => {
     const theme = leaderTheme(stock);
 
-    if (seenThemes.has(theme)) return false;
-    seenThemes.add(theme);
+    byTheme.set(theme, [...(byTheme.get(theme) ?? []), stock]);
+  });
 
-    return true;
-  }).slice(0, 3);
+  return [...byTheme.entries()]
+    .map(([theme, members]) => ({ theme, members }))
+    .slice(0, 3);
 }
 
 function leaderChangeRate(stock: LeadingStock) {
@@ -443,12 +451,60 @@ function fallbackMarketCard(id: string, timestamp?: string): MarketSnapshot {
   };
 }
 
-function safeLeaderTheme(stock?: LeadingStock) {
-  return stock ? leaderTheme(stock) : "확인 대기";
+function themeRankLabel(groups: { theme: string }[], index: number) {
+  return groups[index]?.theme ?? "확인 대기";
 }
 
-function themeRankLabel(stocks: LeadingStock[], index: number) {
-  return stocks[index] ? safeLeaderTheme(stocks[index]) : "확인 대기";
+/**
+ * One theme in the strength list, expanding to the stocks that make it up.
+ *
+ * Uses details/summary so the disclosure works without script and stays
+ * reachable by keyboard and screen reader. A theme carrying a single name has
+ * nothing to reveal, so it renders as a plain row.
+ */
+function ThemeGroupRow({
+  group,
+  nameOf,
+  rankIndex
+}: {
+  group: { theme: string; members: LeadingStock[] };
+  nameOf: (stock: LeadingStock) => string;
+  rankIndex: number;
+}) {
+  const [lead, ...rest] = group.members;
+  // The count sits beside the theme so the turnover figures stay right-aligned
+  // across rows whether or not a theme can expand.
+  const row = (badge?: React.ReactNode) => (
+    <>
+      <Image alt="" aria-hidden="true" height={20} src={rankIcons[rankIndex] ?? rankIcons[2]} width={20} />
+      <span><EnglishText text={group.theme} /></span>
+      {badge}
+      <i />
+      <small>{nameOf(lead)}</small>
+      <b>{lead.turnover}</b>
+    </>
+  );
+
+  if (rest.length === 0) return row();
+
+  return (
+    <details className={styles.themeGroup}>
+      <summary>
+        {row(<em>{group.members.length}종목</em>)}
+      </summary>
+      <ol className={styles.themeMembers}>
+        {group.members.map((stock, index) => (
+          <li key={stock.id}>
+            <em>{index + 1}등주</em>
+            <span><EnglishText text={nameOf(stock)} /></span>
+            <i />
+            <b data-tone={changeTone(leaderChangeRate(stock))}>{leaderChangeRate(stock)}</b>
+            <small>{stock.turnover}</small>
+          </li>
+        ))}
+      </ol>
+    </details>
+  );
 }
 
 function providerStatusFor(board: MarketBoardData, providerId: MarketBoardData["providerStatuses"][number]["id"]) {
@@ -707,8 +763,8 @@ export function MarketBoard({
     usdKrw: marketSnapshotById.get("usd-krw"),
     btc: marketSnapshotById.get("btc")
   };
-  const krThemeLeaders = rankedThemeLeaders(liveBoard.krLeadingStocks);
-  const usThemeLeaders = rankedThemeLeaders(liveBoard.usLeadingStocks);
+  const krThemeLeaders = rankedThemeGroups(liveBoard.krLeadingStocks);
+  const usThemeLeaders = rankedThemeGroups(liveBoard.usLeadingStocks);
   const latestHeadline = useMemo(() => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0], [liveBoard.headlineFlow]);
   const headlineSourceCount = new Set(liveBoard.headlineFlow.map((item) => item.source)).size;
   const originalLinkCount = liveBoard.headlineFlow.filter((item) => item.originalUrl && item.originalUrl !== "#").length;
@@ -1323,13 +1379,9 @@ export function MarketBoard({
                     </h3>
                     <strong>국내 강세 테마 · 거래대금순위</strong>
                     <ol>
-                      {krThemeLeaders.map((stock, index) => (
-                        <li key={stock.id}>
-                          <Image alt="" aria-hidden="true" height={20} src={rankIcons[index] ?? rankIcons[2]} width={20} />
-                          <span><EnglishText text={leaderTheme(stock)} /></span>
-                          <i />
-                          <small>{stock.name}</small>
-                          <b>{stock.turnover}</b>
+                      {krThemeLeaders.map((group, index) => (
+                        <li key={group.theme}>
+                          <ThemeGroupRow group={group} nameOf={(stock) => stock.name} rankIndex={index} />
                         </li>
                       ))}
                     </ol>
@@ -1346,13 +1398,9 @@ export function MarketBoard({
                     </h3>
                     <strong>미국 강세 테마</strong>
                     <ol>
-                      {usThemeLeaders.map((stock, index) => (
-                        <li key={stock.id}>
-                          <Image alt="" aria-hidden="true" height={20} src={rankIcons[index] ?? rankIcons[2]} width={20} />
-                          <span><EnglishText text={leaderTheme(stock)} /></span>
-                          <i />
-                          <small>{stock.symbol}</small>
-                          <b>{stock.turnover}</b>
+                      {usThemeLeaders.map((group, index) => (
+                        <li key={group.theme}>
+                          <ThemeGroupRow group={group} nameOf={(stock) => stock.symbol} rankIndex={index} />
                         </li>
                       ))}
                     </ol>

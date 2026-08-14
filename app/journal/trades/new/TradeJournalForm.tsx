@@ -26,14 +26,49 @@ function editorHtml(sectionId: string) {
   return document.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`)?.innerHTML.trim() ?? "";
 }
 
+/**
+ * Accepts the digits of a 24-hour time as they are typed, refusing any that
+ * could not belong to a real time. There is no 25th hour, so the field never
+ * holds one in the first place rather than failing at save.
+ *
+ * A leading digit above 2 is shorthand: typing 9 means 09, since no hour starts
+ * with 3 or more.
+ */
+function acceptTimeDigits(raw: string) {
+  let digits = "";
+
+  for (const character of raw.replace(/\D/g, "")) {
+    const next = digits + character;
+
+    if (next.length === 1) {
+      digits = Number(character) > 2 ? `0${character}` : character;
+      continue;
+    }
+
+    // Hours run 00 to 24; minutes 00 to 59; and 24 only ever means 24:00.
+    if (next.length === 2 && Number(next) > 24) continue;
+    if (next.length === 3 && (Number(character) > 5 || (digits.startsWith("24") && character !== "0"))) continue;
+    if (next.length === 4 && digits.startsWith("24") && character !== "0") continue;
+    if (next.length > 4) break;
+
+    digits = next;
+  }
+
+  return digits;
+}
+
 // A plain text field rather than type="time": the native picker forces a
 // 오전/오후 control in Korean locales, and a trading log is quicker to fill in
 // by typing 0915 straight through. The colon is inserted as the digits arrive.
 function formatTimeInput(event: React.FormEvent<HTMLInputElement>) {
   const input = event.currentTarget;
-  const digits = input.value.replace(/\D/g, "").slice(0, 4);
+  const digits = acceptTimeDigits(input.value);
 
   input.value = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+}
+
+function isCompleteTime(value: string) {
+  return /^(([01]\d|2[0-3]):[0-5]\d|24:00)$/.test(value);
 }
 
 export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
@@ -54,6 +89,17 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
 
     if (!tradeDate || !result || !title || !buyHtml || !sellHtml || !goodHtml || !badHtml) {
       alert("매매 일자, 손익, 제목, 복기 내용을 모두 입력해주세요.");
+      return;
+    }
+
+    // An incomplete entry such as 09:1 gets past the input mask.
+    if (buyTime && !isCompleteTime(buyTime)) {
+      alert("매수 시각을 24시간제 HH:MM으로 끝까지 입력하거나 비워주세요.");
+      return;
+    }
+
+    if (sellTime && !isCompleteTime(sellTime)) {
+      alert("매도 시각을 24시간제 HH:MM으로 끝까지 입력하거나 비워주세요.");
       return;
     }
 
@@ -78,6 +124,14 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
           badHtml
         })
       });
+
+      // A rejected field is the author's problem to fix, not a server outage.
+      if (response.status === 400) {
+        const problem = await response.json() as { message?: string; details?: { field?: string } };
+
+        alert(`입력을 확인해주세요.${problem.details?.field ? ` (${problem.details.field})` : ""}`);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("save failed");

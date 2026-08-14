@@ -13,7 +13,15 @@ const supportedProviders = new Set<CurrentUser["provider"]>(["mock", "google", "
 const sessionCookieName = "date_session";
 
 function sessionSecret() {
-  return process.env.AUTH_SESSION_SECRET || process.env.NEXTAUTH_SECRET || "date-dev-session-secret";
+  const secret = process.env.AUTH_SESSION_SECRET || process.env.NEXTAUTH_SECRET;
+
+  if (secret) return secret;
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SESSION_SECRET is required in production");
+  }
+
+  return "date-dev-session-secret";
 }
 
 function base64Url(value: string) {
@@ -62,7 +70,7 @@ export function createSessionValue(user: CurrentUser) {
 }
 
 function shouldUseMockSession() {
-  return process.env.NODE_ENV === "development" || process.env.DATE_MOCK_AUTH === "true";
+  return process.env.DATE_MOCK_AUTH === "true";
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -74,14 +82,6 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     const signedSession = parseSignedSession(session);
 
     if (signedSession) return signedSession;
-
-    const provider = supportedProviders.has(session as CurrentUser["provider"]) ? session as CurrentUser["provider"] : "mock";
-
-    return {
-      name: provider === "mock" ? "Mock Trader" : "DATE 회원",
-      provider,
-      providerUserId: provider === "mock" ? "mock-trader" : provider
-    };
   }
 
   if (shouldUseMockSession() && !mockSignedOut) {
@@ -108,5 +108,9 @@ export async function requireCurrentUser(nextPath: string): Promise<CurrentUser>
 export function currentUserAuthorId(user: CurrentUser) {
   if (user.provider === "mock") return "date_user";
 
-  return user.providerUserId ?? user.name;
+  return `${user.provider}_${user.providerUserId ?? user.name}`
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣_]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 64) || `${user.provider}_user`;
 }

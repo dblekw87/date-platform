@@ -14,7 +14,7 @@ KAKAO_REST_API_KEY=
 KAKAO_OAUTH_CLIENT_SECRET=
 ```
 
-`KAKAO_OAUTH_CLIENT_SECRET` is optional unless the Kakao app enables client secret.
+`KAKAO_OAUTH_CLIENT_SECRET` is required when the Kakao app's REST API Client Secret setting is enabled. Newer Kakao apps may have this enabled by default.
 
 ## Redirect URIs
 
@@ -48,4 +48,4 @@ Google needs OAuth consent screen setup and the `openid email profile` scope.
 
 Naver needs Login with Naver enabled and profile/email permissions.
 
-Kakao needs Kakao Login enabled, Redirect URI registered, and profile/email permissions. Use the REST API key as `KAKAO_REST_API_KEY`.
+Kakao needs Kakao Login enabled, Redirect URI registered, and profile permissions for nickname/profile image. Use the REST API key as `KAKAO_REST_API_KEY`.

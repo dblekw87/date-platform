@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { safeNextPath } from "../oauth";
 import { createSessionValue, type CurrentUser } from "../session";
 
 const supportedProviders = new Set<CurrentUser["provider"]>(["mock", "google", "naver", "kakao"]);
 
-function safeNextPath(value: string | null) {
-  return value?.startsWith("/") ? value : "/";
-}
-
 export async function GET(request: NextRequest) {
+  if (process.env.DATE_MOCK_AUTH !== "true") {
+    return NextResponse.json({ error: "mock_auth_disabled" }, { status: 404 });
+  }
+
   const providerParam = request.nextUrl.searchParams.get("provider");
   const provider = supportedProviders.has(providerParam as CurrentUser["provider"])
     ? providerParam as CurrentUser["provider"]

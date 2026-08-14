@@ -18,7 +18,7 @@ class OAuthCallbackError extends Error {
   }
 }
 
-function errorRedirect(request: NextRequest, nextPath: string, error: string, detail?: string) {
+function errorRedirect(request: NextRequest, stateCookieName: string, nextPath: string, error: string, detail?: string) {
   const url = new URL("/auth/login", request.url);
 
   url.searchParams.set("error", error);
@@ -27,7 +27,11 @@ function errorRedirect(request: NextRequest, nextPath: string, error: string, de
     url.searchParams.set("detail", detail.slice(0, 180));
   }
 
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(url);
+
+  response.cookies.delete(stateCookieName);
+
+  return response;
 }
 
 export async function GET(
@@ -58,11 +62,11 @@ export async function GET(
   const nextPath = safeNextPath(storedState.nextPath ?? null);
 
   if (!code || !state || state !== storedState.state) {
-    return errorRedirect(request, nextPath, "invalid_oauth_state");
+    return errorRedirect(request, stateCookieName, nextPath, "invalid_oauth_state");
   }
 
   if (!config.clientId || (config.clientSecretRequired && !config.clientSecret)) {
-    return errorRedirect(request, nextPath, `missing_${provider}_config`);
+    return errorRedirect(request, stateCookieName, nextPath, `missing_${provider}_config`);
   }
 
   const redirectUri = new URL(`/auth/${provider}/callback`, request.nextUrl.origin).toString();
@@ -120,6 +124,6 @@ export async function GET(
 
     console.error(`[oauth:${provider}] ${callbackError.code}`, callbackError.message);
 
-    return errorRedirect(request, nextPath, callbackError.code, callbackError.message);
+    return errorRedirect(request, stateCookieName, nextPath, callbackError.code, callbackError.message);
   }
 }

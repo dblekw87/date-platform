@@ -148,7 +148,7 @@ const maintenanceHtml = `<!doctype html>
 
 export function proxy(request: NextRequest) {
   if (process.env.MAINTENANCE_MODE !== "true") {
-    const useMockSession = process.env.NODE_ENV === "development" || process.env.DATE_MOCK_AUTH === "true";
+    const useMockSession = process.env.DATE_MOCK_AUTH === "true";
     const mockSignedOut = request.cookies.get("date_mock_signed_out")?.value === "true";
 
     const isProtectedPath =

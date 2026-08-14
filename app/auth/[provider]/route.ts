@@ -29,7 +29,7 @@ export async function GET(
   authorizationUrl.searchParams.set("client_id", config.clientId);
   authorizationUrl.searchParams.set("redirect_uri", redirectUri);
   authorizationUrl.searchParams.set("state", state);
-  authorizationUrl.searchParams.set("scope", config.scope);
+  authorizationUrl.searchParams.set("scope", config.scope.join(config.scopeSeparator ?? " "));
 
   const response = NextResponse.redirect(authorizationUrl);
 

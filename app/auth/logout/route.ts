@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-function safeNextPath(value: string | null) {
-  return value?.startsWith("/") ? value : "/";
-}
+import { safeNextPath } from "../oauth";
 
 export async function POST(request: NextRequest) {
   const response = NextResponse.redirect(new URL(safeNextPath(request.nextUrl.searchParams.get("next")), request.url), 303);

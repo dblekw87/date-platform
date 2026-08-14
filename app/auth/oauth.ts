@@ -8,7 +8,8 @@ type OAuthConfig = {
   clientSecret?: string;
   clientSecretRequired?: boolean;
   getProfile: (accessToken: string) => Promise<CurrentUser>;
-  scope: string;
+  scope: string[];
+  scopeSeparator?: " " | ",";
   tokenUrl: string;
 };
 
@@ -43,7 +44,7 @@ export function getOAuthConfig(provider: OAuthProvider): OAuthConfig {
       clientId: requiredString(process.env.GOOGLE_OAUTH_CLIENT_ID),
       clientSecret: requiredString(process.env.GOOGLE_OAUTH_CLIENT_SECRET),
       clientSecretRequired: true,
-      scope: "openid email profile",
+      scope: ["openid", "email", "profile"],
       tokenUrl: "https://oauth2.googleapis.com/token",
       async getProfile(accessToken) {
         const profile = await fetchJson<{
@@ -73,7 +74,7 @@ export function getOAuthConfig(provider: OAuthProvider): OAuthConfig {
       clientId: requiredString(process.env.NAVER_OAUTH_CLIENT_ID),
       clientSecret: requiredString(process.env.NAVER_OAUTH_CLIENT_SECRET),
       clientSecretRequired: true,
-      scope: "name email profile_image",
+      scope: ["name", "email", "profile_image"],
       tokenUrl: "https://nid.naver.com/oauth2.0/token",
       async getProfile(accessToken) {
         const profile = await fetchJson<{
@@ -106,7 +107,8 @@ export function getOAuthConfig(provider: OAuthProvider): OAuthConfig {
     authorizationUrl: "https://kauth.kakao.com/oauth/authorize",
     clientId: requiredString(process.env.KAKAO_OAUTH_CLIENT_ID ?? process.env.KAKAO_REST_API_KEY),
     clientSecret: requiredString(process.env.KAKAO_OAUTH_CLIENT_SECRET),
-    scope: "profile_nickname profile_image",
+    scope: ["profile_nickname", "profile_image"],
+    scopeSeparator: ",",
     tokenUrl: "https://kauth.kakao.com/oauth/token",
     async getProfile(accessToken) {
       const profile = await fetchJson<{

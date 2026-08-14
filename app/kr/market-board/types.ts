@@ -116,6 +116,11 @@ export type LeadingStockDto = {
   name: string;
   market: "US" | "KR";
   marketLabel: string;
+  /** Sector the backend classified this stock into, "미분류" when it could not. */
+  theme?: string;
+  /** Raw figures behind the formatted strings, for ranking without re-parsing. */
+  turnoverValue?: number;
+  changeRateValue?: number;
   burst: string;
   turnover: string;
   intraday: string;

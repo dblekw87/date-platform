@@ -394,11 +394,13 @@ function isThemeLeaderCandidate(stock: LeadingStock) {
 }
 
 /**
- * Groups the leaders by theme instead of keeping one stock per theme.
+ * Groups the leaders by theme and ranks the groups by strength.
  *
- * A theme usually leads with more than one name, and which names those are is
- * the point — so each theme carries its full membership, ordered by the ranking
- * it arrived in, for the accordion to reveal.
+ * Leader order is turnover-led, so taking themes in the order their first stock
+ * appears puts 반도체 on top every session: 삼성전자 and SK하이닉스 trade the
+ * most whether or not the sector is moving. Ranking on turnover-weighted change
+ * — the same measure the backend uses for the theme brief — answers where money
+ * is actually pushing prices today.
  */
 function rankedThemeGroups(stocks: LeadingStock[]) {
   const byTheme = new Map<string, LeadingStock[]>();
@@ -410,7 +412,14 @@ function rankedThemeGroups(stocks: LeadingStock[]) {
   });
 
   return [...byTheme.entries()]
-    .map(([theme, members]) => ({ theme, members }))
+    .map(([theme, members]) => {
+      const turnover = members.reduce((total, stock) => total + (stock.turnoverValue ?? 0), 0);
+      const weighted = members.reduce((total, stock) => total + (stock.turnoverValue ?? 0) * (stock.changeRateValue ?? 0), 0);
+
+      return { theme, members, changeRate: turnover > 0 ? weighted / turnover : 0 };
+    })
+    .filter((group) => group.changeRate > 0)
+    .sort((left, right) => right.changeRate - left.changeRate)
     .slice(0, 3);
 }
 

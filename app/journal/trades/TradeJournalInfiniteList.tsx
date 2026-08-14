@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./page.module.scss";
-import type { tradeJournals } from "./trade-journals";
 
-type TradeJournal = typeof tradeJournals[number];
 type BackendTradeJournal = {
   id: string;
   trade_date: string;
@@ -17,6 +15,7 @@ type BackendTradeJournal = {
   good_html: string;
   bad_html: string;
   author_id: string;
+  nickname?: string | null;
 };
 
 type BackendTradeJournalPage = {
@@ -24,42 +23,60 @@ type BackendTradeJournalPage = {
   nextCursor?: string | null;
 };
 
-const pageSize = 4;
+type TradeJournalCard = {
+  id: string;
+  date: string;
+  title: string;
+  visibility: string;
+  author: string;
+  result: string;
+  buy: string;
+  sell: string;
+  good: string;
+  bad: string;
+};
 
-function fromBackendJournal(journal: BackendTradeJournal): TradeJournal {
+const pageSize = 8;
+
+// Card previews show plain text, so the stored rich text is flattened here.
+function toPreviewText(html: string) {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function fromBackendJournal(journal: BackendTradeJournal): TradeJournalCard {
   return {
     id: journal.id,
-    date: journal.trade_date,
-    symbol: "",
-    name: "",
+    date: journal.trade_date?.slice(0, 10) ?? "",
     title: journal.title,
     visibility: journal.visibility === "public" ? "공개" : "비공개",
-    author: journal.author_id,
+    author: journal.nickname || journal.author_id,
     result: journal.result,
-    buy: journal.buy_html,
-    sell: journal.sell_html,
-    good: journal.good_html,
-    bad: journal.bad_html
+    buy: toPreviewText(journal.buy_html),
+    sell: toPreviewText(journal.sell_html),
+    good: toPreviewText(journal.good_html),
+    bad: toPreviewText(journal.bad_html)
   };
 }
 
-export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[] }) {
+export function TradeJournalInfiniteList() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const [visibleCount, setVisibleCount] = useState(pageSize);
-  const [loadedJournals, setLoadedJournals] = useState<TradeJournal[]>(journals);
+  const [journals, setJournals] = useState<TradeJournalCard[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [usesBackend, setUsesBackend] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const visibleJournals = usesBackend ? loadedJournals : loadedJournals.slice(0, visibleCount);
-  const hasMore = usesBackend ? Boolean(nextCursor) : visibleCount < loadedJournals.length;
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasFailed, setHasFailed] = useState(false);
 
-  const loadBackendPage = useCallback(async (cursor?: string | null, replace = false) => {
+  const loadPage = useCallback(async (cursor?: string | null, replace = false) => {
     setIsLoading(true);
 
     try {
-      const params = new URLSearchParams({
-        limit: String(pageSize)
-      });
+      const params = new URLSearchParams({ limit: String(pageSize) });
 
       if (cursor) params.set("cursor", cursor);
 
@@ -67,64 +84,60 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
         cache: "no-store"
       });
 
-      if (!response.ok) return;
+      if (!response.ok) throw new Error(`backend ${response.status}`);
 
       const data = await response.json() as BackendTradeJournalPage;
       const items = (data.items ?? []).map(fromBackendJournal);
 
-      if (items.length === 0 && replace) {
-        setUsesBackend(false);
-        setLoadedJournals(journals);
-        setNextCursor(null);
-        return;
-      }
-
-      if (items.length > 0 || data.nextCursor) {
-        setUsesBackend(true);
-        setLoadedJournals((current) => replace ? items : [...current, ...items]);
-        setNextCursor(data.nextCursor ?? null);
-      }
+      setHasFailed(false);
+      setJournals((current) => replace ? items : [...current, ...items]);
+      setNextCursor(data.nextCursor ?? null);
     } catch {
+      setHasFailed(true);
       if (replace) {
-        setUsesBackend(false);
-        setLoadedJournals(journals);
+        setJournals([]);
         setNextCursor(null);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [journals]);
+  }, []);
 
   useEffect(() => {
+    // Deferred so the loading flag is not set during the effect itself.
     queueMicrotask(() => {
-      void loadBackendPage(null, true);
+      void loadPage(null, true);
     });
-  }, [loadBackendPage]);
+  }, [loadPage]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
 
-    if (!sentinel || !hasMore) return;
+    if (!sentinel || !nextCursor) return;
 
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        if (usesBackend) {
-          if (!isLoading && nextCursor) void loadBackendPage(nextCursor);
-          return;
-        }
-
-        setVisibleCount((current) => Math.min(current + pageSize, loadedJournals.length));
+      if (entries.some((entry) => entry.isIntersecting) && !isLoading) {
+        void loadPage(nextCursor);
       }
     }, { rootMargin: "240px 0px" });
 
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasMore, isLoading, loadBackendPage, loadedJournals.length, nextCursor, usesBackend]);
+  }, [isLoading, loadPage, nextCursor]);
+
+  function statusMessage() {
+    if (isLoading) return "불러오는 중";
+    if (hasFailed) return "복기를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.";
+    if (journals.length === 0) return "아직 공개된 복기가 없습니다. 첫 복기를 남겨보세요.";
+    if (nextCursor) return "더 불러오는 중";
+
+    return "마지막 복기입니다";
+  }
 
   return (
     <section className={styles.list} aria-label="유저 매매 복기 목록">
-      {visibleJournals.map((journal) => (
+      {journals.map((journal) => (
         <Link className={styles.cardLink} href={`/journal/trades/${journal.id}`} key={journal.id}>
           <header>
             <div>
@@ -156,7 +169,7 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
         </Link>
       ))}
       <div className={styles.scrollSentinel} ref={sentinelRef} aria-live="polite">
-        {isLoading ? "불러오는 중" : hasMore ? "더 불러오는 중" : "마지막 복기입니다"}
+        {statusMessage()}
       </div>
     </section>
   );

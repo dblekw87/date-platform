@@ -1,19 +1,8 @@
 import Link from "next/link";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { fetchBackendJson } from "../../_lib/backend";
-import { currentUserAuthorId, requireCurrentUser } from "../../auth/session";
-import { tradeJournals } from "../../journal/trades/trade-journals";
+import { requireCurrentUser } from "../../auth/session";
 import styles from "./page.module.scss";
-
-const communityPosts = [
-  {
-    id: "semiconductor-question",
-    type: "조언",
-    title: "장 초반 반도체 수급을 보고 들어갔는데 판단이 맞았을까요?",
-    author: "date_user",
-    time: "오늘 10:42"
-  }
-];
 
 type BackendCommunityPost = {
   id: string;
@@ -48,21 +37,22 @@ function formatPostTime(value: string) {
 
 export default async function MyPostsPage() {
   const user = await requireCurrentUser("/profile/posts");
-  const authorId = currentUserAuthorId(user);
-  const backendCommunityPosts = await fetchBackendJson<BackendPage<BackendCommunityPost>>("/api/me/community-posts?limit=30");
-  const backendTradeJournals = await fetchBackendJson<BackendPage<BackendTradeJournal>>("/api/me/trade-journals?limit=30");
+  const [backendCommunityPosts, backendTradeJournals] = await Promise.all([
+    fetchBackendJson<BackendPage<BackendCommunityPost>>("/api/me/community-posts?limit=30"),
+    fetchBackendJson<BackendPage<BackendTradeJournal>>("/api/me/trade-journals?limit=30")
+  ]);
   const myCommunityPosts = backendCommunityPosts?.items?.map((post) => ({
     id: post.id,
     time: formatPostTime(post.created_at),
     title: post.title,
     type: post.category
-  })) ?? communityPosts.filter((post) => post.author === authorId);
+  })) ?? [];
   const myTradeJournals = backendTradeJournals?.items?.map((journal) => ({
-    date: journal.trade_date,
+    date: journal.trade_date?.slice(0, 10) ?? "",
     id: journal.id,
     result: journal.result,
     title: journal.title
-  })) ?? tradeJournals.filter((journal) => journal.author === authorId);
+  })) ?? [];
   const userLabel = user.provider === "mock" ? `${user.name} · 개발 로그인` : user.name;
 
   return (
@@ -81,6 +71,7 @@ export default async function MyPostsPage() {
             <h2>커뮤니티</h2>
             <Link href="/community/new">새 글쓰기</Link>
           </header>
+          {myCommunityPosts.length === 0 ? <p>아직 작성한 글이 없습니다.</p> : null}
           {myCommunityPosts.map((post) => (
             <div className={styles.item} key={post.id}>
               <span>{post.type} · {post.time}</span>
@@ -97,6 +88,7 @@ export default async function MyPostsPage() {
             <h2>매매 복기</h2>
             <Link href="/journal/trades/new">새 복기</Link>
           </header>
+          {myTradeJournals.length === 0 ? <p>아직 작성한 복기가 없습니다.</p> : null}
           {myTradeJournals.map((journal) => (
             <div className={styles.item} key={journal.id}>
               <span>{journal.date} · {journal.result}</span>

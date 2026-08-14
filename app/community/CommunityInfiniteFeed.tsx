@@ -1,8 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./page.module.scss";
+
+type BackendCommunityPost = {
+  id: string;
+  category: string;
+  title: string;
+  author_id: string;
+  nickname?: string | null;
+  reply_count: number;
+  view_count: number;
+  created_at: string;
+};
+
+type BackendCommunityPage = {
+  items?: BackendCommunityPost[];
+  nextCursor?: string | null;
+};
 
 export type CommunityListPost = {
   id: string;
@@ -14,23 +30,8 @@ export type CommunityListPost = {
   time: string;
 };
 
-type BackendCommunityPost = {
-  id: string;
-  category: string;
-  title: string;
-  author_id: string;
-  reply_count: number;
-  view_count: number;
-  created_at: string;
-};
-
-type BackendCommunityPage = {
-  items?: BackendCommunityPost[];
-  nextCursor?: string | null;
-};
-
 const categories = ["전체", "질문", "조언", "시황", "뉴스", "테마", "잡담"];
-const pageSize = 6;
+const pageSize = 10;
 
 function formatTime(value: string) {
   const date = new Date(value);
@@ -50,35 +51,26 @@ function fromBackendPost(post: BackendCommunityPost): CommunityListPost {
     id: post.id,
     type: post.category,
     title: post.title,
-    author: post.author_id,
+    author: post.nickname || post.author_id,
     replies: post.reply_count,
     views: post.view_count,
     time: formatTime(post.created_at)
   };
 }
 
-export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] }) {
+export function CommunityInfiniteFeed() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [category, setCategory] = useState("전체");
-  const [visibleCount, setVisibleCount] = useState(pageSize);
-  const [loadedPosts, setLoadedPosts] = useState<CommunityListPost[]>(posts);
+  const [posts, setPosts] = useState<CommunityListPost[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [usesBackend, setUsesBackend] = useState(false);
-  const filteredPosts = useMemo(
-    () => category === "전체" ? loadedPosts : loadedPosts.filter((post) => post.type === category),
-    [category, loadedPosts]
-  );
-  const visiblePosts = usesBackend ? filteredPosts : filteredPosts.slice(0, visibleCount);
-  const hasMore = usesBackend ? Boolean(nextCursor) : visibleCount < filteredPosts.length;
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasFailed, setHasFailed] = useState(false);
 
-  const loadBackendPage = useCallback(async (cursor?: string | null, replace = false) => {
+  const loadPage = useCallback(async (cursor?: string | null, replace = false) => {
     setIsLoading(true);
 
     try {
-      const params = new URLSearchParams({
-        limit: String(pageSize)
-      });
+      const params = new URLSearchParams({ limit: String(pageSize) });
 
       if (category !== "전체") params.set("category", category);
       if (cursor) params.set("cursor", cursor);
@@ -87,60 +79,56 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
         cache: "no-store"
       });
 
-      if (!response.ok) return;
+      if (!response.ok) throw new Error(`backend ${response.status}`);
 
       const data = await response.json() as BackendCommunityPage;
       const items = (data.items ?? []).map(fromBackendPost);
 
-      if (items.length === 0 && replace) {
-        setUsesBackend(false);
-        setLoadedPosts(posts);
-        setNextCursor(null);
-        return;
-      }
-
-      if (items.length > 0 || data.nextCursor) {
-        setUsesBackend(true);
-        setLoadedPosts((current) => replace ? items : [...current, ...items]);
-        setNextCursor(data.nextCursor ?? null);
-      }
+      setHasFailed(false);
+      setPosts((current) => replace ? items : [...current, ...items]);
+      setNextCursor(data.nextCursor ?? null);
     } catch {
+      setHasFailed(true);
       if (replace) {
-        setUsesBackend(false);
-        setLoadedPosts(posts);
+        setPosts([]);
         setNextCursor(null);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [category, posts]);
+  }, [category]);
 
   useEffect(() => {
+    // Deferred so the loading flag is not set during the effect itself.
     queueMicrotask(() => {
-      void loadBackendPage(null, true);
+      void loadPage(null, true);
     });
-  }, [category, loadBackendPage]);
+  }, [loadPage]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
 
-    if (!sentinel || !hasMore) return;
+    if (!sentinel || !nextCursor) return;
 
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        if (usesBackend) {
-          if (!isLoading && nextCursor) void loadBackendPage(nextCursor);
-          return;
-        }
-
-        setVisibleCount((current) => Math.min(current + pageSize, filteredPosts.length));
+      if (entries.some((entry) => entry.isIntersecting) && !isLoading) {
+        void loadPage(nextCursor);
       }
     }, { rootMargin: "240px 0px" });
 
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [filteredPosts.length, hasMore, isLoading, loadBackendPage, nextCursor, usesBackend]);
+  }, [isLoading, loadPage, nextCursor]);
+
+  function statusMessage() {
+    if (isLoading) return "불러오는 중";
+    if (hasFailed) return "글을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.";
+    if (posts.length === 0) return "아직 글이 없습니다. 첫 글을 남겨보세요.";
+    if (nextCursor) return "더 불러오는 중";
+
+    return "마지막 글입니다";
+  }
 
   return (
     <div className={styles.feed}>
@@ -149,10 +137,7 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
           <button
             aria-pressed={category === item}
             key={item}
-            onClick={() => {
-              setVisibleCount(pageSize);
-              setCategory(item);
-            }}
+            onClick={() => setCategory(item)}
             type="button"
           >
             {item}
@@ -160,7 +145,7 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
         ))}
       </div>
       <div className={styles.postList}>
-        {visiblePosts.map((post) => (
+        {posts.map((post) => (
           <Link href={`/community/posts/${post.id}`} key={post.id}>
             <span>{post.type}</span>
             <h2>{post.title}</h2>
@@ -174,7 +159,7 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
         ))}
       </div>
       <div className={styles.scrollSentinel} ref={sentinelRef} aria-live="polite">
-        {isLoading ? "불러오는 중" : hasMore ? "더 불러오는 중" : "마지막 글입니다"}
+        {statusMessage()}
       </div>
     </div>
   );

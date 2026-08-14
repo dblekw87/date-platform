@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import { AdSlot, SideAdRails } from "../../../../_components/AdSlot";
 import { SiteHeader } from "../../../../_components/SiteHeader";
-import { currentUserAuthorId, requireCurrentUser } from "../../../../auth/session";
+import { requireCurrentUser } from "../../../../auth/session";
 import { fetchBackendJson } from "../../../../_lib/backend";
-import { tradeJournals } from "../../trade-journals";
 import { TradeJournalForm } from "../../new/TradeJournalForm";
 import styles from "../../new/page.module.scss";
 
@@ -18,33 +17,35 @@ type BackendTradeJournal = {
   good_html: string;
   bad_html: string;
   author_id: string;
+  is_owner: boolean;
 };
 
-function fromBackendJournal(journal: BackendTradeJournal) {
+function fromBackendJournal(item: BackendTradeJournal) {
   return {
-    id: journal.id,
-    date: journal.trade_date,
+    id: item.id,
+    date: item.trade_date?.slice(0, 10) ?? "",
     symbol: "",
     name: "",
-    title: journal.title,
-    visibility: journal.visibility === "public" ? "공개" : "비공개",
-    author: journal.author_id,
-    result: journal.result,
-    buy: journal.buy_html,
-    sell: journal.sell_html,
-    good: journal.good_html,
-    bad: journal.bad_html
+    title: item.title,
+    visibility: item.visibility === "public" ? "공개" : "비공개",
+    author: item.author_id,
+    result: item.result,
+    buy: item.buy_html,
+    sell: item.sell_html,
+    good: item.good_html,
+    bad: item.bad_html
   };
 }
 
 export default async function EditTradeJournalPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireCurrentUser("/journal/trades");
   const { id } = await params;
-  const journal = tradeJournals.find((item) => item.id === id) ?? (
-    await fetchBackendJson<BackendTradeJournal>(`/api/trade-journals/${id}`).then((item) => item ? fromBackendJournal(item) : null)
-  );
+  const item = await fetchBackendJson<BackendTradeJournal>(`/api/trade-journals/${id}`);
 
-  if (!journal || currentUserAuthorId(user) !== journal.author) notFound();
+  // is_owner is computed from the viewer's row, so the frontend does not rebuild an author id.
+  if (!item?.is_owner) notFound();
+
+  const journal = fromBackendJournal(item);
 
   return (
     <main className={styles.page}>

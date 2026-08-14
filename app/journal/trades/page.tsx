@@ -3,7 +3,6 @@ import { AdSlot, SideAdRails } from "../../_components/AdSlot";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { getCurrentUser } from "../../auth/session";
 import { TradeJournalInfiniteList } from "./TradeJournalInfiniteList";
-import { tradeJournals } from "./trade-journals";
 import styles from "./page.module.scss";
 
 export default async function TradeJournalPage() {
@@ -23,24 +22,9 @@ export default async function TradeJournalPage() {
         <Link href="/journal/trades/new">새 매매 복기 작성</Link>
       </section>
 
-      <section className={styles.summaryGrid} aria-label="매매 복기 요약">
-        <article>
-          <span>공개 일지</span>
-          <strong>24건</strong>
-        </article>
-        <article>
-          <span>오늘 업로드</span>
-          <strong>5건</strong>
-        </article>
-        <article>
-          <span>많이 본 복기</span>
-          <strong>단타 점검</strong>
-        </article>
-      </section>
-
       <AdSlot label="매매 복기 목록 상단 광고" />
 
-      <TradeJournalInfiniteList journals={tradeJournals} />
+      <TradeJournalInfiniteList />
     </main>
   );
 }

@@ -26,6 +26,16 @@ function editorHtml(sectionId: string) {
   return document.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`)?.innerHTML.trim() ?? "";
 }
 
+// A plain text field rather than type="time": the native picker forces a
+// 오전/오후 control in Korean locales, and a trading log is quicker to fill in
+// by typing 0915 straight through. The colon is inserted as the digits arrive.
+function formatTimeInput(event: React.FormEvent<HTMLInputElement>) {
+  const input = event.currentTarget;
+  const digits = input.value.replace(/\D/g, "").slice(0, 4);
+
+  input.value = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+}
+
 export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -97,13 +107,27 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
       <div className={styles.timeStack}>
         <label>
           매수 시각
-          <input name="buyTime" defaultValue={initialJournal?.buyTime} type="time" />
+          <input
+            name="buyTime"
+            defaultValue={initialJournal?.buyTime}
+            inputMode="numeric"
+            maxLength={5}
+            onInput={formatTimeInput}
+            placeholder="09:15"
+          />
         </label>
         <label>
           매도 시각
-          <input name="sellTime" defaultValue={initialJournal?.sellTime} type="time" />
+          <input
+            name="sellTime"
+            defaultValue={initialJournal?.sellTime}
+            inputMode="numeric"
+            maxLength={5}
+            onInput={formatTimeInput}
+            placeholder="15:20"
+          />
         </label>
-        <small>기억나는 대로 적어두면 그 시각의 시황·뉴스와 함께 복기할 수 있습니다. 비워두어도 저장됩니다.</small>
+        <small>24시간제로 입력합니다. 숫자만 눌러도 콜론이 붙습니다. 비워두어도 저장됩니다.</small>
       </div>
       <label className={styles.full}>
         제목

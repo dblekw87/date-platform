@@ -130,6 +130,15 @@
   grid-column: 1 / -1;
 }
 
+// Entry above exit, in one column, so the pair reads in the order the trade
+// happened rather than being split across the three-column grid.
+.timeStack {
+  display: grid;
+  grid-column: 1 / -1;
+  max-width: 320px;
+  gap: 16px;
+}
+
 .form input,
 .form textarea {
   min-width: 0;

@@ -7,6 +7,8 @@ import styles from "./page.module.scss";
 type BackendTradeJournal = {
   id: string;
   trade_date: string;
+  buy_time: string | null;
+  sell_time: string | null;
   title: string;
   result: string;
   visibility: "public" | "private";
@@ -26,6 +28,7 @@ type BackendTradeJournalPage = {
 type TradeJournalCard = {
   id: string;
   date: string;
+  tradeWindow: string;
   title: string;
   visibility: string;
   author: string;
@@ -53,10 +56,23 @@ function toPreviewText(html: string) {
     .trim();
 }
 
+// "09:15 → 10:40" when both are known, a single side when only one is.
+function tradeWindow(buyTime: string | null, sellTime: string | null) {
+  const buy = buyTime?.slice(0, 5);
+  const sell = sellTime?.slice(0, 5);
+
+  if (buy && sell) return `${buy} → ${sell}`;
+  if (buy) return `매수 ${buy}`;
+  if (sell) return `매도 ${sell}`;
+
+  return "";
+}
+
 function fromBackendJournal(journal: BackendTradeJournal): TradeJournalCard {
   return {
     id: journal.id,
     date: journal.trade_date?.slice(0, 10) ?? "",
+    tradeWindow: tradeWindow(journal.buy_time, journal.sell_time),
     title: journal.title,
     visibility: journal.visibility === "public" ? "공개" : "비공개",
     author: journal.nickname || journal.author_id,
@@ -144,7 +160,7 @@ export function TradeJournalInfiniteList() {
         <Link className={styles.cardLink} href={`/journal/trades/${journal.id}`} key={journal.id}>
           <header>
             <div>
-              <time>{journal.date}</time>
+              <time>{journal.date}{journal.tradeWindow ? ` · ${journal.tradeWindow}` : ""}</time>
               <h2>{journal.title}</h2>
               <p>{journal.author}</p>
             </div>

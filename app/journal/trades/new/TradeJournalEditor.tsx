@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { removeAdjacentImageBlock } from "../../../_lib/editor-images";
 import styles from "./page.module.scss";
 
 type EditorSection = {
@@ -199,9 +200,20 @@ export function TradeJournalEditor({ initialValues = {} }: { initialValues?: Par
               insertImages(section.id, images);
             }}
             onKeyDown={(event) => {
-              if ((event.key === "Backspace" || event.key === "Delete") && selectedImage?.sectionId === section.id) {
+              if (selectedImage?.sectionId === section.id) {
+                if (event.key === "Backspace" || event.key === "Delete") {
+                  event.preventDefault();
+                  deleteSelectedImage(section.id);
+                }
+
+                return;
+              }
+
+              const editor = editorRefs.current[section.id];
+              const removed = editor ? removeAdjacentImageBlock(editor, event.key) : null;
+
+              if (removed) {
                 event.preventDefault();
-                deleteSelectedImage(section.id);
               }
             }}
           />

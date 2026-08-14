@@ -9,6 +9,8 @@ import styles from "./page.module.scss";
 type BackendTradeJournal = {
   id: string;
   trade_date: string;
+  buy_time: string | null;
+  sell_time: string | null;
   title: string;
   result: string;
   visibility: "public" | "private";
@@ -25,6 +27,8 @@ function fromBackendJournal(item: BackendTradeJournal) {
   return {
     id: item.id,
     date: item.trade_date?.slice(0, 10) ?? "",
+    buyTime: item.buy_time?.slice(0, 5) ?? "",
+    sellTime: item.sell_time?.slice(0, 5) ?? "",
     title: item.title,
     visibility: item.visibility === "public" ? "공개" : "비공개",
     author: item.nickname || item.author_id,
@@ -67,11 +71,11 @@ export default async function TradeJournalDetailPage({ params }: { params: Promi
 
         <section className={styles.contentGrid}>
           <article>
-            <h2>매수한 점</h2>
+            <h2>매수한 점{journal.buyTime ? <small> · {journal.buyTime}</small> : null}</h2>
             <div dangerouslySetInnerHTML={{ __html: journal.buy }} />
           </article>
           <article>
-            <h2>매도한 점</h2>
+            <h2>매도한 점{journal.sellTime ? <small> · {journal.sellTime}</small> : null}</h2>
             <div dangerouslySetInnerHTML={{ __html: journal.sell }} />
           </article>
           <article>

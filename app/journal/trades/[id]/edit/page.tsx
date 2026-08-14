@@ -9,6 +9,8 @@ import styles from "../../new/page.module.scss";
 type BackendTradeJournal = {
   id: string;
   trade_date: string;
+  buy_time: string | null;
+  sell_time: string | null;
   title: string;
   result: string;
   visibility: "public" | "private";
@@ -24,6 +26,8 @@ function fromBackendJournal(item: BackendTradeJournal) {
   return {
     id: item.id,
     date: item.trade_date?.slice(0, 10) ?? "",
+    buyTime: item.buy_time?.slice(0, 5) ?? "",
+    sellTime: item.sell_time?.slice(0, 5) ?? "",
     symbol: "",
     name: "",
     title: item.title,

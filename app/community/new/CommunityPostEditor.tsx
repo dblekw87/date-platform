@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { removeAdjacentImageBlock } from "../../_lib/editor-images";
 import { uploadMedia } from "../../_lib/upload-media";
 import styles from "./page.module.scss";
 
@@ -212,9 +213,20 @@ export function CommunityPostEditor({ editorId = "community-post-editor", initia
           void insertImages(images);
         }}
         onKeyDown={(event) => {
-          if ((event.key === "Backspace" || event.key === "Delete") && selectedImage) {
+          if (selectedImage) {
+            if (event.key === "Backspace" || event.key === "Delete") {
+              event.preventDefault();
+              deleteSelectedImage();
+            }
+
+            return;
+          }
+
+          const editor = editorRef.current;
+          const removed = editor ? removeAdjacentImageBlock(editor, event.key) : null;
+
+          if (removed) {
             event.preventDefault();
-            deleteSelectedImage();
           }
         }}
       />

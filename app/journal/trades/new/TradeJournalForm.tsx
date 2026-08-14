@@ -10,6 +10,8 @@ type TradeJournalFormProps = {
   initialJournal?: {
     id: string;
     date: string;
+    buyTime?: string;
+    sellTime?: string;
     title: string;
     result: string;
     visibility: string;
@@ -30,6 +32,8 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
 
   async function saveJournal(formData: FormData) {
     const tradeDate = String(formData.get("tradeDate") ?? "").trim();
+    const buyTime = String(formData.get("buyTime") ?? "").trim();
+    const sellTime = String(formData.get("sellTime") ?? "").trim();
     const result = String(formData.get("result") ?? "").trim();
     const title = String(formData.get("title") ?? "").trim();
     const visibility = String(formData.get("visibility") ?? "public");
@@ -53,6 +57,8 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
         },
         body: JSON.stringify({
           tradeDate,
+          buyTime,
+          sellTime,
           result,
           title,
           visibility,
@@ -88,6 +94,17 @@ export function TradeJournalForm({ initialJournal }: TradeJournalFormProps) {
         손익
         <input name="result" defaultValue={initialJournal?.result} placeholder="예: +1.8% 또는 -0.6%" />
       </label>
+      <div className={styles.timeStack}>
+        <label>
+          매수 시각
+          <input name="buyTime" defaultValue={initialJournal?.buyTime} type="time" />
+        </label>
+        <label>
+          매도 시각
+          <input name="sellTime" defaultValue={initialJournal?.sellTime} type="time" />
+        </label>
+        <small>기억나는 대로 적어두면 그 시각의 시황·뉴스와 함께 복기할 수 있습니다. 비워두어도 저장됩니다.</small>
+      </div>
       <label className={styles.full}>
         제목
         <input name="title" defaultValue={initialJournal?.title} placeholder="복기 제목을 입력하세요" />

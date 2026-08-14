@@ -465,6 +465,15 @@ function fallbackMarketCard(id: string, timestamp?: string): MarketSnapshot {
   };
 }
 
+/**
+ * Marks a stock doing an outsized share of its day's turnover in the last few
+ * minutes — the burst that a cumulative figure hides. A fifth of the day inside
+ * a ten-minute window is well above an even pace and worth looking at now.
+ */
+function isSurging(stock: LeadingStock) {
+  return (stock.recentTurnoverShare ?? 0) >= 0.2 && Boolean(stock.recentTurnover);
+}
+
 function themeRankLabel(groups: { theme: string }[], index: number) {
   return groups[index]?.theme ?? "확인 대기";
 }
@@ -506,6 +515,9 @@ function ThemeGroupRow({
           <li key={stock.id}>
             <em>{index + 1}등주</em>
             <span><EnglishText text={nameOf(stock)} /></span>
+            {isSurging(stock) ? (
+              <mark title={`최근 ${stock.recentWindowMinutes}분 ${stock.recentTurnover}`}>급증</mark>
+            ) : null}
             <i />
             <b data-tone={changeTone(leaderChangeRate(stock))}>{leaderChangeRate(stock)}</b>
             <small>{stock.turnover}</small>

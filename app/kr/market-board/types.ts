@@ -121,6 +121,14 @@ export type LeadingStockDto = {
   /** Raw figures behind the formatted strings, for ranking without re-parsing. */
   turnoverValue?: number;
   changeRateValue?: number;
+  /**
+   * Turnover added since an earlier sample. Absent until the backend has held
+   * two samples far enough apart, and on the first refresh of a session.
+   */
+  recentTurnover?: string;
+  recentTurnoverValue?: number;
+  recentTurnoverShare?: number;
+  recentWindowMinutes?: number;
   burst: string;
   turnover: string;
   intraday: string;

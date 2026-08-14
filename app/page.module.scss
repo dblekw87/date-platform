@@ -3307,6 +3307,19 @@
   font-weight: 800;
 }
 
+// Turnover arriving in a burst rather than at an even pace through the session.
+.themeMembers mark {
+  flex: 0 0 auto;
+  background: #da0000;
+  color: #ffffff;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: help;
+}
+
 .adGrid .adSlot {
   margin: 0;
 }

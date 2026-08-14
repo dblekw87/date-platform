@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./page.module.scss";
 
 export type CommunityListPost = {
@@ -72,7 +72,7 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
   const visiblePosts = usesBackend ? filteredPosts : filteredPosts.slice(0, visibleCount);
   const hasMore = usesBackend ? Boolean(nextCursor) : visibleCount < filteredPosts.length;
 
-  async function loadBackendPage(cursor?: string | null, replace = false) {
+  const loadBackendPage = useCallback(async (cursor?: string | null, replace = false) => {
     setIsLoading(true);
 
     try {
@@ -113,14 +113,13 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [category, posts]);
 
   useEffect(() => {
     queueMicrotask(() => {
       void loadBackendPage(null, true);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
+  }, [category, loadBackendPage]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -141,7 +140,7 @@ export function CommunityInfiniteFeed({ posts }: { posts: CommunityListPost[] })
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [filteredPosts.length, hasMore, isLoading, nextCursor, usesBackend]);
+  }, [filteredPosts.length, hasMore, isLoading, loadBackendPage, nextCursor, usesBackend]);
 
   return (
     <div className={styles.feed}>

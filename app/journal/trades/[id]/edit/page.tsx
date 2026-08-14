@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdSlot, SideAdRails } from "../../../../_components/AdSlot";
 import { SiteHeader } from "../../../../_components/SiteHeader";

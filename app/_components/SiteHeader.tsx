@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { DateLogo } from "./DateLogo";
@@ -123,7 +124,7 @@ export function SiteHeader({ active = "market", hideAuthNav = false, statusLabel
               onClick={() => setIsProfileOpen((current) => !current)}
             >
               <span aria-hidden="true">
-                {profileImage ? <img alt="" src={profileImage} /> : userLabel.slice(0, 1)}
+                {profileImage ? <Image alt="" height={32} src={profileImage} unoptimized width={32} /> : userLabel.slice(0, 1)}
               </span>
               {userLabel}
             </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./page.module.scss";
 import type { tradeJournals } from "./trade-journals";
 
@@ -53,7 +53,7 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
   const visibleJournals = usesBackend ? loadedJournals : loadedJournals.slice(0, visibleCount);
   const hasMore = usesBackend ? Boolean(nextCursor) : visibleCount < loadedJournals.length;
 
-  async function loadBackendPage(cursor?: string | null, replace = false) {
+  const loadBackendPage = useCallback(async (cursor?: string | null, replace = false) => {
     setIsLoading(true);
 
     try {
@@ -93,14 +93,13 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [journals]);
 
   useEffect(() => {
     queueMicrotask(() => {
       void loadBackendPage(null, true);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadBackendPage]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -121,7 +120,7 @@ export function TradeJournalInfiniteList({ journals }: { journals: TradeJournal[
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasMore, isLoading, loadedJournals.length, nextCursor, usesBackend]);
+  }, [hasMore, isLoading, loadBackendPage, loadedJournals.length, nextCursor, usesBackend]);
 
   return (
     <section className={styles.list} aria-label="유저 매매 복기 목록">

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { uploadMedia } from "../_lib/upload-media";
 import styles from "./page.module.scss";
@@ -84,7 +85,7 @@ export function ProfileForm({
     <form action={saveProfile} className={styles.form}>
       <section className={styles.avatarPanel}>
         <div aria-label="대표 이미지 미리보기">
-          {previewUrl ? <img alt="대표 이미지 미리보기" src={previewUrl} /> : "M"}
+          {previewUrl ? <Image alt="대표 이미지 미리보기" height={160} src={previewUrl} unoptimized width={160} /> : "M"}
         </div>
         <label>
           대표 이미지

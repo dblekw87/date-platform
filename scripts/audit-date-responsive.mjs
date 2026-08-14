@@ -40,7 +40,6 @@ for (const [viewportName, viewport] of viewports) {
     const metrics = await page.evaluate(() => {
       const doc = document.documentElement;
       const body = document.body;
-      const main = document.querySelector("main");
       const summary = document.querySelector("section[aria-labelledby='kr-home-title']");
       const tabs = document.querySelector("nav[aria-label='홈 탭']");
       const panel = document.querySelector("[data-tab]");

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { AdSlot, SideAdRails } from "../../_components/AdSlot";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { requireCurrentUser } from "../../auth/session";

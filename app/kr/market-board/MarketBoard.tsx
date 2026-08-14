@@ -865,7 +865,7 @@ export function MarketBoard({
             </div>
             <div>
               <span>갱신 상태</span>
-              <strong>{formatDateTimeMinute(newsProvider?.checkedAt)}</strong>
+              <strong>{isRefreshing ? "갱신 중" : formatDateTimeMinute(newsProvider?.checkedAt)}</strong>
             </div>
           </section>
           <div className={styles.newsFilters} role="group" aria-label="뉴스 필터">

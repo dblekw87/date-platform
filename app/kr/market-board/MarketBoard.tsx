@@ -416,7 +416,16 @@ function rankedThemeGroups(stocks: LeadingStock[]) {
       const turnover = members.reduce((total, stock) => total + (stock.turnoverValue ?? 0), 0);
       const weighted = members.reduce((total, stock) => total + (stock.turnoverValue ?? 0) * (stock.changeRateValue ?? 0), 0);
 
-      return { theme, members, changeRate: turnover > 0 ? weighted / turnover : 0 };
+      return {
+        theme,
+        // Ordered by how far each has moved, so the one leading the theme reads
+        // as 1등주 and the names still trailing it come after — the comparison
+        // this list exists to make.
+        members: [...members].sort((left, right) =>
+          (right.changeRateValue ?? 0) - (left.changeRateValue ?? 0)
+          || (right.turnoverValue ?? 0) - (left.turnoverValue ?? 0)),
+        changeRate: turnover > 0 ? weighted / turnover : 0
+      };
     })
     .filter((group) => group.changeRate > 0)
     .sort((left, right) => right.changeRate - left.changeRate)

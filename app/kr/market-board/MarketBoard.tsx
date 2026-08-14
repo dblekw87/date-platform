@@ -429,7 +429,9 @@ function rankedThemeGroups(stocks: LeadingStock[]) {
         changeRate: turnover > 0 ? weighted / turnover : 0
       };
     })
-    .filter((group) => group.changeRate > 0)
+    // A single name is a 주도주, which has its own list above, so a one-stock
+    // group here would promise a 2등주 that does not exist.
+    .filter((group) => group.members.length >= 2 && group.changeRate > 0)
     .sort((left, right) => right.changeRate - left.changeRate)
     .slice(0, 3);
 }

@@ -1,7 +1,8 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SiteHeader } from "../../_components/SiteHeader";
 import styles from "../../page.module.scss";
 import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId } from "./types";
@@ -759,8 +760,22 @@ export function MarketBoard({
   initialTab?: MarketBoardTabId;
   userLabel?: string;
 }) {
-  const [liveBoard, setLiveBoard] = useState(board);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  // Server render supplies the first board, so the query starts with data and
+  // only takes over the periodic refresh. Refetching pauses while the tab is
+  // hidden and resumes on focus, so a backgrounded tab does not poll the
+  // upstream providers for nothing.
+  const { data: liveBoard, isFetching: isRefreshing } = useQuery({
+    queryKey: ["market-board"],
+    queryFn: async () => {
+      const response = await fetch("/api/market-board", { cache: "no-store" });
+
+      if (!response.ok) throw new Error(`시장 보드 갱신 실패 (${response.status})`);
+
+      return await response.json() as MarketBoardData;
+    },
+    initialData: board,
+    refetchInterval: refreshIntervalMs
+  });
   const [activeTab, setActiveTab] = useState<MarketBoardTabId>(initialTab);
   const [newsFilter, setNewsFilter] = useState<NewsFilterId>("all");
   const [disclosureRegion, setDisclosureRegion] = useState<DisclosureRegion>("us");
@@ -823,42 +838,6 @@ export function MarketBoard({
   const secProvider = liveBoard.providerStatuses.find((provider) => provider.id === "sec");
   const newDisclosureCount = activeDisclosures.filter((item) => item.isNew).length;
   const smallCapDisclosureCount = activeDisclosures.filter((item) => item.issuerType === "small-cap").length;
-
-  useEffect(() => {
-    let ignore = false;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    async function refreshBoard() {
-      if (document.visibilityState !== "visible") {
-        timeoutId = setTimeout(refreshBoard, refreshIntervalMs);
-        return;
-      }
-
-      setIsRefreshing(true);
-
-      try {
-        const response = await fetch("/api/market-board", { cache: "no-store" });
-
-        if (!response.ok) return;
-
-        const nextBoard = await response.json() as MarketBoardData;
-
-        if (!ignore) setLiveBoard(nextBoard);
-      } finally {
-        if (!ignore) {
-          setIsRefreshing(false);
-          timeoutId = setTimeout(refreshBoard, refreshIntervalMs);
-        }
-      }
-    }
-
-    void refreshBoard();
-
-    return () => {
-      ignore = true;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, []);
 
   return (
     <main className={styles.page}>

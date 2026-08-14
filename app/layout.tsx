@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bebas_Neue } from "next/font/google";
+import { QueryProvider } from "./_components/QueryProvider";
 import "./globals.scss";
 
 const bebasNeue = Bebas_Neue({
@@ -20,7 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html className={bebasNeue.variable} lang="ko">
-      <body>{children}</body>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }

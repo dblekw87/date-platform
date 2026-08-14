@@ -55,17 +55,18 @@ PostgreSQL은 로컬에 설치하지 않고 **도커 컨테이너로만** 띄웁
 브라우저
   │
   ├─ 서버 컴포넌트 ─→ app/_lib/backend.ts ────────┐
-  │                    (세션 → X-Date-User-* 헤더)  │
+  │                    (세션 → Bearer 토큰)        │
   └─ 클라이언트 ───→ /api/backend/[...path] ──────┤
-                       (프록시, 헤더 주입)          │
+                       (프록시, 토큰 주입)          │
                                                     ▼
                                        date-platform-backend :4010
                                          ├─ PostgreSQL
-                                         └─ Toss Invest / KIS Open API
+                                         └─ provider 7종 (아래 참고)
 ```
 
-**핵심 원칙: 증권사 API 시크릿은 백엔드 `.env`에만 둡니다.** Toss/KIS 키를 프론트
-환경변수나 Vercel에 넣지 마세요. 프론트는 정규화된 DTO만 받습니다.
+**핵심 원칙: 프론트는 데이터를 만들지 않습니다.** 외부 API 호출과 시크릿은 전부
+백엔드에 있고, 프론트는 정규화된 DTO를 받아 표시만 합니다. 프론트에 provider
+어댑터나 목업 데이터를 다시 만들지 마세요 — 한 번 걷어낸 구조입니다.
 
 ### 시장 보드 데이터 흐름
 
@@ -104,18 +105,31 @@ provider별 API 키는 전부 백엔드 `.env`에 둡니다.
   HS256 토큰을 `Authorization: Bearer`로 보냅니다. 백엔드는 `src/auth/`에서 검증합니다.
   두 저장소의 `INTERNAL_JWT_SECRET` 값이 같아야 합니다
 - `proxy.ts`(Next.js 16 미들웨어)가 `/community`, `/journal/trades/new`를 보호
-- `DATE_MOCK_AUTH=true` 또는 개발 모드에서는 로그인 없이 Mock Trader로 통과
+- `DATE_MOCK_AUTH=true`일 때만 `/auth/mock` 지름길과 Mock Trader가 열립니다.
+  개발 모드라는 이유만으로는 열리지 않습니다
 
-### 라우트 세대
+### 라우트
 
-`app/` 아래 라우트는 세 세대가 섞여 있습니다. 작업 전에 어디에 속하는지 확인하세요.
+`app/` 아래 라우트는 전부 내비게이션에서 도달 가능합니다.
 
-| 그룹 | 경로 | 상태 |
-|---|---|---|
-| 현재 서비스 | `/`, `/community/*`, `/journal/trades/*`, `/profile/*`, `/auth/*` | 활성 |
-| 시장 보드 구현 | `app/kr/market-board/*` | 활성 (`/`가 여기서 렌더) |
-| 프로토타입 잔재 | `app/kr/` 나머지 (market, journal, theme, settings, stock, search) | 내비 도달 불가 |
-| 리서치 실험 | `/discover`, `/entity/*`, `/evidence/*`, `/research`, `/monitoring` | 서로만 링크하는 닫힌 섬 |
+| 경로 | 화면 |
+|---|---|
+| `/` | 시장 보드. 구현은 `app/kr/market-board/`에 있습니다 |
+| `/community`, `/community/new`, `/community/posts/[id]`, `.../edit` | 커뮤니티 |
+| `/journal/trades`, `/new`, `/[id]`, `/[id]/edit` | 매매 복기 |
+| `/profile`, `/profile/posts` | 프로필 |
+| `/auth/login`, `/auth/[provider]`, `/callback`, `/logout`, `/mock` | 인증 |
+| `/terms`, `/privacy` | 약관 |
+| `/api/market-board`, `/news-events`, `/sec-events`, `/api/backend/[...path]` | 라우트 핸들러 |
+
+`app/kr/page.tsx`와 `app/community/review/new/page.tsx`는 각각 `/`와
+`/journal/trades/new`로 보내는 리다이렉트 스텁입니다. 옛 링크를 살려두려고
+남겨둔 것이니 화면이 없다고 지우지 마세요.
+
+`app/kr/` 아래에는 `market-board/`와 이 리다이렉트만 남아 있습니다. 프로토타입
+잔재(`kr/market`, `kr/theme` 등)와 리서치 실험 화면(`/discover`, `/entity`,
+`/evidence`, `/research`, `/monitoring`)은 제거했습니다. 관련 설계 문서는
+`docs/date/research/`에 그대로 있습니다.
 
 ## 코드 컨벤션
 
@@ -136,10 +150,12 @@ provider별 API 키는 전부 백엔드 `.env`에 둡니다.
 
 `.env.example`을 항상 최신으로 유지합니다. 새 변수를 코드에서 읽으면 예제에도 추가합니다.
 
-프론트(`date-platform/.env.local`)에는 백엔드 주소, 세션 시크릿, OAuth 키,
-뉴스/DART/KRX 키만 둡니다. **시장 데이터 provider 시크릿(Toss/KIS)은
-백엔드(`date-platform-backend/.env`)에만 둡니다** — 프론트에 두면 Vercel 클라이언트
-번들 쪽으로 새어나갈 위험이 있어 의도적으로 분리했습니다.
+프론트(`date-platform/.env.local`)에 남는 것은 **백엔드 주소, 세션 시크릿,
+`INTERNAL_JWT_SECRET`, OAuth 키뿐**입니다.
+
+**외부 데이터 provider 키는 전부 백엔드(`date-platform-backend/.env`)에 둡니다** —
+Toss, KIS, Finnhub, DART, KRX, NewsAPI, Naver, SEC User-Agent. 프론트에서
+provider를 호출하지 않으므로 프론트에 그 키가 있으면 잘못된 것입니다.
 
 `INTERNAL_JWT_SECRET`은 양쪽 `.env`에 **같은 값**이어야 합니다. 값이 다르면 모든
 백엔드 호출이 401이 되고, 백엔드에 없으면 위조 가능한 헤더 모드로 떨어집니다.
@@ -158,6 +174,10 @@ OAuth 앱 설정과 Redirect URI 등록 절차는 `docs/oauth-login-setup.md`를
    INSERT하는데 만료 행을 지우는 코드가 없습니다.
 4. **업로드 MIME이 헤더 기반** — 매직바이트 검증이 없고 `/uploads/` 응답에
    `X-Content-Type-Options: nosniff`가 없습니다.
-5. **목업 혼재** — 커뮤니티/매매복기 목록·상세가 하드코딩 배열을 먼저 렌더하고
-   클라이언트에서 백엔드 데이터로 교체합니다. 실서비스 전에 제거 대상입니다.
+5. **커뮤니티·매매복기 목업 혼재** — 두 화면의 목록·상세가 하드코딩 배열을 먼저
+   렌더하고 클라이언트에서 백엔드 데이터로 교체합니다. 시장 보드는 정리했지만
+   이 둘은 남아 있습니다.
 6. **댓글 API 부재** — `community_comments` 테이블은 있지만 엔드포인트가 없어 화면은 목업입니다.
+7. **토스 랭킹 API 429** — 토큰 발급은 성공하는데 `/api/v1/rankings`가 쿼터를
+   반환합니다. 코드 완화책(토큰 디스크 보존, in-flight 중복 제거, 90초 쿨다운)은
+   적용했으니 남은 건 계정 한도 문제입니다. 미국 주도주가 비어 있는 원인입니다.

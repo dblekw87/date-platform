@@ -245,35 +245,31 @@ app/
       - 탭 UI, 필터, 캘린더 선택, 주도주 선택, 상세 패널 렌더링
 
     providers.ts
-      - 여러 API adapter 실행
-      - timeout 처리
-      - provider status 생성
-      - live provider merge
-      - 테마 브리프 파생 데이터 생성
+      - 백엔드 /api/market-board 조회
+      - 백엔드 미응답 시 탭/광고 슬롯 등 고정 구조만 반환
 
     types.ts
-      - 화면과 API adapter가 공유하는 DTO 계약
+      - 화면과 백엔드 provider가 공유하는 DTO 계약
+```
 
-    adapters/
-      kis.ts
-      toss.ts
-      krx.ts
-      dart.ts
-      sec.ts
-      news.ts
-      market.ts
-      news-normalizer.ts
-      cache.ts
-      http.ts
+시장 데이터 provider는 모두 `date-platform-backend/src/providers/`에 있습니다.
+
+```text
+date-platform-backend/src/providers/
+  kis.mjs      toss.mjs     market.mjs
+  sec.mjs      dart.mjs     krx.mjs      news.mjs
+  themes.mjs   news-normalizer.mjs
+  token-store.mjs  runtime-state.mjs
 ```
 
 ## Data Flow
 
 ```text
 External APIs
-  -> adapter layer
-  -> provider orchestration
+  -> backend provider adapters
+  -> provider orchestration (timeout, status, merge)
   -> normalized MarketBoardData DTO
+  -> GET /api/market-board
   -> Next.js page / API route
   -> MarketBoard client component
   -> tabbed dashboard UI
@@ -281,20 +277,24 @@ External APIs
 
 ### Adapter Pattern
 
-각 데이터 공급자는 독립적인 adapter로 분리되어 있습니다.
+각 데이터 공급자는 백엔드에서 독립적인 adapter로 분리되어 있습니다.
 
 - API별 인증 방식과 응답 구조를 adapter 안에 격리
 - adapter 실패 시 전체 화면이 깨지지 않도록 해당 provider 데이터만 제외
 - provider 상태를 상단 상태 스트립에 표시
 - 동일한 DTO로 정규화해 UI 컴포넌트가 공급자 차이를 몰라도 되게 설계
+- provider 시크릿이 브라우저를 향한 프로세스에 존재하지 않음
 
-### Timeout and Fallback
+### Timeout and Rate Limits
 
-금융 데이터 API는 지연, 인증 실패, 레이트 리밋 가능성이 높기 때문에 `providers.ts`에서 각 adapter를 timeout으로 감쌉니다.
+금융 데이터 API는 지연, 인증 실패, 레이트 리밋 가능성이 높기 때문에 백엔드
+`market-board.mjs`에서 각 adapter를 timeout으로 감쌉니다.
 
 - timeout 발생 시 해당 provider만 error 상태 처리
 - 나머지 provider 데이터는 정상 반영
 - 부족한 데이터는 빈 상태와 provider 상태로 명확히 표시
+- 액세스 토큰은 디스크에 보존해 재시작마다 재발급하지 않음
+- 동시 캐시 미스는 한 번의 호출로 합치고, 429 응답 후에는 일정 시간 호출을 멈춤
 - UI는 항상 렌더링 가능한 상태 유지
 
 ## UI/UX Implementation
@@ -415,7 +415,6 @@ npm run dev        # local development
 npm run build      # production build
 npm run start      # production server
 npm run lint       # ESLint
-npm run test:news  # news normalization test
 ```
 
 ## Verification

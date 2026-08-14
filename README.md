@@ -173,8 +173,8 @@ Full responsive audit artifacts:
 
 | Source | Usage | Environment |
 | --- | --- | --- |
-| 한국투자증권 Open API | 국내 지수, 거래대금/거래량 순위, 국내 종목 흐름, 분봉/차트 후보 데이터 | `KIS_APP_KEY`, `KIS_APP_SECRET`, `KIS_HTS_ID` |
-| Toss Invest API | 국내/미국 거래대금, 상승률, 거래량 상위 종목, 환율/시장 지표 | `TOSS_INVEST_CLIENT_ID`, `TOSS_INVEST_CLIENT_SECRET` |
+| 한국투자증권 Open API | 국내 지수, 거래대금/거래량 순위, 국내 종목 흐름, 분봉/차트 후보 데이터 | backend `KIS_APP_KEY`, `KIS_APP_SECRET`, `KIS_HTS_ID` |
+| Toss Invest API | 국내/미국 거래대금, 상승률, 거래량 상위 종목, 환율/시장 지표 | backend `TOSS_INVEST_CLIENT_ID`, `TOSS_INVEST_CLIENT_SECRET` |
 | KRX/KIND | 신규상장, 공모, 국내 시장 일정 | `KRX_CALENDAR_FEED_URL` |
 | DART Open API | 국내 기업 공시 | `DART_API_KEY` |
 | SEC EDGAR | 미국 기업 최신 공시, 8-K, 10-Q, 10-K 등 | public, optional `SEC_USER_AGENT` |
@@ -188,7 +188,7 @@ Full responsive audit artifacts:
 | CoinGecko API | BTC 가격 fallback | public |
 | U.S. Treasury XML | 미국 10년물 금리 fallback | public |
 
-API 키가 없는 환경에서도 프로젝트는 실행되지만, 해당 provider의 콘텐츠는 화면 데이터에서 제외됩니다. 탭, 레이아웃, 상태 스트립은 유지하고 실제 adapter가 수신한 데이터만 보드에 표시합니다.
+프론트엔드는 `DATE_BACKEND_URL`의 `/api/market-board`에서 정규화된 데이터를 먼저 읽습니다. Toss/KIS 같은 provider 비밀키는 `date-platform-backend` 환경변수로만 설정하고, 프론트에는 직접 두지 않습니다. 백엔드가 꺼져 있거나 응답하지 않으면 프론트의 기존 fallback adapter로 화면을 유지합니다.
 
 ## Production Data Health
 
@@ -381,16 +381,12 @@ http://localhost:3000
 
 ## Environment Variables
 
-모든 값이 필수는 아닙니다. 값이 없으면 해당 adapter는 비활성 처리되고, 화면에는 다른 live provider 데이터만 표시됩니다.
+프론트는 백엔드 주소와 OAuth/뉴스 fallback 설정만 필요합니다. Toss/KIS 같은 시장 데이터 provider 비밀키는 `date-platform-backend/.env`에 설정합니다.
 
 ```bash
-KIS_APP_KEY=
-KIS_APP_SECRET=
-KIS_HTS_ID=
-KIS_ENABLE_MINUTE_CHARTS=
-
-TOSS_INVEST_CLIENT_ID=
-TOSS_INVEST_CLIENT_SECRET=
+DATE_BACKEND_URL=http://localhost:4010
+AUTH_SESSION_SECRET=
+DATE_MOCK_AUTH=false
 
 DART_API_KEY=
 SEC_USER_AGENT=

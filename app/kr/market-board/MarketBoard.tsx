@@ -396,13 +396,13 @@ function isThemeLeaderCandidate(stock: LeadingStock) {
 }
 
 /**
- * Groups the leaders by theme and ranks the groups by strength.
+ * Groups the leaders by theme and ranks the groups by how hard they moved.
  *
- * Leader order is turnover-led, so taking themes in the order their first stock
- * appears puts 반도체 on top every session: 삼성전자 and SK하이닉스 trade the
- * most whether or not the sector is moving. Ranking on turnover-weighted change
- * — the same measure the backend uses for the theme brief — answers where money
- * is actually pushing prices today.
+ * Every member counts the same, matching the backend's theme brief. Weighting
+ * by turnover handed the score to whichever member traded most, so 반도체 was
+ * ranked on 삼성전자 alone and a theme of mid caps up 20% placed below a mega
+ * cap up 2%. Turnover concentration is what the 주도주 list above measures; this
+ * one is about which stocks moved as a group.
  */
 function rankedThemeGroups(stocks: LeadingStock[]) {
   const byTheme = new Map<string, LeadingStock[]>();
@@ -415,8 +415,7 @@ function rankedThemeGroups(stocks: LeadingStock[]) {
 
   return [...byTheme.entries()]
     .map(([theme, members]) => {
-      const turnover = members.reduce((total, stock) => total + (stock.turnoverValue ?? 0), 0);
-      const weighted = members.reduce((total, stock) => total + (stock.turnoverValue ?? 0) * (stock.changeRateValue ?? 0), 0);
+      const totalChange = members.reduce((total, stock) => total + (stock.changeRateValue ?? 0), 0);
 
       return {
         theme,
@@ -426,7 +425,7 @@ function rankedThemeGroups(stocks: LeadingStock[]) {
         members: [...members].sort((left, right) =>
           (right.changeRateValue ?? 0) - (left.changeRateValue ?? 0)
           || (right.turnoverValue ?? 0) - (left.turnoverValue ?? 0)),
-        changeRate: turnover > 0 ? weighted / turnover : 0
+        changeRate: members.length > 0 ? totalChange / members.length : 0
       };
     })
     // A single name is a 주도주, which has its own list above, so a one-stock

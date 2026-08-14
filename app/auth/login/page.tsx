@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { DateLogo } from "../../_components/DateLogo";
+import type { OAuthProvider } from "../oauth";
+import { ProviderMark } from "./ProviderMark";
 import styles from "./page.module.scss";
 
-const providers = [
+const providers: Array<{ key: OAuthProvider; label: string }> = [
   { label: "Google로 계속하기", key: "google" },
   { label: "Naver로 계속하기", key: "naver" },
   { label: "Kakao로 계속하기", key: "kakao" }
@@ -56,7 +58,8 @@ export default async function LoginPage({
         <div className={styles.providers}>
           {providers.map((provider) => (
             <Link data-provider={provider.key} href={`/auth/${provider.key}?next=${encodeURIComponent(nextPath)}`} key={provider.key}>
-              {provider.label}
+              <ProviderMark provider={provider.key} />
+              <span>{provider.label}</span>
             </Link>
           ))}
         </div>

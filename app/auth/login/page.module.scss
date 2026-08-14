@@ -138,6 +138,7 @@
 }
 
 .providers a {
+  position: relative;
   display: grid;
   min-height: 46px;
   place-items: center;
@@ -145,8 +146,24 @@
   border-radius: 8px;
   background: #ffffff;
   color: inherit;
+  padding: 0 46px;
   font-weight: 900;
   text-decoration: none;
+}
+
+// Absolute rather than a grid column so the label stays centred in the button
+// regardless of how wide each provider's name is.
+.providers a svg {
+  position: absolute;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+}
+
+.providers a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .providers a[data-provider="kakao"] {

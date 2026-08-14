@@ -1,123 +1,41 @@
-import { marketBoardProviderAdapters } from "./adapters";
-import { attachLeaderNewsTags, loadLeaderNewsHeadlines } from "./adapters/news";
-import { mockMarketBoardData } from "./mock-data";
-import type { LeadingStockDto, MarketBoardData, MarketBriefDto, MarketSnapshotDto, NewsHeadlineDto, ProviderStatusDto, SourceProvider } from "./types";
+import type { MarketBoardData } from "./types";
 
-const timeoutSymbol = Symbol("market-board-provider-timeout");
+const backendUrl = process.env.DATE_BACKEND_URL ?? "http://localhost:4010";
 
-const focusEarningsCalendarItems: MarketBoardData["calendarItems"] = [
-  {
-    id: "focus-earnings-amd-2026-08-04",
-    date: "2026-08-04",
-    day: "화",
-    type: "실적",
-    title: "AMD 실적 발표",
-    market: "미국",
-    check: "미국 8월 4일 장마감 후 발표 · 한국은 8월 5일 새벽 확인",
-    detail: "AMD IR 기준 fiscal Q2 2026 실적 발표입니다. 발표 후 시간외 반응, 반도체 ETF, 관련 AI 인프라 종목 반응을 함께 확인합니다.",
-    source: "AMD IR",
-    originalUrl: "https://ir.amd.com/news-events/press-releases/detail/1289/amd-to-report-fiscal-second-quarter-2026-financial-results",
-    publishedAt: "2026-08-05T05:15:00+09:00"
-  },
-  {
-    id: "focus-earnings-sndk-2026-08-06-kst",
-    date: "2026-08-06",
-    day: "목",
-    type: "실적",
-    title: "SanDisk 실적 발표",
-    market: "미국",
-    check: "미국 8월 5일 13:30 PT 컨퍼런스콜 · 한국은 8월 6일 05:30 확인",
-    detail: "Sandisk IR 기준 fiscal Q4/FY 2026 실적 발표입니다. NAND/스토리지 가격, Western Digital 동반 반응, 반도체 수급을 함께 확인합니다.",
-    source: "Sandisk IR",
-    originalUrl: "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-07-09-sandisk-report-fiscal-fourth-quarter-fiscal-year-2026-results-august-5",
-    publishedAt: "2026-08-06T05:30:00+09:00"
-  }
-];
-
-function missingCredentialMessage(requiredEnv: string[]) {
-  return requiredEnv.length > 0 ? `${requiredEnv.join(", ")} 없음 · provider 비활성` : "공개 adapter 대기";
-}
-
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | typeof timeoutSymbol> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  const timeout = new Promise<typeof timeoutSymbol>((resolve) => {
-    timeoutId = setTimeout(() => resolve(timeoutSymbol), timeoutMs);
-  });
-
-  const result = await Promise.race([promise, timeout]);
-
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-  }
-
-  return result;
-}
-
-function mergeMarketBoardData(base: MarketBoardData, payload: Partial<MarketBoardData>): MarketBoardData {
-  const mergeById = <T extends { id: string }>(baseItems: T[], payloadItems?: T[]) => {
-    if (!payloadItems) return baseItems;
-
-    const byId = new Map(baseItems.map((item) => [item.id, item]));
-
-    payloadItems.forEach((item) => byId.set(item.id, item));
-
-    return [...byId.values()];
-  };
-  const mergeMacroSnapshot = (baseItems: MarketSnapshotDto[], payloadItems?: MarketSnapshotDto[]) => {
-    const providerPriority: Record<SourceProvider, number> = {
-      kis: 60,
-      toss: 50,
-      market: 40,
-      krx: 30,
-      dart: 20,
-      sec: 20,
-      news: 20,
-      mock: 0
-    };
-    const byKey = new Map<string, MarketSnapshotDto>();
-
-    mergeById(baseItems, payloadItems).forEach((item) => {
-      const key = `${item.market}:${item.instrumentType}:${item.symbol.toUpperCase()}`;
-      const current = byKey.get(key);
-
-      if (!current || providerPriority[item.source] >= providerPriority[current.source]) {
-        byKey.set(key, item);
-      }
-    });
-
-    return [...byKey.values()];
-  };
+// Rendered when the backend is unreachable. It carries the board's fixed
+// structure only — tabs, ad slots, and a provider status explaining the gap —
+// so the shell still renders instead of throwing.
+function unavailableBoard(reason: string): MarketBoardData {
+  const checkedAt = new Date().toISOString();
 
   return {
-    ...base,
-    ...payload,
-    tabs: payload.tabs ?? base.tabs,
-    disclosureTabs: payload.disclosureTabs ?? base.disclosureTabs,
-    leaderTabs: payload.leaderTabs ?? base.leaderTabs,
-    adSlots: payload.adSlots ?? base.adSlots,
-    providerStatuses: payload.providerStatuses ?? base.providerStatuses,
-    macroSnapshot: mergeMacroSnapshot(base.macroSnapshot, payload.macroSnapshot),
-    marketBrief: mergeById(base.marketBrief, payload.marketBrief),
-    headlineFlow: payload.headlineFlow ?? base.headlineFlow,
-    calendarItems: mergeById(base.calendarItems, payload.calendarItems)
-      .sort((left, right) => left.date.localeCompare(right.date) || left.type.localeCompare(right.type) || left.title.localeCompare(right.title)),
-    usDisclosures: payload.usDisclosures ?? base.usDisclosures,
-    krDisclosures: payload.krDisclosures ?? base.krDisclosures,
-    flowItems: payload.flowItems ?? base.flowItems,
-    usLeadingStocks: payload.usLeadingStocks ?? base.usLeadingStocks,
-    krLeadingStocks: payload.krLeadingStocks ?? base.krLeadingStocks,
-    smallCapScanner: payload.smallCapScanner ?? base.smallCapScanner
-  };
-}
-
-function withoutMockContent(data: MarketBoardData): MarketBoardData {
-  return {
-    ...data,
+    tabs: [
+      { id: "market", label: "시황", description: "미국 매크로와 국내 개장 기준점을 먼저 확인합니다." },
+      { id: "news", label: "뉴스", description: "미국 뉴스, 국내 뉴스, 테마 흐름, 헤드라인 흐름을 확인합니다." },
+      { id: "calendar", label: "일정", description: "공모주, 실적발표, FOMC, CPI처럼 날짜가 정해진 이벤트를 캘린더로 봅니다." },
+      { id: "breaking", label: "속보·공시", description: "SEC, 인수합병, 매각, 금리, 정책 이벤트처럼 즉시 확인할 항목을 모읍니다." },
+      { id: "flow", label: "수급·차트", description: "시황과 뉴스를 본 뒤 수급과 기술적 위치를 확인합니다." }
+    ],
+    disclosureTabs: [
+      { id: "us", label: "미국 SEC", description: "SEC 공시, 인수합병, 지분 변동, 매각, 금리 이벤트를 미국장 기준으로 봅니다." },
+      { id: "kr", label: "국내 DART", description: "DART 공시, 공급계약, 최대주주 변경, CB/BW, 유상증자, 테마주 재료를 국내장 기준으로 봅니다." }
+    ],
+    leaderTabs: [
+      { id: "us", label: "미국 주도주" },
+      { id: "kr", label: "국내 주도주" }
+    ],
+    adSlots: [
+      { id: "top", label: "상단 광고 영역", reserved: true },
+      { id: "middle", label: "중단 광고 영역", reserved: true },
+      { id: "bottom", label: "하단 광고 영역", reserved: true }
+    ],
+    providerStatuses: [
+      { id: "market", label: "시장 데이터", status: "error", message: reason, checkedAt }
+    ],
     macroSnapshot: [],
     marketBrief: [],
     headlineFlow: [],
-    calendarItems: focusEarningsCalendarItems,
+    calendarItems: [],
     usDisclosures: [],
     krDisclosures: [],
     flowItems: [],
@@ -127,274 +45,24 @@ function withoutMockContent(data: MarketBoardData): MarketBoardData {
   };
 }
 
-function mergeNewsHeadlines(baseItems: NewsHeadlineDto[], payloadItems: NewsHeadlineDto[]) {
-  const byId = new Map(baseItems.map((item) => [item.id, item]));
-
-  payloadItems.forEach((item) => byId.set(item.id, item));
-
-  return [...byId.values()].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
-}
-
-function parseTurnoverValue(value: string) {
-  const normalized = value.replace(/,/g, "");
-  const number = Number(normalized.match(/\d+(?:\.\d+)?/)?.[0] ?? 0);
-
-  if (!Number.isFinite(number)) return 0;
-  if (/\$/.test(value)) {
-    if (/B/i.test(value)) return number * 1_000_000_000;
-    if (/M/i.test(value)) return number * 1_000_000;
-
-    return number;
-  }
-  if (/조/.test(value)) return number * 1_000_000_000_000;
-  if (/억/.test(value)) return number * 100_000_000;
-
-  return number;
-}
-
-function leaderTheme(leader: LeadingStockDto) {
-  const [theme] = leader.reason.split(" · ");
-
-  if (!theme || theme === "ETF" || theme === "미분류") return "";
-  if (/KIS|토스증권|거래대금|거래량|상승률|순위|표시순위/i.test(theme)) return "";
-
-  return theme;
-}
-
-function buildThemeLeadershipBrief(id: string, region: string, leaders: LeadingStockDto[], currency: "KRW" | "USD"): MarketBriefDto | null {
-  const byTheme = new Map<string, { turnover: number; leaders: string[] }>();
-
-  leaders.forEach((leader) => {
-    const theme = leaderTheme(leader);
-
-    if (!theme || theme === "개별 이슈" || theme === "미분류") return;
-
-    const current = byTheme.get(theme) ?? { turnover: 0, leaders: [] };
-
-    current.turnover += parseTurnoverValue(leader.turnover);
-    if (current.leaders.length < 3) current.leaders.push(leader.name);
-    byTheme.set(theme, current);
-  });
-
-  const themes = [...byTheme.entries()]
-    .map(([theme, score]) => ({ theme, ...score }))
-    .filter((score) => score.turnover > 0)
-    .sort((left, right) => right.turnover - left.turnover)
-    .slice(0, 3);
-
-  if (themes.length === 0) return null;
-
-  const formatAmount = (value: number) => {
-    if (currency === "USD") {
-      if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
-      if (value >= 1_000_000) return `$${Math.round(value / 1_000_000).toLocaleString("ko-KR")}M`;
-
-      return `$${Math.round(value).toLocaleString("ko-KR")}`;
-    }
-
-    const eok = value / 100_000_000;
-
-    if (eok >= 10_000) return `${(eok / 10_000).toFixed(1)}조`;
-    if (eok >= 100) return `${Math.round(eok).toLocaleString("ko-KR")}억`;
-
-    return `${eok.toFixed(1)}억`;
-  };
-
-  return {
-    id,
-    region,
-    title: `금일 강세 테마는 ${themes.map((theme, index) => `${index + 1}위 ${theme.theme}`).join(", ")}입니다.`,
-    points: themes.map((theme) => `${theme.theme}: ${formatAmount(theme.turnover)} · ${theme.leaders.join(", ")}`),
-    source: "toss",
-    timestamp: new Date().toISOString()
-  };
-}
-
-function attachDerivedThemeBriefs(data: MarketBoardData): MarketBoardData {
-  const derived = [
-    buildThemeLeadershipBrief("derived-kr-theme-leadership", "시황 · 국내 강세 테마", data.krLeadingStocks, "KRW"),
-    buildThemeLeadershipBrief("derived-us-theme-leadership", "시황 · 미국 강세 테마", data.usLeadingStocks, "USD")
-  ].filter((brief): brief is MarketBriefDto => Boolean(brief));
-
-  if (derived.length === 0) return data;
-
-  const byId = new Map(data.marketBrief.map((brief) => [brief.id, brief]));
-
-  derived.forEach((brief) => byId.set(brief.id, brief));
-
-  return {
-    ...data,
-    marketBrief: [...byId.values()]
-  };
-}
-
-async function getBackendMarketBoardData(): Promise<MarketBoardData | null> {
-  const backendUrl = process.env.DATE_BACKEND_URL;
-
-  if (!backendUrl) return null;
-
+/**
+ * The backend owns every market data provider, so this is a read of its
+ * normalized board rather than a second provider stack.
+ */
+export async function getMarketBoardData(): Promise<MarketBoardData> {
   try {
     const response = await fetch(new URL("/api/market-board", backendUrl), {
       cache: "no-store"
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return unavailableBoard(`백엔드 응답 ${response.status} · 데이터를 불러오지 못했습니다`);
+    }
 
     return await response.json() as MarketBoardData;
-  } catch {
-    return null;
+  } catch (error) {
+    const reason = error instanceof Error && error.message ? ` · ${error.message}` : "";
+
+    return unavailableBoard(`백엔드에 연결하지 못했습니다${reason}`);
   }
-}
-
-// The backend answers 200 with an empty board when its providers are disabled
-// (MARKET_DATA_MODE=demo) or not migrated yet. Treating that as authoritative
-// would blank the screen, so only a board with real content wins. Calendar items
-// are excluded because the backend always ships the same hardcoded entries.
-function hasMarketContent(data: MarketBoardData) {
-  return data.macroSnapshot.length > 0
-    || data.marketBrief.length > 0
-    || data.headlineFlow.length > 0
-    || data.usDisclosures.length > 0
-    || data.krDisclosures.length > 0
-    || data.flowItems.length > 0
-    || data.krLeadingStocks.length > 0
-    || data.usLeadingStocks.length > 0
-    || data.smallCapScanner.length > 0;
-}
-
-// Toss and KIS credentials live only in the backend, so the local adapters can
-// never speak for them. Keep the backend's explanation for those two.
-const backendOwnedProviders = new Set<ProviderStatusDto["id"]>(["kis", "toss"]);
-
-function withBackendProviderStatuses(data: MarketBoardData, backendData: MarketBoardData | null): MarketBoardData {
-  const backendStatuses = backendData?.providerStatuses.filter((status) => backendOwnedProviders.has(status.id));
-
-  if (!backendStatuses?.length) return data;
-
-  const byId = new Map(data.providerStatuses.map((status) => [status.id, status]));
-
-  backendStatuses.forEach((status) => byId.set(status.id, status));
-
-  return {
-    ...data,
-    providerStatuses: [...byId.values()]
-  };
-}
-
-// The backend owns Toss and KIS; KRX, DART, SEC, news, and market data are still
-// served by the local adapters. Taking only the populated backend collections
-// lets both halves combine instead of one blanking the other.
-function backendContentPayload(data: MarketBoardData): Partial<MarketBoardData> {
-  const payload: Partial<MarketBoardData> = {};
-
-  if (data.macroSnapshot.length) payload.macroSnapshot = data.macroSnapshot;
-  if (data.marketBrief.length) payload.marketBrief = data.marketBrief;
-  if (data.headlineFlow.length) payload.headlineFlow = data.headlineFlow;
-  if (data.calendarItems.length) payload.calendarItems = data.calendarItems;
-  if (data.usDisclosures.length) payload.usDisclosures = data.usDisclosures;
-  if (data.krDisclosures.length) payload.krDisclosures = data.krDisclosures;
-  if (data.flowItems.length) payload.flowItems = data.flowItems;
-  if (data.krLeadingStocks.length) payload.krLeadingStocks = data.krLeadingStocks;
-  if (data.usLeadingStocks.length) payload.usLeadingStocks = data.usLeadingStocks;
-  if (data.smallCapScanner.length) payload.smallCapScanner = data.smallCapScanner;
-
-  return payload;
-}
-
-// Runs after the merge so leaders sourced from the backend also get theme briefs
-// and matching news attached.
-async function attachLeaderContext(data: MarketBoardData): Promise<MarketBoardData> {
-  const withThemes = attachDerivedThemeBriefs(data);
-  const leaders = [...withThemes.krLeadingStocks, ...withThemes.usLeadingStocks];
-
-  if (leaders.length === 0) return withThemes;
-
-  const taggedHeadlines = attachLeaderNewsTags(withThemes.headlineFlow, leaders);
-  const leaderNewsResult = await withTimeout(loadLeaderNewsHeadlines(leaders), 4500);
-  const leaderHeadlines = leaderNewsResult === timeoutSymbol ? [] : leaderNewsResult;
-
-  return {
-    ...withThemes,
-    headlineFlow: mergeNewsHeadlines(taggedHeadlines, leaderHeadlines)
-  };
-}
-
-export async function getMarketBoardData(): Promise<MarketBoardData> {
-  const [backendData, localData] = await Promise.all([
-    getBackendMarketBoardData(),
-    loadLocalMarketBoardData()
-  ]);
-  const merged = backendData && hasMarketContent(backendData)
-    ? mergeMarketBoardData(localData, backendContentPayload(backendData))
-    : localData;
-
-  return withBackendProviderStatuses(await attachLeaderContext(merged), backendData);
-}
-
-async function loadLocalMarketBoardData(): Promise<MarketBoardData> {
-  const checkedAt = new Date().toISOString();
-  const providerResults = await Promise.all(
-    marketBoardProviderAdapters.map(async (adapter) => {
-      if (!adapter.hasCredentials()) {
-        return {
-          payload: {},
-          status: {
-            id: adapter.id,
-            label: adapter.label,
-            status: "mock",
-            message: missingCredentialMessage(adapter.requiredEnv),
-            checkedAt
-          } satisfies ProviderStatusDto
-        };
-      }
-
-      try {
-        const payload = await withTimeout(adapter.load(), adapter.timeoutMs);
-
-        if (payload === timeoutSymbol) {
-          return {
-            payload: {},
-            status: {
-              id: adapter.id,
-              label: adapter.label,
-              status: "error",
-              message: `${adapter.timeoutMs}ms 초과 · 해당 데이터 제외`,
-              checkedAt
-            } satisfies ProviderStatusDto
-          };
-        }
-
-        return {
-          payload,
-          status: {
-            id: adapter.id,
-            label: adapter.label,
-            status: "ready",
-            message: "adapter 활성화 · live 데이터 수신",
-            checkedAt
-          } satisfies ProviderStatusDto
-        };
-      } catch (error) {
-        const reason = error instanceof Error && error.message ? ` · ${error.message}` : "";
-
-        return {
-          payload: {},
-          status: {
-            id: adapter.id,
-            label: adapter.label,
-            status: "error",
-            message: `adapter 오류${reason} · 해당 데이터 제외`,
-            checkedAt
-          } satisfies ProviderStatusDto
-        };
-      }
-    })
-  );
-  const providerPayloads = providerResults.map((result) => result.payload);
-  const baseData: MarketBoardData = {
-    ...withoutMockContent(mockMarketBoardData),
-    providerStatuses: providerResults.map((result) => result.status)
-  };
-
-  return providerPayloads.reduce<MarketBoardData>(mergeMarketBoardData, baseData);
 }

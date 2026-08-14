@@ -28,8 +28,10 @@ npm run dev        # 개발 서버 http://localhost:3000
 npm run build      # 프로덕션 빌드 (Turbopack)
 npm run lint       # ESLint
 npx tsc --noEmit   # 타입 검사
-npm run test:news  # 뉴스 정규화 테스트 (유일한 테스트)
 ```
+
+프론트에는 테스트가 없습니다. 시장 데이터 로직은 전부 백엔드에 있으므로
+관련 테스트도 그쪽에 둡니다.
 
 검증할 때는 `npm run lint` → `npx tsc --noEmit` → `npm run build` 순서로 돌립니다.
 
@@ -67,15 +69,27 @@ PostgreSQL은 로컬에 설치하지 않고 **도커 컨테이너로만** 띄웁
 
 ### 시장 보드 데이터 흐름
 
-`app/kr/market-board/providers.ts`의 `getMarketBoardData()`가 진입점입니다.
+**시장 데이터 provider는 전부 백엔드에 있습니다.** 프론트는 표시만 합니다.
 
-1. 백엔드 `/api/market-board`를 먼저 시도
-2. 실패(non-2xx 또는 예외) 시에만 프론트 자체 어댑터 7종을 timeout으로 감싸 병렬 실행
-3. 어댑터 하나가 죽어도 해당 provider만 `error` 상태로 표시하고 나머지를 머지
+`app/kr/market-board/providers.ts`의 `getMarketBoardData()`는 백엔드
+`/api/market-board`를 읽어 그대로 반환합니다. 백엔드가 응답하지 않으면 탭·광고
+슬롯 같은 고정 구조만 담은 보드를 돌려줘 화면이 깨지지 않게 합니다.
+**여기에 자체 데이터 소스를 다시 만들지 마세요.**
 
-어댑터는 `app/kr/market-board/adapters/`에 provider별로 분리되어 있습니다
-(kis, toss, krx, market, dart, sec, news). 새 provider를 추가하면 `adapters/index.ts`
-배열에 등록합니다. 화면과 어댑터는 `types.ts`의 `MarketBoardData` DTO를 공유합니다.
+백엔드 provider는 `date-platform-backend/src/providers/`에 있습니다
+(kis, toss, market, sec, dart, krx, news). 추가하려면 모듈을 만들고
+`src/routes/market-board.mjs`의 `providerAdapters` 배열에 등록합니다:
+
+```js
+{ id, label, hasCredentials, load, timeoutMs, licensed?, missingMessage? }
+```
+
+`licensed: true`는 시세 표시 권리가 필요한 provider(toss, kis)를 뜻하며
+`MARKET_DATA_MODE`로 차단됩니다. 화면과 provider는 프론트 `types.ts`의
+`MarketBoardData` DTO를 계약으로 공유하므로, 백엔드 응답 모양을 바꾸면
+이 타입도 함께 고쳐야 합니다.
+
+provider별 API 키는 전부 백엔드 `.env`에 둡니다.
 
 ### 인증
 

@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "test:news": "tsc --ignoreConfig --ignoreDeprecations 6.0 --outDir .tmp/news-test --module commonjs --target ES2022 --moduleResolution node --types node --esModuleInterop --skipLibCheck scripts/test-news-normalization.ts app/kr/market-board/adapters/news-normalizer.ts app/kr/market-board/types.ts && node .tmp/news-test/scripts/test-news-normalization.js",
     "start": "next start",
     "lint": "eslint ."
   },

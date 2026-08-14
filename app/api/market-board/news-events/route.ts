@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
-import { readNewsHeadlineEvents } from "../../../kr/market-board/adapters/news-state";
+
+const backendUrl = process.env.DATE_BACKEND_URL ?? "http://localhost:4010";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET() {
-  const events = await readNewsHeadlineEvents();
+  try {
+    const response = await fetch(new URL("/api/market-board/news-events", backendUrl), {
+      cache: "no-store"
+    });
 
-  return NextResponse.json({ events }, {
-    headers: {
-      "Cache-Control": "no-store"
-    }
-  });
+    if (!response.ok) throw new Error(`backend ${response.status}`);
+
+    return NextResponse.json(await response.json(), {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
+  } catch {
+    return NextResponse.json({ events: [] }, {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
+  }
 }

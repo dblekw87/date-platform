@@ -238,7 +238,8 @@ Full responsive audit artifacts:
 | Source | Usage | Environment |
 | --- | --- | --- |
 | 한국투자증권 Open API | 국내 지수, 거래대금/거래량 순위, 국내 종목 흐름, 분봉/차트 후보 데이터 | backend `KIS_APP_KEY`, `KIS_APP_SECRET`, `KIS_HTS_ID` |
-| Toss Invest API | 국내/미국 거래대금, 상승률, 거래량 상위 종목, 환율/시장 지표 | backend `TOSS_INVEST_CLIENT_ID`, `TOSS_INVEST_CLIENT_SECRET` |
+| Yahoo Finance Screener | 미국 주도주 (거래대금, 등락률, 3개월 평균 거래량, 52주 신고가) | public, no key |
+| Toss Invest API | 국내/미국 랭킹 (현재 계정 쿼터로 비활성) | backend `TOSS_INVEST_CLIENT_ID`, `TOSS_INVEST_CLIENT_SECRET` |
 | KRX/KIND | 신규상장, 공모, 국내 시장 일정 | `KRX_CALENDAR_FEED_URL` |
 | DART Open API | 국내 기업 공시 | `DART_API_KEY` |
 | SEC EDGAR | 미국 기업 최신 공시, 8-K, 10-Q, 10-K 등 | public, optional `SEC_USER_AGENT` |
@@ -593,7 +594,7 @@ vercel inspect https://date-platform.vercel.app
 
 ## Limitations and Next Steps
 
-- 토스 랭킹 API가 계정 쿼터로 429를 반환해 미국 주도주가 비어 있습니다. 코드 측 완화(토큰 보존·중복 제거·백오프)는 적용된 상태입니다.
+- 토스 랭킹 API가 계정 쿼터로 429를 반환합니다. 미국 주도주는 키가 필요 없는 Yahoo Finance 스크리너로 대체해 정상 동작하며, 토스 어댑터는 상태만 보고합니다.
 - 커뮤니티 검색이 제목만 대상입니다.
 - 조회수에 세션 단위 중복 방지가 없습니다.
 - 실시간 WebSocket 기반 가격 업데이트, 관심 종목 저장, 대시보드 개인화가 남아 있습니다.

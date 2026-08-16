@@ -3631,17 +3631,26 @@ a.dayLeaderReason:hover {
   color: #ffffff;
 }
 
-.dayLeaderReason b {
+// Two classes deep, every one of them, and the reason is worth writing down:
+// these rows live inside .themeSection li, which styles bare `i` and `b` for
+// the theme list — `.themeSection li i` is the divider and is display:none on
+// narrow screens. A single class loses to it on specificity, so the 근거 number
+// and the bar fill vanished at 360px while everything else looked right, and
+// the title silently rendered at the theme list's 19px. Element selectors
+// cannot be trusted in this scope; .dayLeaderCatalyst b above is the same
+// workaround, one collision earlier.
+.dayLeaderReason .dayLeaderReasonTitle {
   flex: 1 1 auto;
   min-width: 0;
+  font-size: 13px;
   font-weight: 900;
 }
 
 // Evidence, not probability. The wording is part of the design: a number beside
 // a rising stock reads as a forecast unless it is labelled otherwise.
-// Scoped to the header row on purpose: the bar below fills with an <i> too, and
-// an unscoped selector styled both.
-.dayLeaderReason p i {
+.dayLeaderReason .dayLeaderReasonScore {
+  display: block;
+  height: auto;
   flex: 0 0 auto;
   color: #707070;
   font-size: 11px;
@@ -3656,8 +3665,9 @@ a.dayLeaderReason:hover {
   background: #eef0f4;
 }
 
-.dayLeaderReasonBar i {
+.dayLeaderReasonBar .dayLeaderReasonBarFill {
   display: block;
+  flex: none;
   height: 100%;
   background: #000000;
 }

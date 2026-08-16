@@ -41,11 +41,11 @@ function ReasonBlock({ reason }: { reason: DayLeaderReasonDto }) {
     <>
       <p>
         <mark>{reason.path}</mark>
-        <b>{reason.title}</b>
-        <i>근거 {reason.confidence}</i>
+        <b className={styles.dayLeaderReasonTitle}>{reason.title}</b>
+        <i className={styles.dayLeaderReasonScore}>근거 {reason.confidence}</i>
       </p>
       <span className={styles.dayLeaderReasonBar}>
-        <i style={{ width: `${Math.min(reason.confidence, 100)}%` }} />
+        <i className={styles.dayLeaderReasonBarFill} style={{ width: `${Math.min(reason.confidence, 100)}%` }} />
       </span>
       <ul>
         {reason.evidence.filter(Boolean).map((line) => <li key={line}>{line}</li>)}

@@ -3890,8 +3890,17 @@ a.dayLeaderReason:hover {
   display: none;
 }
 
+// The theme name, as plain text. `.themeSection strong` is the section heading
+// badge — black background, white text — and this row only overrode the colour,
+// so every 짝꿍 row rendered its theme as black on black: a solid bar where the
+// name should be, in the one place the reader looks first. The background has
+// to come off with the padding and the width that shaped the badge.
 .pairTrade summary strong {
+  width: auto;
+  max-width: none;
   flex: 0 0 auto;
+  background: none;
+  padding: 0;
   color: #000000;
   font-size: 14px;
   font-weight: 900;

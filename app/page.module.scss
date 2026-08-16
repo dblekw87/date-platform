@@ -3735,6 +3735,181 @@
   overflow-wrap: anywhere;
 }
 
+// 짝꿍매매 — one full-width row, like the surge list and for the same reason:
+// it is derived from the two lists above it and belongs to neither, so it does
+// not sit beside them in a column.
+.pairTradeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pairTradeRow ol {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.pairTrade {
+  min-width: 0;
+  border: 1px solid #d5d9e2;
+  padding: 12px 14px;
+}
+
+.pairTrade summary {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.pairTrade summary::-webkit-details-marker {
+  display: none;
+}
+
+.pairTrade summary strong {
+  flex: 0 0 auto;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+// The gap is the reading, so it is the loudest thing on the row. Filled only
+// when there is real room left; a theme already followed through reads grey,
+// because it is the same information arriving too late to act on.
+.pairTrade summary em {
+  flex: 0 0 auto;
+  border: 1px solid #d5d9e2;
+  color: #707070;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.pairTrade summary em[data-band="wide"] {
+  border-color: #da0000;
+  background: #da0000;
+  color: #ffffff;
+}
+
+.pairTrade summary em[data-band="narrow"] {
+  border-color: #da0000;
+  color: #da0000;
+}
+
+.pairTrade summary i {
+  height: 1px;
+  min-width: 16px;
+  flex: 1 1 auto;
+  background: #d5d9e2;
+}
+
+.pairTrade summary span {
+  flex: 0 1 auto;
+  overflow: hidden;
+  min-width: 0;
+  color: #526077;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pairTrade summary b {
+  flex: 0 0 auto;
+  color: #da0000;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.pairTradeDetail {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 2px;
+  border-left: 2px solid #000000;
+  padding: 0 0 0 12px;
+}
+
+.pairTradeDetail > p {
+  margin: 0;
+  color: #707070;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.pairTradeDetail > p b {
+  color: #000000;
+  font-weight: 900;
+}
+
+.pairTradeRow .pairTradeDetail ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pairTradeDetail li {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+}
+
+.pairTradeDetail li b {
+  display: flex;
+  width: 56px;
+  height: 20px;
+  flex: 0 0 56px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #da0000;
+  color: #da0000;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pairTradeDetail li span {
+  flex: 0 1 auto;
+  overflow: hidden;
+  min-width: 0;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pairTradeDetail li mark {
+  flex: 0 0 auto;
+  border: 1px solid #d5d9e2;
+  background: none;
+  color: #707070;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.pairTradeDetail li i {
+  height: 1px;
+  min-width: 8px;
+  flex: 1 1 auto;
+  background: #eef1f5;
+}
+
+.pairTradeRow .pairTradeDetail li small {
+  flex: 0 0 auto;
+  color: #526077;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 // Sits under the list rather than beside a row: it qualifies every number
 // above it, and a reader who acts on the list has to have passed it.
 .surgeCandidateNote {
@@ -4485,6 +4660,21 @@
   .surgeCandidateRow ol {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  // The theme name and the gap badge stay on the first line; the leader and its
+  // move fall to the second rather than squeezing five things into 320px.
+  .pairTrade summary {
+    flex-wrap: wrap;
+  }
+
+  .pairTrade summary i {
+    display: none;
+  }
+
+  .pairTrade summary span {
+    margin-left: auto;
+  }
+
   // .themeSection li wraps above, but the candidate's flex container is the
   // summary inside the li, which that selector never reaches — the li itself is
   // display: block here. Without this the row had no way to give.

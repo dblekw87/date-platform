@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { DayLeaders } from "./DayLeaders";
+import { PairTrades } from "./PairTrades";
 import { SurgeCandidates } from "./SurgeCandidates";
 import styles from "../../page.module.scss";
 import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId } from "./types";
@@ -1406,6 +1407,17 @@ export function MarketBoard({
                   emptyMessage={leaderUnavailableMessage(liveBoard, "US")}
                   label="미국 주도주"
                   leaders={liveBoard.usDayLeaders ?? []}
+                />
+              </div>
+              {/* 짝꿍매매 sits between the two lists it is derived from and
+                  belongs to neither. 주도주 ranks the turnover top of the
+                  market; a 짝꿍 is smaller than the stock it follows and is
+                  almost never in that ranking, so it needs its own row. */}
+              <div className={styles.pairTradeRow}>
+                <PairTrades
+                  emptyMessage={leaderUnavailableMessage(liveBoard, "KR")}
+                  label="시황 · 국내 짝꿍매매"
+                  pairs={liveBoard.krPairTrades ?? []}
                 />
               </div>
               <div className={styles.themeAnalysisGrid}>

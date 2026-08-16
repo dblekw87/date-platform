@@ -262,6 +262,47 @@ export type PremarketMoverDto = {
   probability: number | null;
 };
 
+/** One stock that could follow the leader of its theme. */
+export type PairCandidateDto = {
+  changeRateValue: number;
+  /**
+   * Whether this name is also in the 주도주 list. Mostly false, and that is the
+   * point: a follower is smaller than what it follows, so it rarely makes a
+   * turnover ranking at all.
+   */
+  inLeaderBoard: boolean;
+  name: string;
+  symbol: string;
+  turnover: string;
+};
+
+/**
+ * 짝꿍매매 — a theme's leader and the stocks that have not moved with it yet.
+ *
+ * Grouped by theme rather than by leader because that is the unit the trade is
+ * read in: 반도체 is moving, and here is what is still behind it. The 주도주
+ * list answers a different question (where did the money go) and repeats a
+ * theme whenever two of its names lead.
+ */
+export type PairTradeDto = {
+  id: string;
+  candidates: PairCandidateDto[];
+  leader: {
+    changeRateValue: number;
+    name: string;
+    symbol: string;
+    turnover: string;
+  };
+  /**
+   * How far the best follower still is from the leader, in percentage points.
+   * This is the room left in the trade; negative means the follower already ran
+   * harder than the leader did, which is the same theme read too late.
+   */
+  leadGap: number;
+  market: "KR";
+  theme: string;
+};
+
 export type ReactionCandidateDto = {
   id: string;
   group: string;
@@ -303,6 +344,7 @@ export type MarketBoardData = {
   krLeadingStocks: LeadingStockDto[];
   usDayLeaders: DayLeaderDto[];
   krDayLeaders: DayLeaderDto[];
+  krPairTrades: PairTradeDto[];
   usSurgeCandidates: SurgeCandidateDto[];
   usPremarketMovers: PremarketMoverDto[];
   smallCapScanner: ReactionCandidateDto[];

@@ -222,8 +222,11 @@ export type DayLeaderDto = {
   /**
    * Ranked reasons, strongest evidence first, at most three. Empty when nothing
    * cleared the evidence floor — which is shown as 이유 미확인 rather than
-   * filled with the best of a bad set. Domestic leaders only for now: the
-   * ownership graph and the KOSPI regime check are both domestic.
+   * filled with the best of a bad set.
+   *
+   * Both markets carry these, but not through the same paths: 보유 지분 and
+   * 산업 뉴스 are domestic only, because no free US filing carries a stake's
+   * book value and the theme fan-out has no exact match to key on in English.
    */
   reasons?: DayLeaderReasonDto[];
   caution: string;

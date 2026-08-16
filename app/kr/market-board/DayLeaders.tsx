@@ -73,9 +73,8 @@ function ReasonBlock({ reason }: { reason: DayLeaderReasonDto }) {
 /**
  * The reasons behind one leader, or an honest blank.
  *
- * US leaders carry the older single catalyst — the ownership graph and the
- * KOSPI regime check are both domestic — so both shapes render until the US
- * side has generators of its own.
+ * The older single catalyst still renders as a fallback: a board restored from
+ * a snapshot written before reasons existed carries one and nothing else.
  */
 function DayLeaderReasons({ leader }: { leader: DayLeaderDto }) {
   if (leader.reasons && leader.reasons.length > 0) {

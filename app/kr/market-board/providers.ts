@@ -43,6 +43,8 @@ function unavailableBoard(reason: string): MarketBoardData {
     krLeadingStocks: [],
     usDayLeaders: [],
     krDayLeaders: [],
+    usSurgeCandidates: [],
+    usPremarketMovers: [],
     smallCapScanner: []
   };
 }

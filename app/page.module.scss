@@ -3172,6 +3172,133 @@
   gap: 32px;
 }
 
+// One column, unlike the grids above it. 급등 후보 has no counterpart list to
+// sit beside — the board carries KR and US versions of everything else — so a
+// two-column grid would leave the right half empty.
+.surgeCandidateRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+// Live, unlike everything around it, so it carries the board's only red fill.
+// Sits above the candidate list because it is that list's result: these are
+// names the board scored before the session that is moving them.
+.premarketStrip {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #da0000;
+  padding: 12px 14px;
+}
+
+.premarketStrip > strong {
+  color: #da0000;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.premarketStrip ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.premarketStrip ol li {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+}
+
+// Darker than the board's #da0000 rise colour, and only here. White on full
+// saturated red at 12px reads as a smear rather than a number — the fill has to
+// give the digits somewhere to sit, and these digits are the point of the row.
+//
+// Selectors here carry the extra `ol` for the same reason the caution text does:
+// `.themeSection li b` paints slate #526077, scores the same (0,1,2), and is
+// declared further down the file, so it won on order and the badge read grey.
+.premarketStrip ol li b {
+  flex: 0 0 auto;
+  min-width: 62px;
+  background: #a80000;
+  color: #ffffff;
+  padding: 3px 7px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.premarketStrip ol li span {
+  flex: 0 0 auto;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+// The only thing on the row that can afford to be cut. Everything else is a
+// figure the row exists to state; the name is what makes the ticker legible at
+// all, so it takes whatever width is left and ellipses rather than pushing a
+// number off the end.
+.premarketStrip ol li em {
+  overflow: hidden;
+  min-width: 0;
+  flex: 0 1 auto;
+  color: #526077;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premarketStrip ol li i {
+  height: 1px;
+  min-width: 8px;
+  flex: 1 1 auto;
+  background: #d5d9e2;
+}
+
+.premarketStrip ol li small {
+  flex: 0 0 auto;
+  color: #526077;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+// The score the name carried before it moved — the whole claim of the section.
+.premarketStrip ol li mark {
+  flex: 0 0 auto;
+  border: 1px solid #d5d9e2;
+  background: none;
+  color: #707070;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+// The rows themselves then flow into as many columns as the width allows.
+// Filling the row with one long list would only move the empty space from
+// beside the box to inside it.
+//
+// align-items: start because a row opens to four lines while its neighbours
+// stay on one; stretched, the closed rows would float in the middle of a cell
+// sized by whichever row happens to be open.
+.surgeCandidateRow ol {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  align-items: start;
+  column-gap: 32px;
+}
+
+.surgeCandidateRow li {
+  display: block;
+  min-width: 0;
+}
+
 .themeSection {
   gap: 24px;
   padding-bottom: 32px;
@@ -3452,6 +3579,172 @@
   color: #707070;
   font-size: 12px;
   font-weight: 700;
+}
+
+// 급등 후보. Shares the 주도주 row shape, with the rank badge replaced by the
+// probability — a candidate has no rank worth reading, and the measured rate is
+// the only thing separating one row from the next.
+.surgeCandidate {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.surgeCandidate summary {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.surgeCandidate summary::-webkit-details-marker {
+  display: none;
+}
+
+// Wider than the 주도주 badge because it holds "18.7%" rather than a rank, and
+// deliberately the loudest thing in the row.
+.surgeCandidate summary b {
+  display: flex;
+  width: 52px;
+  height: 20px;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d5d9e2;
+  color: #707070;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+// Three bands, filled only at the top one. A 2% candidate printed in the same
+// weight as an 18% candidate would flatten the only distinction the list has.
+.surgeCandidate summary b[data-band="high"] {
+  border-color: #da0000;
+  background: #da0000;
+  color: #ffffff;
+}
+
+.surgeCandidate summary b[data-band="mid"] {
+  border-color: #da0000;
+  color: #da0000;
+}
+
+.surgeCandidate summary span {
+  flex: 0 0 auto;
+  font-weight: 900;
+}
+
+// 대기 is the one being looked for, so it is the outlined badge that reads as
+// the answer; 이미 급등 is muted because it is a continuation the reader should
+// see but not mistake for a fresh signal.
+.surgeCandidate summary mark {
+  flex: 0 0 auto;
+  border: 1px solid #d5d9e2;
+  background: none;
+  color: #707070;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.surgeCandidate summary mark[data-stage="waiting"] {
+  border-color: #000000;
+  color: #000000;
+}
+
+// A filing is the only thing on the row that is not a price fact, so it reads
+// in the rise colour rather than in the neutral outline the stage badges use.
+.surgeCandidate summary mark[data-stage="catalyst"] {
+  border-color: #a80000;
+  color: #a80000;
+}
+
+.surgeCandidate summary i {
+  height: 1px;
+  min-width: 16px;
+  flex: 1 1 auto;
+  background: #d5d9e2;
+}
+
+.surgeCandidate summary small {
+  flex: 0 0 auto;
+  color: #526077;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+// Turnover against share count, the figure the ranking is built on.
+.surgeCandidate summary em {
+  flex: 0 0 auto;
+  color: #da0000;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.surgeCandidateDetail {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 4px;
+  border-left: 2px solid #000000;
+  padding: 0 0 0 12px;
+}
+
+.surgeCandidateDetail p {
+  margin: 0;
+  color: #000000;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.surgeCandidateDetail ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 16px;
+  color: #526077;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+// .themeSection li small is nowrap — theme rows put a short figure there and
+// need it on one line. This one holds a sentence, and the nowrap ran it through
+// the neighbouring card.
+//
+// Written with the row class in front to outweigh it: `.themeSection li small`
+// scores (0,1,2) and a bare `.surgeCandidateDetail small` only (0,1,1), so the
+// first override lost the cascade and changed nothing on screen.
+.surgeCandidateRow .surgeCandidateDetail small {
+  min-width: 0;
+  color: #707070;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.surgeCandidateRow .surgeCandidateDetail p,
+.surgeCandidateRow .surgeCandidateDetail li,
+.surgeCandidateRow .surgeCandidateDetail ul {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+// Sits under the list rather than beside a row: it qualifies every number
+// above it, and a reader who acts on the list has to have passed it.
+.surgeCandidateNote {
+  margin: 8px 0 0;
+  border-top: 1px solid #d5d9e2;
+  padding-top: 8px;
+  color: #707070;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 // Turnover arriving in a burst rather than at an even pace through the session.
@@ -4184,6 +4477,21 @@
     white-space: normal;
   }
 
+  // Both surge lists auto-fill their columns, and both hold a row that cannot
+  // shrink — every child is flex: 0 0 auto. At 760px auto-fill still fits two
+  // ~324px columns while the row needs ~322px, so a longer ticker or a
+  // four-digit turnover ran straight into the neighbouring column.
+  .premarketStrip ol,
+  .surgeCandidateRow ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  // .themeSection li wraps above, but the candidate's flex container is the
+  // summary inside the li, which that selector never reaches — the li itself is
+  // display: block here. Without this the row had no way to give.
+  .surgeCandidate summary {
+    flex-wrap: wrap;
+  }
+
   .adGrid {
     margin-top: 32px;
   }
@@ -4249,6 +4557,22 @@
 
   .macroGrid {
     grid-template-columns: 1fr;
+  }
+
+  // 280px of usable width against a row that wants 322px: below 360 the break
+  // is certain, so it is placed rather than left to wherever the widths land.
+  // The hairline comes back as the break itself, full width, still doing what
+  // it did on one line — separating what the row is from what it is worth.
+  .surgeCandidate summary i {
+    display: block;
+    min-width: 0;
+    flex-basis: 100%;
+  }
+
+  // Which leaves the price and the turnover alone on the last line, so they
+  // take its two ends instead of huddling at the left.
+  .surgeCandidate summary em {
+    margin-left: auto;
   }
 }
 

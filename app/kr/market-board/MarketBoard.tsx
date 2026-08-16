@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { DayLeaders } from "./DayLeaders";
+import { SurgeCandidates } from "./SurgeCandidates";
 import styles from "../../page.module.scss";
 import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId } from "./types";
 
@@ -1446,6 +1447,18 @@ export function MarketBoard({
                     {usThemeLeaders.length === 0 ? <p className={styles.emptyDisclosure}>{themeUnavailableMessage(liveBoard, "US")}</p> : null}
                   </div>
                 </article>
+              </div>
+              {/* 급등 후보 reads last and alone. Every list above it is in the
+                  past tense — what led, what rose, what was strong — and this
+                  one is the only forward-looking list on the board, so it does
+                  not share a row with them. */}
+              <div className={styles.surgeCandidateRow}>
+                <SurgeCandidates
+                  candidates={liveBoard.usSurgeCandidates ?? []}
+                  emptyMessage="미국 일봉 이력이 쌓이면 급등 후보가 계산됩니다."
+                  label="미국 급등 후보"
+                  movers={liveBoard.usPremarketMovers ?? []}
+                />
               </div>
             </div>
           </section>

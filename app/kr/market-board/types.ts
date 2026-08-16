@@ -195,6 +195,73 @@ export type DayLeaderDto = {
   source: SourceProvider;
 };
 
+/**
+ * A US stock that could run tomorrow, carrying the rate it was ranked by.
+ *
+ * Distinct from DayLeaderDto in tense. A leader is a stock the day's money has
+ * already gone to; a candidate has not moved yet, and the only thing that can
+ * be said about it is how often stocks in its condition have moved. Which is
+ * why the probability is part of the type rather than a footnote — a row of
+ * small caps with no number beside it reads as a recommendation.
+ */
+/** The SEC filing a candidate is standing on, when there is one. */
+export type SurgeCatalystDto = {
+  formType: string;
+  label: string;
+  /** Sessions between the filing and the close the candidate was scored on. */
+  daysAgo: number;
+};
+
+export type SurgeCandidateDto = {
+  id: string;
+  symbol: string;
+  name: string;
+  market: "US";
+  /** Session the figures are measured from — always before the one predicted. */
+  asOf: string;
+  horizonDays: number;
+  price: string;
+  /** 대기 has not moved in over a week; 이미 급등 ran within it and may continue. */
+  stage: "대기" | "이미 급등";
+  /** Null for half of them — most surges have no filing behind them at all. */
+  catalyst: SurgeCatalystDto | null;
+  /** Sessions since this stock last ran. Null when it never has. */
+  daysSinceLastRun: number | null;
+  /** Measured frequency for this stock's bucket, 0 to 1. */
+  probability: number;
+  probabilityLabel: string;
+  marketCapValue: number;
+  /** Day's volume divided by shares outstanding. 1 means the share count turned over once. */
+  turnoverValue: number;
+  evidence: string[];
+  caution: string;
+};
+
+/**
+ * A watched stock moving outside the regular session.
+ *
+ * The board's other US figures are all closing prices. This one is live, and it
+ * exists because 72% of surges are already up more than 50% before the US open —
+ * by the time a Seoul reader sees a list built from the close, the move it was
+ * predicting has usually started.
+ */
+export type PremarketMoverDto = {
+  id: string;
+  symbol: string;
+  name: string;
+  /** Which extended session this reading came from. */
+  phase: "pre" | "regular" | "post";
+  phaseLabel: string;
+  previousClose: number;
+  last: number;
+  high: number;
+  /** Move to the session high, against yesterday's close. */
+  highRate: number;
+  changeRate: number;
+  /** What the candidate list scored it at before it moved. Null if it dropped off. */
+  probability: number | null;
+};
+
 export type ReactionCandidateDto = {
   id: string;
   group: string;
@@ -236,5 +303,7 @@ export type MarketBoardData = {
   krLeadingStocks: LeadingStockDto[];
   usDayLeaders: DayLeaderDto[];
   krDayLeaders: DayLeaderDto[];
+  usSurgeCandidates: SurgeCandidateDto[];
+  usPremarketMovers: PremarketMoverDto[];
   smallCapScanner: ReactionCandidateDto[];
 };

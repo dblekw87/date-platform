@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "../../page.module.scss";
-import type { DayLeaderDto } from "./types";
+import type { DayLeaderDto, DayLeaderReasonDto } from "./types";
 
 /**
  * 주도주 — the day's concentration, shown apart from 강세 테마.
@@ -25,6 +25,86 @@ function formatChangeRate(changeRate: number) {
   return `${changeRate > 0 ? "+" : ""}${changeRate.toFixed(2)}%`;
 }
 
+/**
+ * One reason, with the path that makes it this stock's.
+ *
+ * The path label is doing the work the old 고유/공유 badge could not. "보유 지분"
+ * and "전방 수요" both mean somebody else's event moved this stock, and they
+ * mean it for completely different reasons — one is a balance sheet, the other
+ * is a customer. A reader who knows which can check the right thing.
+ *
+ * Only reasons read off a document link out. A regime reason has no original to
+ * open, so it stays a plain block rather than a link that goes nowhere.
+ */
+function ReasonBlock({ reason }: { reason: DayLeaderReasonDto }) {
+  const body = (
+    <>
+      <p>
+        <mark>{reason.path}</mark>
+        <b>{reason.title}</b>
+        <i>근거 {reason.confidence}</i>
+      </p>
+      <span className={styles.dayLeaderReasonBar}>
+        <i style={{ width: `${Math.min(reason.confidence, 100)}%` }} />
+      </span>
+      <ul>
+        {reason.evidence.filter(Boolean).map((line) => <li key={line}>{line}</li>)}
+      </ul>
+    </>
+  );
+
+  if (!reason.originalUrl) {
+    return <div className={styles.dayLeaderReason} data-kind={reason.kind === "공유" ? "shared" : "own"}>{body}</div>;
+  }
+
+  return (
+    <a
+      className={styles.dayLeaderReason}
+      data-kind={reason.kind === "공유" ? "shared" : "own"}
+      href={reason.originalUrl}
+      rel="noreferrer"
+      target="_blank"
+    >
+      {body}
+    </a>
+  );
+}
+
+/**
+ * The reasons behind one leader, or an honest blank.
+ *
+ * US leaders carry the older single catalyst — the ownership graph and the
+ * KOSPI regime check are both domestic — so both shapes render until the US
+ * side has generators of its own.
+ */
+function DayLeaderReasons({ leader }: { leader: DayLeaderDto }) {
+  if (leader.reasons && leader.reasons.length > 0) {
+    return (
+      <div className={styles.dayLeaderReasons}>
+        {leader.reasons.map((reason) => <ReasonBlock key={reason.id} reason={reason} />)}
+      </div>
+    );
+  }
+
+  if (leader.catalyst) {
+    return (
+      <a
+        className={styles.dayLeaderCatalyst}
+        data-kind={leader.catalyst.kind === "공유" ? "shared" : "own"}
+        href={leader.catalyst.originalUrl}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <mark>{leader.catalyst.kind === "공유" ? "업종 공유 재료" : "종목 고유 재료"}</mark>
+        <b>{leader.catalyst.label}</b>
+        <span>{leader.catalyst.headline}</span>
+      </a>
+    );
+  }
+
+  return <p className={styles.dayLeaderNoCatalyst}>오른 이유를 설명하는 근거를 찾지 못했습니다.</p>;
+}
+
 function DayLeaderRow({ leader }: { leader: DayLeaderDto }) {
   return (
     <details className={styles.dayLeader}>
@@ -44,21 +124,7 @@ function DayLeaderRow({ leader }: { leader: DayLeaderDto }) {
         <ul>
           {leader.evidence.map((line) => <li key={line}>{line}</li>)}
         </ul>
-        {leader.catalyst ? (
-          <a
-            className={styles.dayLeaderCatalyst}
-            data-kind={leader.catalyst.kind === "공유" ? "shared" : "own"}
-            href={leader.catalyst.originalUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <mark>{leader.catalyst.kind === "공유" ? "업종 공유 재료" : "종목 고유 재료"}</mark>
-            <b>{leader.catalyst.label}</b>
-            <span>{leader.catalyst.headline}</span>
-          </a>
-        ) : (
-          <p className={styles.dayLeaderNoCatalyst}>오른 이유를 설명하는 뉴스를 찾지 못했습니다.</p>
-        )}
+        <DayLeaderReasons leader={leader} />
         <small>{leader.caution}</small>
       </div>
     </details>

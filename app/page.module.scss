@@ -3581,6 +3581,98 @@
   font-weight: 700;
 }
 
+// 오른 이유. Several reasons rather than one, because a stock rarely rises for
+// exactly one, and the old single row could not say so.
+.dayLeaderReasons {
+  display: grid;
+  gap: 6px;
+}
+
+.dayLeaderReason {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #d5d9e2;
+  padding: 7px 9px;
+  color: #000000;
+  text-decoration: none;
+}
+
+a.dayLeaderReason:hover {
+  border-color: #000000;
+}
+
+.dayLeaderReason p {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+// The path is the label doing the most work here: it says why somebody else's
+// event is this stock's reason, which 고유/공유 alone never could.
+.dayLeaderReason mark {
+  flex: 0 0 auto;
+  background: none;
+  border: 1px solid #d5d9e2;
+  color: #707070;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+// A shared reason is the one a 짝꿍 can be traded on, so it reads as the
+// positive case and a company-only reason stays muted.
+.dayLeaderReason[data-kind="shared"] mark {
+  border-color: #000000;
+  background: #000000;
+  color: #ffffff;
+}
+
+.dayLeaderReason b {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 900;
+}
+
+// Evidence, not probability. The wording is part of the design: a number beside
+// a rising stock reads as a forecast unless it is labelled otherwise.
+// Scoped to the header row on purpose: the bar below fills with an <i> too, and
+// an unscoped selector styled both.
+.dayLeaderReason p i {
+  flex: 0 0 auto;
+  color: #707070;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.dayLeaderReasonBar {
+  display: block;
+  height: 2px;
+  background: #eef0f4;
+}
+
+.dayLeaderReasonBar i {
+  display: block;
+  height: 100%;
+  background: #000000;
+}
+
+.dayLeaderReason ul {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding-left: 14px;
+  color: #526077;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 // 급등 후보. Shares the 주도주 row shape, with the rank badge replaced by the
 // probability — a candidate has no rank worth reading, and the measured rate is
 // the only thing separating one row from the next.

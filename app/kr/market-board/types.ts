@@ -152,6 +152,35 @@ export type DayLeaderPairing = "단독 주도" | "테마 주도";
  */
 export type CatalystKind = "고유" | "공유";
 
+/**
+ * How an event reaches this stock — the part that makes it this stock's reason
+ * rather than somebody else's news.
+ *
+ * "전방 수요" is the one worth spelling out: the event happened to a company
+ * upstream of this one, so the stock is downstream of a reason it did not
+ * cause. 엔비디아 실적 is 심텍's reason by that path and nobody else's by name.
+ */
+export type ReasonPath = "공시" | "보유 지분" | "산업 뉴스" | "시장 국면" | "전방 수요" | "종목 뉴스";
+
+/**
+ * One reason a leader rose, with the evidence standing behind it.
+ *
+ * `confidence` is how much evidence there is, not a probability that the stock
+ * keeps rising. A filing the company made itself outranks a headline that
+ * merely mentioned its industry, and the number says so.
+ */
+export type DayLeaderReasonDto = {
+  id: string;
+  confidence: number;
+  /** Measured figures and quoted headlines — never an inferred sentence. */
+  evidence: string[];
+  kind: CatalystKind;
+  originalUrl?: string;
+  path: ReasonPath;
+  publishedAt?: string;
+  title: string;
+};
+
 /** The headline the backend read the leader's reason from. */
 export type DayLeaderCatalystDto = {
   /** Set when the reason is a negative one, kept only if nothing better matched. */
@@ -190,6 +219,13 @@ export type DayLeaderDto = {
   evidence: string[];
   /** Absent when no headline explained the move — shown as 이유 미확인. */
   catalyst?: DayLeaderCatalystDto;
+  /**
+   * Ranked reasons, strongest evidence first, at most three. Empty when nothing
+   * cleared the evidence floor — which is shown as 이유 미확인 rather than
+   * filled with the best of a bad set. Domestic leaders only for now: the
+   * ownership graph and the KOSPI regime check are both domestic.
+   */
+  reasons?: DayLeaderReasonDto[];
   caution: string;
   timestamp: string;
   source: SourceProvider;

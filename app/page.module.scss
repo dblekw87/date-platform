@@ -3520,10 +3520,24 @@
   font-weight: 700;
 }
 
-.dayLeaderDetail small {
+// The same nowrap the 급등 후보 card had to escape, and for the same reason:
+// `.themeSection li small` (0,1,2) keeps a theme row's figure on one line, and
+// this one holds a sentence. It never showed while the caution was
+// "같은 테마 종목의 동반 여부와 거래대금 유지 확인"; the reason engine writes
+// much longer ones, and the first three-reason card stretched the detail
+// column's grid track to 635px inside a 477px card and put a horizontal
+// scrollbar on the whole page.
+//
+// The row class goes in front to outweigh the theme rule — a bare
+// `.dayLeaderDetail small` scores (0,1,1) and loses.
+.dayLeader .dayLeaderDetail small {
+  min-width: 0;
   color: #707070;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 // The headline the reason was read from, linked so the original is one click away.
@@ -3568,10 +3582,17 @@
   font-weight: 900;
 }
 
-.dayLeaderCatalyst span {
+// The third element in this card caught by `.themeSection li` — the theme rows
+// keep a stock name on one line with ellipsis, and this span holds a headline.
+// A 623px headline stretched the detail column's track to 641px inside a 477px
+// card, which is where the desktop board's horizontal scrollbar came from.
+// Row class in front to outweigh (0,1,2), the same as the caution above.
+.dayLeader .dayLeaderCatalyst span {
   min-width: 0;
   color: #526077;
   font-weight: 600;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .dayLeaderNoCatalyst {

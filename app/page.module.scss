@@ -388,7 +388,10 @@
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  // One row whatever the tab count. It was pinned at five columns, so adding
+  // 매매참고 as a sixth dropped it onto a line of its own.
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 8px;
   margin-top: 12px;
   border: 1px solid rgba(31, 38, 32, 0.1);
@@ -2265,7 +2268,8 @@
 
   .tabs {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
 
@@ -4191,7 +4195,8 @@ a.dayLeaderReason:hover {
   }
 
   .tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     height: auto;
     margin-top: 48px;
   }
@@ -4919,7 +4924,8 @@ a.dayLeaderReason:hover {
   border-bottom: 1px solid #000000;
   border-radius: 0;
   color: #b1bbc8;
-  font-size: 20px;
+  // Six labels share the strip now rather than five, so each gets less of it.
+  font-size: 18px;
   font-weight: 800;
   line-height: 1.2;
   text-align: center;

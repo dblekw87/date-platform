@@ -395,6 +395,7 @@ export type MarketBoardData = {
   krDayLeaders: DayLeaderDto[];
   krAfterPairs?: PairTradeDto[];
   krEtfLeaders?: LeadingStockDto[];
+  usEtfLeaders?: LeadingStockDto[];
   krPairTrades: PairTradeDto[];
   usSurgeCandidates: SurgeCandidateDto[];
   usPremarketMovers: PremarketMoverDto[];

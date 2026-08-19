@@ -859,7 +859,7 @@ export function MarketBoard({
   // tab from the stocks the board is about. The domestic ones arrive in their own
   // list, and the US feed carries its own inside the leaders already.
   const etfLeadingStocks = effectiveLeaderRegion === "us"
-    ? activeLeadingStocks.filter(isEtfLeader)
+    ? (liveBoard.usEtfLeaders ?? [])
     : (liveBoard.krEtfLeaders ?? []);
   // Ranked over the list being shown rather than per row, so each filter orders
   // by its own figure instead of all three sharing one number.

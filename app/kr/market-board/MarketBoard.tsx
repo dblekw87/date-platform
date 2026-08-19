@@ -629,7 +629,12 @@ function leaderRanks(stocks: LeadingStock[], filterId: Extract<LeaderFilterId, "
 function sortLeadingStocks(stocks: MarketBoardData["usLeadingStocks"], filterId: LeaderFilterId) {
   if (filterId !== "turnover" && filterId !== "gainers" && filterId !== "volume" && filterId !== "etf") return stocks;
 
-  const rankFilter = filterId === "etf" ? "turnover" : filterId;
+  // US ETFs carry no turnover outside the regular session — Yahoo reports zero
+  // volume on pre and post bars — so ranking them by it would leave the tab in
+  // whatever order the fetch happened to return.
+  const rankFilter = filterId === "etf"
+    ? (stocks.some((stock) => Number(stock.turnoverValue) > 0) ? "turnover" : "gainers")
+    : filterId;
   const ranks = leaderRanks(stocks, rankFilter);
 
   return [...stocks].sort((left, right) => (ranks.get(left.id) ?? 999) - (ranks.get(right.id) ?? 999));

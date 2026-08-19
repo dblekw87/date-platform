@@ -316,7 +316,13 @@ function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId, rank
     return rank !== null && rank <= 30;
   }
   if (filterId === "etf") return etf;
-  if (filterId === "risk") return /거래정지|정리매매|관리종목|투자경고|투자위험|단기과열|상장폐지|상장상태|VI 발동|변동성완화/i.test(labelText);
+  // The exchange's own designation first. The text match stays for the US side
+  // and for warnings the board writes itself, but a 관리종목 is a fact about the
+  // listing rather than a phrase that happened to appear in a label.
+  if (filterId === "risk") {
+    return (stock.cautionLabels?.length ?? 0) > 0
+      || /거래정지|정리매매|관리종목|투자경고|투자위험|단기과열|상장폐지|상장상태|VI 발동|변동성완화/i.test(labelText);
+  }
 
   return true;
 }
@@ -848,6 +854,13 @@ export function MarketBoard({
   const activeDisclosureDescription = liveBoard.disclosureTabs.find((tab) => tab.id === disclosureRegion)?.description;
   const effectiveLeaderRegion: LeaderRegion = leaderRegion === "us" && liveBoard.usLeadingStocks.length === 0 && liveBoard.krLeadingStocks.length > 0 ? "kr" : leaderRegion;
   const activeLeadingStocks = effectiveLeaderRegion === "us" ? liveBoard.usLeadingStocks : liveBoard.krLeadingStocks;
+  // ETFs stay out of activeLeadingStocks and out of every ranking drawn from it:
+  // KODEX 인버스 traded 1.2조 today and would have taken the top of the turnover
+  // tab from the stocks the board is about. The domestic ones arrive in their own
+  // list, and the US feed carries its own inside the leaders already.
+  const etfLeadingStocks = effectiveLeaderRegion === "us"
+    ? activeLeadingStocks.filter(isEtfLeader)
+    : (liveBoard.krEtfLeaders ?? []);
   // Ranked over the list being shown rather than per row, so each filter orders
   // by its own figure instead of all three sharing one number.
   const turnoverRanks = leaderRanks(activeLeadingStocks, "turnover");
@@ -857,7 +870,9 @@ export function MarketBoard({
     filterId === "gainers" ? gainerRanks : filterId === "volume" ? volumeRanks : turnoverRanks;
   const leaderRankSet = { gainers: gainerRanks, turnover: turnoverRanks, volume: volumeRanks };
   const filteredLeadingStocks = sortLeadingStocks(
-    activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter, ranksFor(leaderFilter))),
+    leaderFilter === "etf"
+      ? etfLeadingStocks
+      : activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter, ranksFor(leaderFilter))),
     leaderFilter
   );
   const leaderDataUnavailable = activeLeadingStocks.length === 0;

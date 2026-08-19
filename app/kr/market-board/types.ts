@@ -129,6 +129,11 @@ export type LeadingStockDto = {
   /** Position in the turnover ranking the leaders were drawn from. */
   rank?: number;
   /**
+   * 시장 지정 — 관리종목, 투자주의·경고·위험, 거래정지, 정리매매, 단기과열.
+   * Absent when the exchange has designated nothing, which is the usual case.
+   */
+  cautionLabels?: string[];
+  /**
    * Turnover added since an earlier sample. Absent until the backend has held
    * two samples far enough apart, and on the first refresh of a session.
    */
@@ -389,6 +394,7 @@ export type MarketBoardData = {
   usDayLeaders: DayLeaderDto[];
   krDayLeaders: DayLeaderDto[];
   krAfterPairs?: PairTradeDto[];
+  krEtfLeaders?: LeadingStockDto[];
   krPairTrades: PairTradeDto[];
   usSurgeCandidates: SurgeCandidateDto[];
   usPremarketMovers: PremarketMoverDto[];

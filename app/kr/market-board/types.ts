@@ -123,6 +123,11 @@ export type LeadingStockDto = {
   /** Raw figures behind the formatted strings, for ranking without re-parsing. */
   turnoverValue?: number;
   changeRateValue?: number;
+  volumeValue?: number;
+  /** Today's volume against its own average, which is what a burst means. */
+  volumeRatioValue?: number;
+  /** Position in the turnover ranking the leaders were drawn from. */
+  rank?: number;
   /**
    * Turnover added since an earlier sample. Absent until the backend has held
    * two samples far enough apart, and on the first refresh of a session.

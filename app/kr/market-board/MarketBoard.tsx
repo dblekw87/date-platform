@@ -303,22 +303,12 @@ function matchesDisclosureFilter(item: MarketBoardData["usDisclosures"][number],
   return true;
 }
 
-function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId) {
+function matchesLeaderFilter(stock: LeadingStock, filterId: LeaderFilterId, ranks?: Map<string, number>) {
   const labelText = `${stock.burst} ${stock.turnover} ${stock.intraday} ${stock.reason} ${stock.caution}`;
   const etf = isEtfLeader(stock);
 
-  if (filterId === "gainers") {
-    const rank = leaderRankFor(stock, "gainers");
-
-    return rank !== null && rank <= 30;
-  }
-  if (filterId === "turnover") {
-    const rank = leaderRankFor(stock, "turnover");
-
-    return rank !== null && rank <= 30;
-  }
-  if (filterId === "volume") {
-    const rank = leaderRankFor(stock, "volume");
+  if (filterId === "gainers" || filterId === "turnover" || filterId === "volume") {
+    const rank = ranks?.get(stock.id) ?? null;
 
     return rank !== null && rank <= 30;
   }
@@ -599,27 +589,41 @@ function leaderVolumeOnly(stock: LeadingStock) {
     .trim();
 }
 
-function leaderRankFor(stock: LeadingStock, filterId: Extract<LeaderFilterId, "turnover" | "gainers" | "volume">) {
-  const patterns = {
-    turnover: /(?:거래대금|거래대금순위) #(\d+)/i,
-    gainers: /상승률 #(\d+)/i,
-    volume: /거래량 #(\d+)/i
-  };
-  const match = `${stock.marketLabel} ${stock.reason}`.match(patterns[filterId]);
+/**
+ * The figure each filter ranks on, taken from the data rather than the prose.
+ *
+ * This read the rank out of the reason sentence with a regular expression, and
+ * on 2026-08-19 every filter returned zero of thirty in both markets. Domestic
+ * rows say "거래대금 순위 #8" and the pattern wanted "거래대금 #8" — one space —
+ * while the US rows carry no rank sentence at all, so nothing could ever match.
+ * A wording change on the server silently emptied the board, which is what
+ * parsing a sentence for a number buys.
+ *
+ * Every one of these is already a number on the DTO.
+ */
+function leaderMetric(stock: LeadingStock, filterId: Extract<LeaderFilterId, "turnover" | "gainers" | "volume">) {
+  if (filterId === "gainers") return stock.changeRateValue ?? null;
+  if (filterId === "volume") return stock.volumeRatioValue ?? stock.volumeValue ?? null;
 
-  return match?.[1] ? Number(match[1]) : null;
+  return stock.turnoverValue ?? null;
+}
+
+/** Positions within the list being shown, best first, one-indexed. */
+function leaderRanks(stocks: LeadingStock[], filterId: Extract<LeaderFilterId, "turnover" | "gainers" | "volume">) {
+  const ordered = stocks
+    .filter((stock) => leaderMetric(stock, filterId) !== null)
+    .sort((left, right) => (leaderMetric(right, filterId) ?? 0) - (leaderMetric(left, filterId) ?? 0));
+
+  return new Map(ordered.map((stock, index) => [stock.id, index + 1]));
 }
 
 function sortLeadingStocks(stocks: MarketBoardData["usLeadingStocks"], filterId: LeaderFilterId) {
   if (filterId !== "turnover" && filterId !== "gainers" && filterId !== "volume" && filterId !== "etf") return stocks;
 
-  return [...stocks].sort((left, right) => {
-    const rankFilter = filterId === "etf" ? "turnover" : filterId;
-    const leftRank = leaderRankFor(left, rankFilter) ?? 999;
-    const rightRank = leaderRankFor(right, rankFilter) ?? 999;
+  const rankFilter = filterId === "etf" ? "turnover" : filterId;
+  const ranks = leaderRanks(stocks, rankFilter);
 
-    return leftRank - rightRank;
-  });
+  return [...stocks].sort((left, right) => (ranks.get(left.id) ?? 999) - (ranks.get(right.id) ?? 999));
 }
 
 function normalizeForMatch(value: string) {
@@ -720,21 +724,23 @@ function relatedDisclosures(stock: LeadingStock, disclosures: Disclosure[]) {
   });
 }
 
-function leaderRankSummary(stock: LeadingStock) {
+type LeaderRankSet = { gainers: Map<string, number>; turnover: Map<string, number>; volume: Map<string, number> };
+
+function leaderRankSummary(stock: LeadingStock, ranks: LeaderRankSet) {
   return [
-    leaderRankFor(stock, "turnover") ? `거래대금 #${leaderRankFor(stock, "turnover")}` : null,
-    leaderRankFor(stock, "gainers") ? `상승률 #${leaderRankFor(stock, "gainers")}` : null,
-    leaderRankFor(stock, "volume") ? `거래량 #${leaderRankFor(stock, "volume")}` : null
+    ranks.turnover.get(stock.id) ? `거래대금 #${ranks.turnover.get(stock.id)}` : null,
+    ranks.gainers.get(stock.id) ? `상승률 #${ranks.gainers.get(stock.id)}` : null,
+    ranks.volume.get(stock.id) ? `거래량 #${ranks.volume.get(stock.id)}` : null
   ].filter(Boolean).join(" · ");
 }
 
-function leaderRankSummaryForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
-  if (filterId === "turnover") return leaderRankFor(stock, "turnover") ? `거래대금 #${leaderRankFor(stock, "turnover")}` : "거래대금 순위";
-  if (filterId === "gainers") return leaderRankFor(stock, "gainers") ? `상승률 #${leaderRankFor(stock, "gainers")}` : "상승률 순위";
-  if (filterId === "volume") return leaderRankFor(stock, "volume") ? `거래량 #${leaderRankFor(stock, "volume")}` : "거래량 순위";
-  if (filterId === "etf") return leaderRankFor(stock, "turnover") ? `ETF 거래대금 #${leaderRankFor(stock, "turnover")}` : "ETF";
+function leaderRankSummaryForFilter(stock: LeadingStock, filterId: LeaderFilterId, ranks: LeaderRankSet) {
+  if (filterId === "turnover") return ranks.turnover.get(stock.id) ? `거래대금 #${ranks.turnover.get(stock.id)}` : "거래대금 순위";
+  if (filterId === "gainers") return ranks.gainers.get(stock.id) ? `상승률 #${ranks.gainers.get(stock.id)}` : "상승률 순위";
+  if (filterId === "volume") return ranks.volume.get(stock.id) ? `거래량 #${ranks.volume.get(stock.id)}` : "거래량 순위";
+  if (filterId === "etf") return ranks.turnover.get(stock.id) ? `ETF 거래대금 #${ranks.turnover.get(stock.id)}` : "ETF";
 
-  return leaderRankSummary(stock) || "주의";
+  return leaderRankSummary(stock, ranks) || "주의";
 }
 
 function leaderSignalForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
@@ -749,9 +755,9 @@ function leaderSignalForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
   return stock.marketLabel;
 }
 
-function leaderReasonForFilter(stock: LeadingStock, filterId: LeaderFilterId) {
+function leaderReasonForFilter(stock: LeadingStock, filterId: LeaderFilterId, ranks: LeaderRankSet) {
   const theme = leaderTheme(stock);
-  const rank = leaderRankSummaryForFilter(stock, filterId);
+  const rank = leaderRankSummaryForFilter(stock, filterId, ranks);
 
   if (filterId === "turnover" || filterId === "etf") {
     return `${theme} · 토스증권 ${rank} · 거래대금 ${stock.turnover}`;
@@ -838,7 +844,18 @@ export function MarketBoard({
   const activeDisclosureDescription = liveBoard.disclosureTabs.find((tab) => tab.id === disclosureRegion)?.description;
   const effectiveLeaderRegion: LeaderRegion = leaderRegion === "us" && liveBoard.usLeadingStocks.length === 0 && liveBoard.krLeadingStocks.length > 0 ? "kr" : leaderRegion;
   const activeLeadingStocks = effectiveLeaderRegion === "us" ? liveBoard.usLeadingStocks : liveBoard.krLeadingStocks;
-  const filteredLeadingStocks = sortLeadingStocks(activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter)), leaderFilter);
+  // Ranked over the list being shown rather than per row, so each filter orders
+  // by its own figure instead of all three sharing one number.
+  const turnoverRanks = leaderRanks(activeLeadingStocks, "turnover");
+  const gainerRanks = leaderRanks(activeLeadingStocks, "gainers");
+  const volumeRanks = leaderRanks(activeLeadingStocks, "volume");
+  const ranksFor = (filterId: LeaderFilterId) =>
+    filterId === "gainers" ? gainerRanks : filterId === "volume" ? volumeRanks : turnoverRanks;
+  const leaderRankSet = { gainers: gainerRanks, turnover: turnoverRanks, volume: volumeRanks };
+  const filteredLeadingStocks = sortLeadingStocks(
+    activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter, ranksFor(leaderFilter))),
+    leaderFilter
+  );
   const leaderDataUnavailable = activeLeadingStocks.length === 0;
   const selectedLeader = filteredLeadingStocks.find((stock) => stock.id === selectedLeaderId) ?? filteredLeadingStocks[0];
   const activeLeaderDisclosures = selectedLeader?.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures;
@@ -1172,15 +1189,15 @@ export function MarketBoard({
               </div>
               <div>
                 <span>거래대금 확인</span>
-                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "turnover")).length}개`}</strong>
+                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "turnover", turnoverRanks)).length}개`}</strong>
               </div>
               <div>
                 <span>상승률 확인</span>
-                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "gainers")).length}개`}</strong>
+                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "gainers", gainerRanks)).length}개`}</strong>
               </div>
               <div>
                 <span>거래량 확인</span>
-                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "volume")).length}개`}</strong>
+                <strong>{leaderDataUnavailable ? "대기" : `${activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, "volume", volumeRanks)).length}개`}</strong>
               </div>
             </section>
             <div className={styles.leaderFilterTabs} role="group" aria-label="거래 집중 필터">
@@ -1236,7 +1253,7 @@ export function MarketBoard({
                         <div className={styles.leaderReason}>
                           <span>{leaderSignalForFilter(stock, leaderFilter)}</span>
                           <small>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? `뉴스 ${rowNews.length}건 · 테마 ${rowThemeNews.length}건 · 공시 ${rowDisclosures.length}건` : "토스증권 랭킹 데이터"}</small>
-                          {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, leaderFilter)}</small>}
+                          {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, leaderFilter, leaderRankSet)}</small>}
                           <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "뉴스·공시 원문 확인 가능" : "뉴스·공시 매칭 대기"}</em>
                         </div>
                       </article>
@@ -1255,7 +1272,7 @@ export function MarketBoard({
                     <div>
                       <span>{leaderSignalForFilter(selectedLeader, leaderFilter)}</span>
                       <h3 id="leader-insight-title">{selectedLeader.name} 랭킹 근거</h3>
-                      <p>{leaderReasonForFilter(selectedLeader, leaderFilter)}</p>
+                      <p>{leaderReasonForFilter(selectedLeader, leaderFilter, leaderRankSet)}</p>
                     </div>
                     <strong>{selectedEvidenceCount > 0 ? `뉴스 ${selectedLeaderNews.length} · 테마 ${selectedThemeNews.length} · 공시 ${selectedDisclosures.length}` : "토스 랭킹만 수신"}</strong>
                   </header>

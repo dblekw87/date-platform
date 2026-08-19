@@ -835,7 +835,7 @@ export function MarketBoard({
     usdKrw: marketSnapshotById.get("usd-krw"),
     btc: marketSnapshotById.get("btc")
   };
-  const krThemeGroups = liveBoard.krThemeGroups ?? [];
+  const krAfterPairs = liveBoard.krAfterPairs ?? [];
   const krThemeLeaders = rankedThemeGroups(liveBoard.krLeadingStocks);
   const usThemeLeaders = rankedThemeGroups(liveBoard.usLeadingStocks);
   const latestHeadline = useMemo(() => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0], [liveBoard.headlineFlow]);
@@ -1434,19 +1434,19 @@ export function MarketBoard({
                   belongs to neither. 주도주 ranks the turnover top of the
                   market; a 짝꿍 is smaller than the stock it follows and is
                   almost never in that ranking, so it needs its own row. */}
-              <div className={`${styles.pairTradeRow} ${krThemeGroups.length > 0 ? styles.pairTradeRowSplit : ""}`}>
+              <div className={`${styles.pairTradeRow} ${krAfterPairs.length > 0 ? styles.pairTradeRowSplit : ""}`}>
                 <PairTrades
                   emptyMessage={leaderUnavailableMessage(liveBoard, "KR")}
-                  label="시황 · 국내 짝꿍매매"
+                  label="시황 · 국내 짝꿍매매 · 정규장 09:00–15:30"
                   pairs={liveBoard.krPairTrades ?? []}
                 />
-                {/* The ranked pairs on the left can only come from a theme that
-                    reached the turnover top. This is every other theme the
-                    collector saw move, so it stays hidden on a day with none. */}
-                {krThemeGroups.length > 0 ? (
+                {/* The NXT evening, which is a different book with different
+                    liquidity — so it is a separate panel rather than more rows.
+                    Hidden until 15:40, when there is an evening to describe. */}
+                {krAfterPairs.length > 0 ? (
                   <PairTrades
-                    label="시황 · 다른 테마 짝꿍 후보"
-                    pairs={krThemeGroups}
+                    label="시황 · 국내 짝꿍매매 · NXT 애프터마켓 15:40–20:00"
+                    pairs={krAfterPairs}
                   />
                 ) : null}
               </div>

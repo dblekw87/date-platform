@@ -1378,64 +1378,14 @@ export function MarketBoard({
         <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "top")?.label ?? "상단 광고 영역"} />
         <AdSlot label={liveBoard.adSlots.find((slot) => slot.id === "middle")?.label ?? "중단 광고 영역"} />
       </div>
-      {activeTab === "market" ? (
-        <>
-          <section className={`${styles.tabPanel} ${styles.marketFlowPanel}`} data-tab="market-flow" aria-labelledby="market-flow-title">
-            <div className={styles.sectionHeader}>
-              <p className={styles.eyebrow}>시황 흐름</p>
-              <h2 id="market-flow-title">시황 : 개장 전 후 참고할 흐름</h2>
-              <p className={styles.sectionLead}>미국 매크로와 국내 개장 기준점을 먼저 확인합니다.</p>
-            </div>
-            <div className={styles.marketTrendDetails}>
-              <div className={styles.trendSectionGrid}>
-                <article className={styles.trendContent}>
-                  <span>미국시황</span>
-                  <div>
-                    <h3>
-                      <EnglishText text={marketTrendItems.qqq?.label ?? "NASDAQ 100 ETF"} />{" "}
-                      <b data-tone={marketTrendItems.qqq?.tone}>{marketChangeLabel(marketTrendItems.qqq)}</b>
-                      <br />
-                      <EnglishText text={marketTrendItems.spy?.label ?? "S&P 500 ETF"} />{" "}
-                      <b data-tone={marketTrendItems.spy?.tone}>{marketChangeLabel(marketTrendItems.spy)}</b> 흐름입니다
-                    </h3>
-                    <ul>
-                      <li>반도체 기준 <EnglishText text={marketTrendItems.soxx?.symbol ?? "SOXX"} /> <b data-tone={marketTrendItems.soxx?.tone}>{marketChangeLabel(marketTrendItems.soxx)}</b></li>
-                      <li>10년물 {marketTrendItems.us10y?.value ?? "확인 중"} · <b data-tone={marketTrendItems.us10y?.tone}>{marketChangeLabel(marketTrendItems.us10y)}</b></li>
-                      <li>선물 원본이 아닌 <EnglishText text="ETF" />/공식 금리 기준으로 참고합니다.</li>
-                    </ul>
-                  </div>
-                </article>
-                <article className={styles.trendContent}>
-                  <span>국내시황</span>
-                  <div>
-                    <h3>
-                      <EnglishText text="KOSPI" /> <b data-tone={marketTrendItems.kospi?.tone}>{marketChangeLabel(marketTrendItems.kospi)}</b>
-                      <br />
-                      <EnglishText text="KOSDAQ" /> <b data-tone={marketTrendItems.kosdaq?.tone}>{marketChangeLabel(marketTrendItems.kosdaq)}</b> 흐름입니다
-                    </h3>
-                    <ul>
-                      <li><EnglishText text={marketTrendItems.kospi?.label ?? "KOSPI"} /> {marketTrendItems.kospi?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kospi?.tone}>{marketChangeLabel(marketTrendItems.kospi)}</b></li>
-                      <li><EnglishText text={marketTrendItems.kospi200?.label ?? "KOSPI200"} /> {marketTrendItems.kospi200?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kospi200?.tone}>{marketChangeLabel(marketTrendItems.kospi200)}</b></li>
-                      <li><EnglishText text={marketTrendItems.kosdaq?.label ?? "KOSDAQ"} /> {marketTrendItems.kosdaq?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kosdaq?.tone}>{marketChangeLabel(marketTrendItems.kosdaq)}</b></li>
-                    </ul>
-                  </div>
-                </article>
-                <article className={styles.trendContent}>
-                  <span>환율 시황</span>
-                  <div>
-                    <h3>
-                      원/달러 <b data-tone="flat">{marketTrendItems.usdKrw?.value ?? "확인 중"}</b>
-                      <br />
-                      <EnglishText text="BTC" /> <b data-tone={marketTrendItems.btc?.tone}>{marketChangeLabel(marketTrendItems.btc)}</b> 기준입니다
-                    </h3>
-                    <ul>
-                      <li>{marketTrendItems.usdKrw?.note ?? "Frankfurter 기준"}</li>
-                      <li><EnglishText text="CoinGecko BTC/USD" /> 24시간 변화</li>
-                      <li>국내 개장 전 수출주와 위험선호 참고값으로만 봅니다.</li>
-                    </ul>
-                  </div>
-                </article>
-              </div>
+      {activeTab === "trade" ? (
+        <section className={styles.tabPanel} data-tab="trade" aria-labelledby="trade-panel-title">
+          <div className={styles.sectionHeader}>
+            <p className={styles.eyebrow}>매매참고</p>
+            <h2 id="trade-panel-title">주도주와 테마, 그리고 아직 따라오지 않은 자리를 함께 봅니다.</h2>
+            <p className={styles.sectionLead}>시황을 확인한 뒤 실제로 무엇을 볼지 좁히는 화면입니다. 예측이 아니라 간격과 근거입니다.</p>
+          </div>
+          <div className={styles.marketTrendDetails}>
               {/* 주도주 comes before 강세 테마: the day's concentration is read
                   first, and the theme list answers what moved with it. */}
               <div className={styles.themeAnalysisGrid}>
@@ -1521,6 +1471,67 @@ export function MarketBoard({
                   label="미국 급등 후보"
                   movers={liveBoard.usPremarketMovers ?? []}
                 />
+              </div>
+          </div>
+        </section>
+      ) : null}
+      {activeTab === "market" ? (
+        <>
+          <section className={`${styles.tabPanel} ${styles.marketFlowPanel}`} data-tab="market-flow" aria-labelledby="market-flow-title">
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>시황 흐름</p>
+              <h2 id="market-flow-title">시황 : 개장 전 후 참고할 흐름</h2>
+              <p className={styles.sectionLead}>미국 매크로와 국내 개장 기준점을 먼저 확인합니다.</p>
+            </div>
+            <div className={styles.marketTrendDetails}>
+              <div className={styles.trendSectionGrid}>
+                <article className={styles.trendContent}>
+                  <span>미국시황</span>
+                  <div>
+                    <h3>
+                      <EnglishText text={marketTrendItems.qqq?.label ?? "NASDAQ 100 ETF"} />{" "}
+                      <b data-tone={marketTrendItems.qqq?.tone}>{marketChangeLabel(marketTrendItems.qqq)}</b>
+                      <br />
+                      <EnglishText text={marketTrendItems.spy?.label ?? "S&P 500 ETF"} />{" "}
+                      <b data-tone={marketTrendItems.spy?.tone}>{marketChangeLabel(marketTrendItems.spy)}</b> 흐름입니다
+                    </h3>
+                    <ul>
+                      <li>반도체 기준 <EnglishText text={marketTrendItems.soxx?.symbol ?? "SOXX"} /> <b data-tone={marketTrendItems.soxx?.tone}>{marketChangeLabel(marketTrendItems.soxx)}</b></li>
+                      <li>10년물 {marketTrendItems.us10y?.value ?? "확인 중"} · <b data-tone={marketTrendItems.us10y?.tone}>{marketChangeLabel(marketTrendItems.us10y)}</b></li>
+                      <li>선물 원본이 아닌 <EnglishText text="ETF" />/공식 금리 기준으로 참고합니다.</li>
+                    </ul>
+                  </div>
+                </article>
+                <article className={styles.trendContent}>
+                  <span>국내시황</span>
+                  <div>
+                    <h3>
+                      <EnglishText text="KOSPI" /> <b data-tone={marketTrendItems.kospi?.tone}>{marketChangeLabel(marketTrendItems.kospi)}</b>
+                      <br />
+                      <EnglishText text="KOSDAQ" /> <b data-tone={marketTrendItems.kosdaq?.tone}>{marketChangeLabel(marketTrendItems.kosdaq)}</b> 흐름입니다
+                    </h3>
+                    <ul>
+                      <li><EnglishText text={marketTrendItems.kospi?.label ?? "KOSPI"} /> {marketTrendItems.kospi?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kospi?.tone}>{marketChangeLabel(marketTrendItems.kospi)}</b></li>
+                      <li><EnglishText text={marketTrendItems.kospi200?.label ?? "KOSPI200"} /> {marketTrendItems.kospi200?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kospi200?.tone}>{marketChangeLabel(marketTrendItems.kospi200)}</b></li>
+                      <li><EnglishText text={marketTrendItems.kosdaq?.label ?? "KOSDAQ"} /> {marketTrendItems.kosdaq?.value ?? "확인 중"} · <b data-tone={marketTrendItems.kosdaq?.tone}>{marketChangeLabel(marketTrendItems.kosdaq)}</b></li>
+                    </ul>
+                  </div>
+                </article>
+                <article className={styles.trendContent}>
+                  <span>환율 시황</span>
+                  <div>
+                    <h3>
+                      원/달러 <b data-tone="flat">{marketTrendItems.usdKrw?.value ?? "확인 중"}</b>
+                      <br />
+                      <EnglishText text="BTC" /> <b data-tone={marketTrendItems.btc?.tone}>{marketChangeLabel(marketTrendItems.btc)}</b> 기준입니다
+                    </h3>
+                    <ul>
+                      <li>{marketTrendItems.usdKrw?.note ?? "Frankfurter 기준"}</li>
+                      <li><EnglishText text="CoinGecko BTC/USD" /> 24시간 변화</li>
+                      <li>국내 개장 전 수출주와 위험선호 참고값으로만 봅니다.</li>
+                    </ul>
+                  </div>
+                </article>
               </div>
             </div>
           </section>

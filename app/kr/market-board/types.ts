@@ -1,4 +1,4 @@
-export type MarketBoardTabId = "market" | "news" | "calendar" | "breaking" | "flow";
+export type MarketBoardTabId = "market" | "news" | "calendar" | "breaking" | "flow" | "trade";
 
 export type RegionCode = "US" | "KR" | "GLOBAL" | "CRYPTO";
 

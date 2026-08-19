@@ -8,7 +8,7 @@ import type { MarketBoardTabId } from "./kr/market-board/types";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const tabIds = new Set<MarketBoardTabId>(["market", "news", "calendar", "breaking", "flow"]);
+const tabIds = new Set<MarketBoardTabId>(["market", "news", "calendar", "breaking", "flow", "trade"]);
 
 function parseInitialTab(value?: string | string[]) {
   const tab = Array.isArray(value) ? value[0] : value;

@@ -46,7 +46,8 @@ const newsFilters: Array<{ id: NewsFilterId; label: string }> = [
   { id: "macro", label: "매크로" }
 ];
 
-const weekdayLabels = ["월", "화", "수", "목", "금", "토", "일"];
+// Sunday first, the way a Korean calendar is read.
+const weekdayLabels = ["일", "월", "화", "수", "목", "금", "토"];
 const marketCardOrder = [
   "nasdaq-future",
   "sp500-future",
@@ -120,11 +121,13 @@ function buildCalendarDays(anchorDate: string) {
   const [year, month] = anchorDate.split("-").map(Number);
   const firstDate = new Date(Date.UTC(year, month - 1, 1));
   const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  const mondayOffset = (firstDate.getUTCDay() + 6) % 7;
-  const cellCount = Math.ceil((mondayOffset + lastDay) / 7) * 7;
+  // getUTCDay is already Sunday-indexed, so the week needs no shifting. It used
+  // to be rotated by six to start on Monday.
+  const leadingBlanks = firstDate.getUTCDay();
+  const cellCount = Math.ceil((leadingBlanks + lastDay) / 7) * 7;
 
   return Array.from({ length: cellCount }, (_, index) => {
-    const day = index - mondayOffset + 1;
+    const day = index - leadingBlanks + 1;
 
     if (day < 1 || day > lastDay) {
       return null;
@@ -832,6 +835,7 @@ export function MarketBoard({
     usdKrw: marketSnapshotById.get("usd-krw"),
     btc: marketSnapshotById.get("btc")
   };
+  const krThemeGroups = liveBoard.krThemeGroups ?? [];
   const krThemeLeaders = rankedThemeGroups(liveBoard.krLeadingStocks);
   const usThemeLeaders = rankedThemeGroups(liveBoard.usLeadingStocks);
   const latestHeadline = useMemo(() => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0], [liveBoard.headlineFlow]);
@@ -1430,12 +1434,21 @@ export function MarketBoard({
                   belongs to neither. 주도주 ranks the turnover top of the
                   market; a 짝꿍 is smaller than the stock it follows and is
                   almost never in that ranking, so it needs its own row. */}
-              <div className={styles.pairTradeRow}>
+              <div className={`${styles.pairTradeRow} ${krThemeGroups.length > 0 ? styles.pairTradeRowSplit : ""}`}>
                 <PairTrades
                   emptyMessage={leaderUnavailableMessage(liveBoard, "KR")}
                   label="시황 · 국내 짝꿍매매"
                   pairs={liveBoard.krPairTrades ?? []}
                 />
+                {/* The ranked pairs on the left can only come from a theme that
+                    reached the turnover top. This is every other theme the
+                    collector saw move, so it stays hidden on a day with none. */}
+                {krThemeGroups.length > 0 ? (
+                  <PairTrades
+                    label="시황 · 다른 테마 짝꿍 후보"
+                    pairs={krThemeGroups}
+                  />
+                ) : null}
               </div>
               <div className={styles.themeAnalysisGrid}>
                 <article className={styles.themeSection}>

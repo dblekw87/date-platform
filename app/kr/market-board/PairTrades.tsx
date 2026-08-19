@@ -77,11 +77,13 @@ function PairTradeRow({ pair }: { pair: PairTradeDto }) {
 }
 
 export function PairTrades({
-  emptyMessage,
+  emptyMessage = "",
   label,
   pairs
 }: {
-  emptyMessage: string;
+  // Optional because a panel that is only mounted when it has rows never shows
+  // an empty state.
+  emptyMessage?: string;
   label: string;
   pairs: PairTradeDto[];
 }) {

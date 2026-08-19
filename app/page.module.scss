@@ -3871,6 +3871,14 @@ a.dayLeaderReason:hover {
   gap: 10px;
 }
 
+// Two panels when the wider theme list has something to add. The left one is
+// the ranked pairs and the right one is every other theme that moved, so they
+// read side by side rather than one under the other.
+.pairTradeRowSplit {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
 .pairTrade {
   min-width: 0;
   border: 1px solid #d5d9e2;
@@ -4128,6 +4136,10 @@ a.dayLeaderReason:hover {
   .statusBox {
     grid-template-columns: 1fr;
     gap: 32px;
+  }
+
+  .pairTradeRowSplit {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .macroGrid {

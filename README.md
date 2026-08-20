@@ -68,19 +68,36 @@ Google, Naver, Kakao OAuth 2.0 Authorization Code 흐름을 직접 구현했습�
 
 ## Portfolio Screen Captures
 
-포트폴리오 검토자가 주요 화면을 빠르게 확인할 수 있도록 핵심 탭의 데스크톱 캡처를 정리했습니다.
+포트폴리오 검토자가 주요 화면을 빠르게 확인할 수 있도록 여섯 개 탭 전부를 데스크톱
+전체 화면으로 캡처했습니다. 2026-08-20 로컬 실행 기준이고, 표시되는 종목과 수치는
+그 시각 실제 수집 데이터입니다.
 
 | 시황 | 뉴스 |
 | --- | --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-market.png" width="420" alt="DATE Market Board 시황 탭" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-news.png" width="420" alt="DATE Market Board 뉴스 탭" /> |
+| <img src="./docs/portfolio/2026-08-20/desktop-market.png" width="420" alt="시황 탭 — 미국 매크로와 국내 개장 기준점" /> | <img src="./docs/portfolio/2026-08-20/desktop-news.png" width="420" alt="뉴스 탭 — 국내외 헤드라인 흐름" /> |
 
 | 일정 | 속보·공시 |
 | --- | --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-calendar.png" width="420" alt="DATE Market Board 일정 탭" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-breaking.png" width="420" alt="DATE Market Board 속보 공시 탭" /> |
+| <img src="./docs/portfolio/2026-08-20/desktop-calendar.png" width="420" alt="일정 탭 — 공모주·실적발표 캘린더" /> | <img src="./docs/portfolio/2026-08-20/desktop-breaking.png" width="420" alt="속보·공시 탭 — SEC와 DART" /> |
 
-| 수급·차트 |
-| --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/desktop-flow.png" width="860" alt="DATE Market Board 수급 차트 탭" /> |
+| 수급·차트 | 매매참고 |
+| --- | --- |
+| <img src="./docs/portfolio/2026-08-20/desktop-flow.png" width="420" alt="수급·차트 탭 — 거래대금·상승률·거래량·ETF·주의" /> | <img src="./docs/portfolio/2026-08-20/desktop-trade.png" width="420" alt="매매참고 탭 — 주도주·짝꿍매매·강세 테마·급등 후보" /> |
+
+**매매참고**는 가장 나중에 분리한 탭입니다. 주도주·강세 테마·짝꿍매매·급등 후보가
+시황 탭 아래로 계속 쌓여 한 화면이 아니라 스크롤이 되어버려서, "시장이 무엇을 했나"와
+"그래서 무엇을 볼까"를 갈랐습니다.
+
+그 안의 **짝꿍매매**는 장 구간으로 다시 나뉩니다 — 왼쪽 정규장 09:00~15:30, 오른쪽
+NXT 애프터마켓 15:40~20:00. 같은 두 종목이라도 KRX 14시와 NXT 18시는 다른 호가창·다른
+유동성이라 한 패널에 섞으면 읽을 수 없기 때문이고, 오른쪽은 15:40 전에는 아예 렌더하지
+않습니다. 1등주를 후보가 추월해 간격이 사라진 조합도 목록에서 빠집니다.
+
+**수급·차트** 탭의 하위 필터도 여섯입니다 — 거래대금·상승률·거래량·ETF·주의. ETF와
+주의는 원래 화면만 있고 채울 데이터가 없었습니다. ETF는 주도주 랭킹에서 걸러 버리던
+것을 별도 목록으로 살렸고(지수 펀드를 테마 거래대금에 합산하면 "누가 KODEX 200을
+샀으니 반도체가 움직인다"가 됩니다), 주의는 KIS 시세 응답에 이미 들어 있던 관리종목·
+투자경고 지정을 읽어 채웠습니다.
 
 ## Responsive Frontend Review
 

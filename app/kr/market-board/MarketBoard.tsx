@@ -80,7 +80,7 @@ const marketCardFallbacks: Record<string, Pick<MarketSnapshot, "label" | "market
   "nasdaq-future": { label: "NASDAQ 100 선물", market: "US", instrumentType: "future", symbol: "NQ=F", note: "E-mini NASDAQ 100 · 10분 지연", source: "market" },
   "dow-future": { label: "다우 선물", market: "US", instrumentType: "future", symbol: "YM=F", note: "E-mini 다우 30 · 10분 지연", source: "market" },
   "nikkei-future": { label: "닛케이225 선물", market: "GLOBAL", instrumentType: "future", symbol: "NIY=F", note: "CME 닛케이225 · 10분 지연", source: "market" },
-  "kosdaq150-future": { label: "코스닥150 선물", market: "KR", instrumentType: "future", symbol: "F-KQ150", note: "KIS 연결선물", source: "kis" },
+  "kosdaq150-future": { label: "KOSDAQ150 선물", market: "KR", instrumentType: "future", symbol: "F-KQ150", note: "KIS 연결선물", source: "kis" },
   "kospi200-future": { label: "KOSPI200 선물", market: "KR", instrumentType: "future", symbol: "F-K200", note: "KIS 연결선물", source: "kis" },
   "sp500-future": { label: "S&P 500 선물", market: "US", instrumentType: "future", symbol: "ES=F", note: "E-mini S&P 500 · 10분 지연", source: "market" },
   "phlx-sox": { label: "반도체 ETF", market: "US", instrumentType: "index", symbol: "SOXX", note: "SOX 원지수 대체 확인용 반도체 ETF", source: "market" },

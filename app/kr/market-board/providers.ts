@@ -1,7 +1,11 @@
 import type { MarketBoardData } from "./types";
 
 const backendUrl = process.env.DATE_BACKEND_URL ?? "http://localhost:4010";
-const snapshotUrl = process.env.DATE_BOARD_SNAPSHOT_URL;
+// Defaulted rather than required. The snapshot repository is public and its URL
+// is fixed, so making production depend on an environment variable only creates
+// a way for the deploy to be silently dataless. The variable still wins when set.
+const snapshotUrl = process.env.DATE_BOARD_SNAPSHOT_URL
+  ?? "https://raw.githubusercontent.com/dblekw87/date-board-snapshot/main/board.json";
 
 // Rendered when the backend is unreachable. It carries the board's fixed
 // structure only — tabs, ad slots, and a provider status explaining the gap —

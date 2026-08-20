@@ -1800,8 +1800,13 @@
 
 .macroGrid article {
   position: relative;
+  // A column rather than a grid, so the timestamp's margin-top:auto has the
+  // card's spare height to consume. Packed into grid rows it had none, and the
+  // 시각 line sat right under wherever the note happened to end — one line for
+  // 금 선물, two for 10Y 금리, so neighbouring cards read at different heights.
+  display: flex;
+  flex-direction: column;
   min-height: 132px;
-  align-content: start;
   overflow: hidden;
   background:
     linear-gradient(145deg, rgba(var(--accent-rgb), 0.09), transparent 48%),
@@ -2708,6 +2713,11 @@
 }
 
 .macroGrid article {
+  // Sized when the card also carried an instrument note. Without it the three
+  // remaining lines sat at the top and left 58px of dead space beneath the
+  // timestamp, so the content is centred in the box instead — the height stays,
+  // and every card's block of text lands in the same place.
+  justify-content: center;
   min-height: 192px;
   gap: 10px;
   border: 1px solid #d5d9e2;
@@ -2822,7 +2832,9 @@
 }
 
 .macroGrid em {
-  margin-top: auto;
+  // Was pinned to the bottom of the card, which left a gap under the figure
+  // once the instrument note was removed. It reads as a caption on the number,
+  // so it stays with it.
   color: #8695aa;
   font-size: 12px;
   font-weight: 700;

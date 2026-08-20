@@ -267,10 +267,6 @@ function displaySource(source?: string) {
   return source;
 }
 
-function displayMarketNote(note: string) {
-  return note.replace(/^KIS\s+/i, "");
-}
-
 function displayProviderMessage(message: string) {
   return message.replace(/mock/gi, "비활성");
 }
@@ -974,7 +970,11 @@ export function MarketBoard({
                     <Image alt="" aria-hidden="true" className={styles.marketTrendIcon} height={16} src={trendIconByTone[item.tone]} width={16} />
                   ) : null}
                 </div>
-                <small>{displayMarketNote(item.note)}</small>
+                {/* The instrument note is dropped on purpose — "KIS 국내업종
+                    현재지수", "SOX 원지수에는 선물이 없어 SOXX" — it is reference
+                    material rather than a reading, and its length varied enough
+                    to leave neighbouring cards misaligned. Source and time still
+                    say where the number came from. */}
                 <em>{displaySource(item.source)} · {formatDateTimeMinute(item.timestamp)}</em>
               </article>
             ))}

@@ -48,21 +48,28 @@ const newsFilters: Array<{ id: NewsFilterId; label: string }> = [
 
 // Sunday first, the way a Korean calendar is read.
 const weekdayLabels = ["일", "월", "화", "수", "목", "금", "토"];
+// The macro row, read left to right: US direction first, then what it lands on
+// at home, then the rest of the world, then the prices everything is measured
+// against. Ids not listed here are dropped, which is how four new cards were
+// fetched and never drawn.
 const marketCardOrder = [
   "nasdaq-future",
   "sp500-future",
+  "dow-future",
   "phlx-sox",
   "kospi-day-future",
+  "kospi200-future",
   "kospi-night-future",
-  "wti",
   "kosdaq-night-future",
-  // "russell-future",
+  "kosdaq150-future",
+  "nikkei-future",
+  "wti",
   "gold",
   "usd-krw",
-  "btc",
-  // "vix",
-  "us10y"
+  "us10y",
+  "btc"
 ];
+
 const trendIconByTone = {
   up: "/market-board/trend-up.svg",
   down: "/market-board/trend-down.svg",
@@ -70,16 +77,20 @@ const trendIconByTone = {
 } satisfies Record<MarketBoardData["macroSnapshot"][number]["tone"], string>;
 const rankIcons = ["/market-board/rank-a.svg", "/market-board/rank-b.svg", "/market-board/rank-c.svg"];
 const marketCardFallbacks: Record<string, Pick<MarketSnapshot, "label" | "market" | "instrumentType" | "symbol" | "note" | "source">> = {
-  "nasdaq-future": { label: "NASDAQ 100 ETF", market: "US", instrumentType: "future", symbol: "QQQ", note: "NASDAQ 선물 대체 확인용 ETF", source: "market" },
-  "sp500-future": { label: "S&P 500 ETF", market: "US", instrumentType: "future", symbol: "SPY", note: "S&P 500 선물 대체 확인용 ETF", source: "market" },
+  "nasdaq-future": { label: "NASDAQ 100 선물", market: "US", instrumentType: "future", symbol: "NQ=F", note: "E-mini NASDAQ 100 · 10분 지연", source: "market" },
+  "dow-future": { label: "다우 선물", market: "US", instrumentType: "future", symbol: "YM=F", note: "E-mini 다우 30 · 10분 지연", source: "market" },
+  "nikkei-future": { label: "닛케이225 선물", market: "GLOBAL", instrumentType: "future", symbol: "NIY=F", note: "CME 닛케이225 · 10분 지연", source: "market" },
+  "kosdaq150-future": { label: "코스닥150 선물", market: "KR", instrumentType: "future", symbol: "F-KQ150", note: "KIS 연결선물", source: "kis" },
+  "kospi200-future": { label: "KOSPI200 선물", market: "KR", instrumentType: "future", symbol: "F-K200", note: "KIS 연결선물", source: "kis" },
+  "sp500-future": { label: "S&P 500 선물", market: "US", instrumentType: "future", symbol: "ES=F", note: "E-mini S&P 500 · 10분 지연", source: "market" },
   "phlx-sox": { label: "반도체 ETF", market: "US", instrumentType: "index", symbol: "SOXX", note: "SOX 원지수 대체 확인용 반도체 ETF", source: "market" },
   "kospi-day-future": { label: "KOSPI", market: "KR", instrumentType: "index", symbol: "KOSPI", note: "KIS 국내업종 현재지수", source: "kis" },
   "kospi-night-future": { label: "KOSPI200", market: "KR", instrumentType: "index", symbol: "KOSPI200", note: "KIS 국내업종 현재지수", source: "kis" },
-  wti: { label: "WTI ETF", market: "GLOBAL", instrumentType: "commodity", symbol: "USO", note: "WTI 선물 대체 확인용 ETF", source: "market" },
+  wti: { label: "WTI 선물", market: "GLOBAL", instrumentType: "commodity", symbol: "CL=F", note: "NYMEX WTI 원유 · 10분 지연", source: "market" },
   "kosdaq-night-future": { label: "KOSDAQ", market: "KR", instrumentType: "index", symbol: "KOSDAQ", note: "KIS 국내업종 현재지수", source: "kis" },
   "russell-future": { label: "RUSSELL 2000 선물", market: "US", instrumentType: "future", symbol: "RTY", note: "미국 중소형주 기준", source: "market" },
-  gold: { label: "금 ETF", market: "GLOBAL", instrumentType: "commodity", symbol: "GLD", note: "금선물 대체 확인용 ETF", source: "market" },
-  "usd-krw": { label: "원/달러 환율", market: "KR", instrumentType: "fx", symbol: "USD/KRW", note: "Frankfurter 기준", source: "market" },
+  gold: { label: "금 선물", market: "GLOBAL", instrumentType: "commodity", symbol: "GC=F", note: "COMEX 금 · 10분 지연", source: "market" },
+  "usd-krw": { label: "원/달러 환율", market: "KR", instrumentType: "fx", symbol: "USD/KRW", note: "Yahoo USD/KRW 실시간", source: "market" },
   btc: { label: "BTC", market: "CRYPTO", instrumentType: "crypto", symbol: "BTC", note: "CoinGecko BTC/USD 24시간 변화", source: "market" },
   vix: { label: "VIX", market: "US", instrumentType: "index", symbol: "VIX", note: "위험 회피 참고지수", source: "market" },
   us10y: { label: "10Y 금리", market: "US", instrumentType: "rate", symbol: "US10Y", note: "U.S. Treasury Daily Yield Curve", source: "market" }

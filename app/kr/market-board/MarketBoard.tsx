@@ -1393,7 +1393,7 @@ export function MarketBoard({
         <section className={styles.tabPanel} data-tab="trade" aria-labelledby="trade-panel-title">
           <div className={styles.sectionHeader}>
             <p className={styles.eyebrow}>매매참고</p>
-            <h2 id="trade-panel-title">주도주와 테마, 그리고 아직 따라오지 않은 자리를 함께 봅니다.</h2>
+            <h2 id="trade-panel-title">주도주와 테마, 아직 따라오지 않은 자리를 함께 봅니다.</h2>
             <p className={styles.sectionLead}>시황을 확인한 뒤 실제로 무엇을 볼지 좁히는 화면입니다. 예측이 아니라 간격과 근거입니다.</p>
           </div>
           <div className={styles.marketTrendDetails}>

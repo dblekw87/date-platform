@@ -78,12 +78,12 @@ const trendIconByTone = {
 const rankIcons = ["/market-board/rank-a.svg", "/market-board/rank-b.svg", "/market-board/rank-c.svg"];
 const marketCardFallbacks: Record<string, Pick<MarketSnapshot, "label" | "market" | "instrumentType" | "symbol" | "note" | "source">> = {
   "nasdaq-future": { label: "NASDAQ 100 선물", market: "US", instrumentType: "future", symbol: "NQ=F", note: "E-mini NASDAQ 100 · 10분 지연", source: "market" },
-  "dow-future": { label: "다우 선물", market: "US", instrumentType: "future", symbol: "YM=F", note: "E-mini 다우 30 · 10분 지연", source: "market" },
+  "dow-future": { label: "DOW 선물", market: "US", instrumentType: "future", symbol: "YM=F", note: "E-mini DOW 30 · 10분 지연", source: "market" },
   "nikkei-future": { label: "NIKKEI225 선물", market: "GLOBAL", instrumentType: "future", symbol: "NIY=F", note: "CME NIKKEI225 · 10분 지연", source: "market" },
   "kosdaq150-future": { label: "KOSDAQ150 선물", market: "KR", instrumentType: "future", symbol: "F-KQ150", note: "KIS 연결선물", source: "kis" },
   "kospi200-future": { label: "KOSPI200 선물", market: "KR", instrumentType: "future", symbol: "F-K200", note: "KIS 연결선물", source: "kis" },
   "sp500-future": { label: "S&P 500 선물", market: "US", instrumentType: "future", symbol: "ES=F", note: "E-mini S&P 500 · 10분 지연", source: "market" },
-  "phlx-sox": { label: "반도체 ETF", market: "US", instrumentType: "index", symbol: "SOXX", note: "SOX 원지수 대체 확인용 반도체 ETF", source: "market" },
+  "phlx-sox": { label: "반도체 ETF", market: "US", instrumentType: "index", symbol: "SOXX", note: "SOX 원지수에 선물이 없어 SOXX · 미국 시간외 반영", source: "market" },
   "kospi-day-future": { label: "KOSPI", market: "KR", instrumentType: "index", symbol: "KOSPI", note: "KIS 국내업종 현재지수", source: "kis" },
   "kospi-night-future": { label: "KOSPI200", market: "KR", instrumentType: "index", symbol: "KOSPI200", note: "KIS 국내업종 현재지수", source: "kis" },
   wti: { label: "WTI 선물", market: "GLOBAL", instrumentType: "commodity", symbol: "CL=F", note: "NYMEX WTI 원유 · 10분 지연", source: "market" },
@@ -1509,7 +1509,7 @@ export function MarketBoard({
                     <ul>
                       <li>반도체 기준 <EnglishText text={marketTrendItems.soxx?.symbol ?? "SOXX"} /> <b data-tone={marketTrendItems.soxx?.tone}>{marketChangeLabel(marketTrendItems.soxx)}</b></li>
                       <li>10년물 {marketTrendItems.us10y?.value ?? "확인 중"} · <b data-tone={marketTrendItems.us10y?.tone}>{marketChangeLabel(marketTrendItems.us10y)}</b></li>
-                      <li>선물 원본이 아닌 <EnglishText text="ETF" />/공식 금리 기준으로 참고합니다.</li>
+                      <li>지수·상품은 실제 선물이며 <EnglishText text="CME" /> 기준 10분 지연입니다.</li>
                     </ul>
                   </div>
                 </article>

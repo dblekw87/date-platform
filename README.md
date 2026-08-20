@@ -58,6 +58,13 @@ DB 없이도 채워지지만 짝꿍 패널·테마 그룹은 기록에서 읽으
 
 ## Screens
 
+### 시장 보드
+
+여섯 개 탭 전부를 아래 [Portfolio Screen Captures](#portfolio-screen-captures)에
+데스크톱 전체 화면으로 실었습니다.
+
+<img src="./docs/portfolio/2026-08-20/desktop-market.png" width="860" alt="시장 보드 시황 탭" />
+
 ### 로그인 — SNS OAuth
 
 Google, Naver, Kakao OAuth 2.0 Authorization Code 흐름을 직접 구현했습니다. NextAuth 같은 라이브러리 없이 state 검증, 토큰 교환, 프로필 조회, 세션 서명까지 처리합니다.
@@ -84,17 +91,13 @@ Google, Naver, Kakao OAuth 2.0 Authorization Code 흐름을 직접 구현했습�
 
 ![내가 쓴 글](./public/portfolio/my-posts.png)
 
-### 시장 보드
-
-![시장 보드 데스크톱](./public/portfolio/date-market-board-desktop.png)
-
 ### 모바일
 
 정보량이 많은 화면을 좁은 폭에서 어떻게 재배치했는지 확인할 수 있습니다.
 
-| 커뮤니티 | 매매 복기 |
-| --- | --- |
-| <img src="./public/portfolio/community-mobile.png" width="260" alt="커뮤니티 모바일" /> | <img src="./public/portfolio/trade-journal-mobile.png" width="260" alt="매매 복기 모바일" /> |
+| 시장 보드 | 커뮤니티 | 매매 복기 |
+| --- | --- | --- |
+| <img src="./docs/portfolio/2026-08-20/mobile-market.png" width="240" alt="시장 보드 모바일" /> | <img src="./public/portfolio/community-mobile.png" width="240" alt="커뮤니티 모바일" /> | <img src="./public/portfolio/trade-journal-mobile.png" width="240" alt="매매 복기 모바일" /> |
 
 ## Portfolio Screen Captures
 
@@ -137,12 +140,12 @@ NXT 애프터마켓 15:40~20:00. 같은 두 종목이라도 KRX 14시와 NXT 18�
 
 | Check | Result |
 | --- | --- |
-| 검증 일자 | 2026-08-08 |
+| 검증 일자 | 2026-08-20 |
 | 검증 방식 | Playwright full-page screenshot + DOM overflow scan |
 | 검증 뷰포트 | Desktop `1440x900`, Tablet `768x1024`, Mobile `390x844`, Narrow Mobile `320x568` |
-| 탭 범위 | 시황, 뉴스, 일정, 속보·공시, 수급·차트 |
+| 탭 범위 | 시황, 뉴스, 일정, 속보·공시, 수급·차트, 매매참고 |
 | 렌더링 상태 | 모든 탭 HTTP `200`, 콘솔 오류 `0` |
-| 반응형 상태 | 확인한 모든 뷰포트에서 문서 전체 가로 스크롤 없음 |
+| 반응형 상태 | 24개 조합(6탭 × 4뷰포트) 전부 문서 가로 스크롤 없음 |
 
 ### What To Look For
 
@@ -159,7 +162,7 @@ NXT 애프터마켓 15:40~20:00. 같은 두 종목이라도 KRX 14시와 NXT 18�
 
 | Mobile 390x844 | Tablet 768x1024 |
 | --- | --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-market.png" width="260" alt="DATE Market Board mobile market tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-market.png" width="360" alt="DATE Market Board tablet market tab" /> |
+| <img src="./docs/portfolio/2026-08-20/mobile-market.png" width="260" alt="DATE Market Board mobile market tab" /> | <img src="./docs/portfolio/2026-08-20/tablet-market.png" width="360" alt="DATE Market Board tablet market tab" /> |
 
 </details>
 
@@ -170,7 +173,7 @@ NXT 애프터마켓 15:40~20:00. 같은 두 종목이라도 KRX 14시와 NXT 18�
 
 | Mobile 390x844 | Tablet 768x1024 |
 | --- | --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-news.png" width="260" alt="DATE Market Board mobile news tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-news.png" width="360" alt="DATE Market Board tablet news tab" /> |
+| <img src="./docs/portfolio/2026-08-20/mobile-news.png" width="260" alt="DATE Market Board mobile news tab" /> | <img src="./docs/portfolio/2026-08-20/tablet-news.png" width="360" alt="DATE Market Board tablet news tab" /> |
 
 </details>
 
@@ -181,7 +184,7 @@ NXT 애프터마켓 15:40~20:00. 같은 두 종목이라도 KRX 14시와 NXT 18�
 
 | Mobile 390x844 | Tablet 768x1024 |
 | --- | --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-calendar.png" width="260" alt="DATE Market Board mobile calendar tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-calendar.png" width="360" alt="DATE Market Board tablet calendar tab" /> |
+| <img src="./docs/portfolio/2026-08-20/mobile-calendar.png" width="260" alt="DATE Market Board mobile calendar tab" /> | <img src="./docs/portfolio/2026-08-20/tablet-calendar.png" width="360" alt="DATE Market Board tablet calendar tab" /> |
 
 </details>
 
@@ -192,7 +195,7 @@ NXT 애프터마켓 15:40~20:00. 같은 두 종목이라도 KRX 14시와 NXT 18�
 
 | Mobile 390x844 | Tablet 768x1024 |
 | --- | --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-breaking.png" width="260" alt="DATE Market Board mobile breaking disclosure tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-breaking.png" width="360" alt="DATE Market Board tablet breaking disclosure tab" /> |
+| <img src="./docs/portfolio/2026-08-20/mobile-breaking.png" width="260" alt="DATE Market Board mobile breaking disclosure tab" /> | <img src="./docs/portfolio/2026-08-20/tablet-breaking.png" width="360" alt="DATE Market Board tablet breaking disclosure tab" /> |
 
 </details>
 
@@ -203,15 +206,13 @@ NXT 애프터마켓 15:40~20:00. 같은 두 종목이라도 KRX 14시와 NXT 18�
 
 | Mobile 390x844 | Tablet 768x1024 |
 | --- | --- |
-| <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/mobile-flow.png" width="260" alt="DATE Market Board mobile flow chart tab" /> | <img src="./docs/date/implementation/responsive-audit-2026-08-08/screenshots/tablet-flow.png" width="360" alt="DATE Market Board tablet flow chart tab" /> |
+| <img src="./docs/portfolio/2026-08-20/mobile-flow.png" width="260" alt="DATE Market Board mobile flow chart tab" /> | <img src="./docs/portfolio/2026-08-20/tablet-flow.png" width="360" alt="DATE Market Board tablet flow chart tab" /> |
 
 </details>
 
-Full responsive audit artifacts:
-
-- Report: [`docs/date/implementation/responsive-audit-2026-08-08/README.md`](./docs/date/implementation/responsive-audit-2026-08-08/README.md)
-- Raw diagnostics: [`responsive-audit-results.json`](./docs/date/implementation/responsive-audit-2026-08-08/responsive-audit-results.json)
-- Screenshots: [`docs/date/implementation/responsive-audit-2026-08-08/screenshots/`](./docs/date/implementation/responsive-audit-2026-08-08/screenshots/)
+캡처 전체: [`docs/portfolio/2026-08-20/`](./docs/portfolio/2026-08-20/) — 여섯 개 탭을
+Desktop `1440x900`, Tablet `768x1024`, Mobile `390x844`, Narrow `320x568`에서
+찍은 24장입니다. 전부 전체 화면이고, 어느 조합에서도 문서 가로 스크롤이 없습니다.
 
 ## Project Summary
 

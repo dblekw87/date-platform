@@ -26,9 +26,12 @@
   position: absolute;
   inset: 0;
   background-image: url("/auth/trading-desk.svg");
+  // The art is 1200x1400 portrait and this panel is landscape, so cover cropped
+  // the monitor off the top. contain keeps the whole desk in frame and the panel
+  // colour fills the sides.
   background-position: center bottom;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain;
 }
 
 // The copy sits in white over a light illustration, so the bottom needs a scrim

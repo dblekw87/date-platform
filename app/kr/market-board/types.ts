@@ -184,6 +184,49 @@ export type CloseBetCandidateDto = {
   } | null;
 };
 
+/**
+ * 짝꿍매매 후보 — 같은 테마 1등주가 상한가에 잠겼을 때의 2등주.
+ *
+ * 메커니즘이 상한가에 있습니다. 상한가는 더 높은 값에 거래가 안 되는 상태라 그
+ * 종목을 사려던 수요가 같은 테마의 다음 종목으로 넘칩니다. 미국에서 같은 매매가
+ * 성립하지 않은 것도 가격제한폭이 없어서입니다.
+ *
+ * 스캘핑에 가까운 매매라 `provisional`이 대부분 true입니다 — 1등주가 상한가에서
+ * 풀릴 수도, 2등주가 더 갈 수도 있어 목록이 몇 분 만에 바뀝니다.
+ */
+export type LimitPairDto = {
+  id: string;
+  theme: string;
+  /** 간격으로 나눈 등급. 좁을수록 좋았습니다. */
+  tier: "밀착" | "근접" | "여유";
+  /** 1등주 상승률 − 2등주 상승률. 0에 가까울수록 둘이 나란히 달린다는 뜻입니다. */
+  leadGap: number;
+  leader: { symbol: string; name: string; changeRateValue: number; turnoverValue: number };
+  second: { symbol: string; name: string; changeRateValue: number; turnoverValue: number; closePrice?: number };
+  market: string;
+  marketCapValue: number | null;
+  sessionDate: string;
+  provisional: boolean;
+  observedAt: string | null;
+  /**
+   * 이 등급이 과거에 실제로 어땠는가.
+   *
+   * 한 가지 유보가 있습니다. 여기 숫자는 **종가 매수·익일 시가 매도**를 잰 값인데,
+   * 실제 짝꿍매매는 장중에 들어가 장중에 나오는 매매입니다. 같은 자리를 재긴 했지만
+   * 같은 보유구간은 아닙니다 — 분봉 이력이 쌓이면 그쪽으로 다시 재야 합니다.
+   */
+  measured: {
+    beatRate: number;
+    excessMean: number;
+    gapUpRate: number;
+    /** 하루를 들고 있었을 때. 갭만 먹는 매매라는 것을 보여줍니다. */
+    holdExcessMean: number;
+    samples: number;
+    nights: number;
+    window: string;
+  } | null;
+};
+
 export type FlowItemDto = {
   id: string;
   label: string;
@@ -497,6 +540,7 @@ export type MarketBoardData = {
   usEtfLeaders?: LeadingStockDto[];
   krPairTrades: PairTradeDto[];
   krCloseBetCandidates?: CloseBetCandidateDto[];
+  krLimitPairs?: LimitPairDto[];
   krHaltedStocks?: HaltedStockDto[];
   /**
    * 강세 테마 source rows, one list per trading session.

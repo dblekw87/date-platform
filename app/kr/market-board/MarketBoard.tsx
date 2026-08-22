@@ -977,6 +977,7 @@ export function MarketBoard({
   const krAfterThemeLeaders = rankedThemeGroups(sessionThemeStocks?.after ?? []);
   const krHaltedStocks = liveBoard.krHaltedStocks ?? [];
   const closeBetCandidates = liveBoard.krCloseBetCandidates ?? [];
+  const limitPairs = liveBoard.krLimitPairs ?? [];
   // 정지된 대형주는 시장이 읽어야 할 사건이고 소형주는 목록입니다. 같은 크기로
   // 늘어놓으면 한화가 멈춘 것이 쉰 몇 번째 코스닥 종목과 나란히 묻힙니다.
   const notableHalts = krHaltedStocks.filter((stock) => stock.issuerType === "large-cap" || stock.issuerType === "mid-cap");
@@ -1707,6 +1708,56 @@ export function MarketBoard({
                   </div>
                 </article>
               </div>
+              {/* 짝꿍매매 후보. 같은 테마 1등주가 상한가에 잠기면 그 종목을
+                  사려던 수요가 2등주로 넘칩니다 — 가격제한폭이 있는 시장에서만
+                  생기는 자리라, 미국판이 없는 이유이기도 합니다. 스캘핑에 가까운
+                  매매라 목록이 장중 내내 바뀝니다. */}
+              {limitPairs.length > 0 ? (
+                <article className={styles.themeSection}>
+                  <span>
+                    매매참고 · 짝꿍매매 후보 · {limitPairs[0]?.sessionDate}
+                    {limitPairs[0]?.provisional ? " 장중" : " 종가"}
+                  </span>
+                  <div>
+                    <h3>
+                      1등주가 상한가에 잠긴 테마 {limitPairs.length}개입니다.<br />
+                      그 테마의 2등주를 봅니다.
+                    </h3>
+                    <strong>같은 테마 · 상승률 1등주 상한가 · 2등주 15%↑ · 간격 좁은 순</strong>
+                    <ol>
+                      {limitPairs.map((pair) => (
+                        <li key={pair.id}>
+                          <b>{pair.second.name}</b>
+                          <span>{pair.tier} · 간격 {pair.leadGap.toFixed(2)}%p</span>
+                          <span>
+                            {pair.theme} · 1등주 {pair.leader.name} +{pair.leader.changeRateValue.toFixed(2)}%
+                            → 2등주 +{pair.second.changeRateValue.toFixed(2)}%
+                          </span>
+                          {pair.measured ? (
+                            <i>
+                              같은 등급 과거 {pair.measured.samples.toLocaleString("ko-KR")}건 ·
+                              익일 시가까지 시장 평균보다 {pair.measured.excessMean >= 0 ? "+" : ""}
+                              {pair.measured.excessMean.toFixed(2)}%p · 평균 상회 {Math.round(pair.measured.beatRate * 100)}%
+                            </i>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                    <p className={styles.closeBetCaveat}>
+                      {limitPairs[0]?.provisional ? (
+                        <>
+                          <b>{formatTimeOnly(limitPairs[0]?.observedAt ?? undefined)} 기준입니다.</b>{" "}
+                          1등주가 상한가에서 풀리거나 2등주가 더 가면 목록이 바뀝니다.{" "}
+                        </>
+                      ) : null}
+                      성적은 <b>종가 매수·익일 시가 매도</b>를 잰 값입니다 — 실제 짝꿍매매는 장중에 들고
+                      장중에 나오는 매매라 같은 자리를 재긴 했어도 같은 보유구간은 아닙니다. 분봉 이력이
+                      쌓이면 그쪽으로 다시 잽니다. 간격이 <b>2%p 이내(밀착)</b>일 때만 크게 좋았고
+                      (817건 +5.95%p·상회 77%), 2~5%p는 −0.42%p로 오히려 나빴습니다.
+                    </p>
+                  </div>
+                </article>
+              ) : null}
               {/* 종가배팅 후보. 조건은 50만 종목-밤에서 골라낸 것이고, 행마다
                   그 등급이 과거에 실제로 어땠는지를 답니다 — 숫자 없이 종목만
                   늘어놓으면 추천으로 읽히기 때문입니다. 앞세우는 값이 승률이

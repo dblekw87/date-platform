@@ -4197,16 +4197,11 @@ a.dayLeaderReason:hover {
   white-space: nowrap;
 }
 
-.pairTrade summary em[data-band="wide"] {
-  border-color: #da0000;
-  background: #da0000;
-  color: #ffffff;
-}
-
-.pairTrade summary em[data-band="narrow"] {
-  border-color: #da0000;
-  color: #da0000;
-}
+/*
+ * 간격 배지는 색을 잃었습니다. 넓은 간격을 빨갛게 칠하던 것은 "간격이 클수록
+ * 기회가 크다"는 주장이었는데, 186,726쌍에서 간격 구간과 익일 갭 사이에 순서가
+ * 없었습니다. 이제 읽을 수 있는 사실 하나이지 강조할 값이 아닙니다.
+ */
 
 .pairTrade summary i {
   height: 1px;

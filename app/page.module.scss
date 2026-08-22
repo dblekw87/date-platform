@@ -3228,6 +3228,180 @@
   color: #707070;
 }
 
+/*
+ * 거래정지 — 이 보드에서 유일하게 빨간 띠를 두른 패널.
+ *
+ * 나머지가 전부 검은 띠에 흰 바탕이라, 같은 모양으로 두면 목록 하나가 더 늘어난
+ * 것으로 읽힙니다. 거래정지는 목록이 아니라 경고입니다 -- 산 다음에 알게 되면
+ * 안 되는 유일한 항목이고, 그래서 찾지 않아도 눈에 들어와야 합니다.
+ *
+ * 상승 red / 하락 blue라는 국내 관행과 부딪히지 않도록 등락률에 쓰는 #da0000이
+ * 아니라 더 어두운 경고색을 씁니다. 여기 빨강은 "올랐다"가 아니라 "멈췄다"입니다.
+ */
+.haltPanel {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  border: 2px solid #8f2d1f;
+  background: #ffffff;
+}
+
+.haltPanel > span {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 8px;
+  background: #8f2d1f;
+  color: #ffffff;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.haltPanel > div {
+  display: grid;
+  gap: 16px;
+  padding: 20px 16px 24px;
+}
+
+.haltLead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.haltLead b {
+  color: #8f2d1f;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.haltLead em {
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 700;
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
+/* 조각 사이의 구분점. 첫 조각 앞에는 붙지 않습니다. */
+.haltLead em + em::before {
+  content: "· ";
+}
+
+/*
+ * 대형·중형만 카드로 섭니다. 측정일 기준 정지 60종목 중 대형 2 · 중형 4이고,
+ * 나머지 54개를 같은 크기로 늘어놓으면 한화 5.9조가 멈춘 사실이 그 안에 묻힙니다.
+ */
+.haltCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.haltCards li {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  border: 1px solid #e5b3ab;
+  background: #fdf5f4;
+  padding: 12px 14px;
+}
+
+.haltCards li[data-size="large-cap"] {
+  border-color: #8f2d1f;
+  background: #f9e8e5;
+}
+
+.haltCards strong {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.haltCards b {
+  justify-self: start;
+  border-radius: 999px;
+  background: #8f2d1f;
+  color: #ffffff;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.haltCards span {
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.haltCards small {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/*
+ * 소형주는 접어 둡니다. details/summary라 스크립트 없이도 열리고, 닫혀 있어도
+ * 몇 종목인지는 요약 줄이 말합니다.
+ */
+.haltRest {
+  border-top: 1px solid #e5b3ab;
+  padding-top: 12px;
+}
+
+.haltRest summary {
+  cursor: pointer;
+  color: #8f2d1f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.haltRest ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.haltRest li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  min-width: 0;
+}
+
+.haltRest strong {
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.haltRest span {
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.haltRest small {
+  width: 100%;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .themeAnalysisGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

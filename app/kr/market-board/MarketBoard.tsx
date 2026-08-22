@@ -976,6 +976,10 @@ export function MarketBoard({
   );
   const krAfterThemeLeaders = rankedThemeGroups(sessionThemeStocks?.after ?? []);
   const krHaltedStocks = liveBoard.krHaltedStocks ?? [];
+  // 정지된 대형주는 시장이 읽어야 할 사건이고 소형주는 목록입니다. 같은 크기로
+  // 늘어놓으면 한화가 멈춘 것이 쉰 몇 번째 코스닥 종목과 나란히 묻힙니다.
+  const notableHalts = krHaltedStocks.filter((stock) => stock.issuerType === "large-cap" || stock.issuerType === "mid-cap");
+  const smallHalts = krHaltedStocks.filter((stock) => stock.issuerType !== "large-cap" && stock.issuerType !== "mid-cap");
   const usThemeLeaders = rankedThemeGroups(liveBoard.usLeadingStocks);
   const latestHeadline = useMemo(() => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0], [liveBoard.headlineFlow]);
   const headlineSourceCount = new Set(liveBoard.headlineFlow.map((item) => item.source)).size;
@@ -1585,6 +1589,56 @@ export function MarketBoard({
                   />
                 ) : null}
               </div>
+              {/* 거래정지, and it reads before the theme lists rather than
+                  after them. A halted stock has no turnover, so it is in no
+                  ranking and the board could not show one at all — and it is
+                  the one thing on this page you must not learn about after
+                  buying. Risk comes before opportunity, and this is the only
+                  panel on the board wearing red so it is found without being
+                  looked for. */}
+              {krHaltedStocks.length > 0 ? (
+                <article className={styles.haltPanel}>
+                  <span>매매참고 · 거래정지</span>
+                  <div>
+                    <p className={styles.haltLead}>
+                      <b>{krHaltedStocks.length}종목</b>
+                      {/* 두 조각으로 나눕니다. 한 문장으로 두면 360px에서
+                          날짜가 "2026-08-" / "21 기준"으로 잘립니다. */}
+                      <em>해제 전까지 매수·매도가 모두 막힙니다</em>
+                      <em>{krHaltedStocks[0]?.sessionDate} 기준</em>
+                    </p>
+                    {/* 대형·중형만 카드로. 정지된 대형주는 시장 전체가 읽어야 할
+                        사건이고, 소형주 쉰 몇 개를 같은 크기로 늘어놓으면 그 둘을
+                        오히려 덮습니다. */}
+                    {notableHalts.length > 0 ? (
+                      <ul className={styles.haltCards}>
+                        {notableHalts.map((stock) => (
+                          <li key={stock.id} data-size={stock.issuerType}>
+                            <strong>{stock.name}</strong>
+                            <b>{issuerSizeLabels[stock.issuerType] ?? "규모 미상"}</b>
+                            <span>시총 {formatKrwSize(stock.marketCapValue)}</span>
+                            <small>{stock.symbol} · {stock.market}</small>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {smallHalts.length > 0 ? (
+                      <details className={styles.haltRest}>
+                        <summary>소형주 {smallHalts.length}종목 더 보기</summary>
+                        <ul>
+                          {smallHalts.map((stock) => (
+                            <li key={stock.id}>
+                              <strong>{stock.name}</strong>
+                              <span>{formatKrwSize(stock.marketCapValue)}</span>
+                              <small>{stock.symbol} · {stock.market}</small>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    ) : null}
+                  </div>
+                </article>
+              ) : null}
               <div className={styles.themeAnalysisGrid}>
                 <article className={styles.themeSection}>
                   <span>시황 · 국내 강세 테마 · 정규장 09:00–15:30</span>
@@ -1648,32 +1702,6 @@ export function MarketBoard({
                   </div>
                 </article>
               </div>
-              {/* 거래정지. A halted stock has no turnover, so it is in no
-                  ranking and the board could not show one at all — and it is
-                  exactly the thing you must not find out about after buying.
-                  Largest first, because size is what makes the list readable. */}
-              {krHaltedStocks.length > 0 ? (
-                <article className={styles.themeSection}>
-                  <span>매매참고 · 거래정지 종목</span>
-                  <div>
-                    <h3>
-                      거래정지 {krHaltedStocks.length}종목입니다.<br />
-                      {krHaltedStocks[0]?.sessionDate} 기준이며, 해제까지 매수·매도가 모두 막힙니다.
-                    </h3>
-                    <strong>거래정지 · 시가총액순</strong>
-                    <ol>
-                      {krHaltedStocks.map((stock) => (
-                        <li key={stock.id}>
-                          <b>{stock.name}</b>
-                          <span>{stock.symbol} · {stock.market}</span>
-                          <span>{issuerSizeLabels[stock.issuerType] ?? "규모 미상"}</span>
-                          <span>시총 {formatKrwSize(stock.marketCapValue)}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                </article>
-              ) : null}
               {/* 급등 후보 reads last and alone. Every list above it is in the
                   past tense — what led, what rose, what was strong — and this
                   one is the only forward-looking list on the board, so it does

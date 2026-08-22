@@ -129,6 +129,51 @@ export type HaltedStockDto = {
   haltedAt?: string | null;
 };
 
+/**
+ * 종가배팅 후보 — 오늘 종가에 사서 내일 시가에 팔 만한 자리.
+ *
+ * `measured`가 타입의 일부인 이유는 미국 급등 후보와 같습니다: 숫자 없이 종목만
+ * 늘어놓은 표는 추천으로 읽히고, 그 말을 할 자격이 없습니다.
+ *
+ * 재는 값이 갭이 아니라 **그날 밤 평균 대비 초과분**인 것도 의도입니다. 밤이 갭의
+ * 대부분을 정하고 예측할 수도 없으니 -- 전쟁이 나면 다 같이 떨어집니다 -- 초과분만
+ * 종목 선택의 몫입니다. 나스닥 선물은 옆에 맥락으로 두되 이 숫자에 섞지 않습니다.
+ */
+export type CloseBetCandidateDto = {
+  id: string;
+  symbol: string;
+  name: string;
+  market: string;
+  /** 당일 상승률로 나눈 등급. 위로 갈수록 후보가 줄고 초과가 커집니다. */
+  tier: "강" | "중" | "약";
+  changeRateValue: number;
+  closePrice: number;
+  turnoverValue: number;
+  marketCapValue: number | null;
+  /** 20일 평균 거래량 대비. */
+  volumeRatio: number;
+  /** 0에 가까울수록 종가가 고가에 붙었다는 뜻입니다. */
+  upperShadow: number;
+  /** 60일 고점을 몇 % 넘겼는가. */
+  breakMargin: number;
+  sessionDate: string;
+  /**
+   * 이 등급이 과거에 실제로 어땠는가. 캘리브레이션이 없으면 null이고, 그때는 후보
+   * 자체를 내보내지 않습니다.
+   */
+  measured: {
+    /** 밤 평균을 이긴 비율. 승률이 아니라 "밤만큼은 했는가"입니다. */
+    beatRate: number;
+    /** 초과분 평균(%p). 화면이 앞세우는 숫자입니다. */
+    excessMean: number;
+    /** 갭상승 빈도. 초과분과 같이 보여야 오해가 없습니다. */
+    gapUpRate: number;
+    samples: number;
+    nights: number;
+    window: string;
+  } | null;
+};
+
 export type FlowItemDto = {
   id: string;
   label: string;
@@ -441,6 +486,7 @@ export type MarketBoardData = {
   krEtfLeaders?: LeadingStockDto[];
   usEtfLeaders?: LeadingStockDto[];
   krPairTrades: PairTradeDto[];
+  krCloseBetCandidates?: CloseBetCandidateDto[];
   krHaltedStocks?: HaltedStockDto[];
   /**
    * 강세 테마 source rows, one list per trading session.

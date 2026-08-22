@@ -3413,6 +3413,28 @@
   font-weight: 700;
 }
 
+/*
+ * 종가배팅 후보의 성적표 줄과 단서 문단.
+ *
+ * 조건과 실측을 같은 카드에 두되 무게를 달리합니다 - 조건은 왜 이 종목인지이고,
+ * 실측은 그 조건이 과거에 어땠는지입니다. 뒤엣것이 없으면 앞엣것은 추천이 됩니다.
+ */
+.closeBetCaveat {
+  margin: 0;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.closeBetCaveat b {
+  color: #8f2d1f;
+  font-weight: 800;
+}
+
 .themeAnalysisGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

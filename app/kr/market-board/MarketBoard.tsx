@@ -976,6 +976,7 @@ export function MarketBoard({
   );
   const krAfterThemeLeaders = rankedThemeGroups(sessionThemeStocks?.after ?? []);
   const krHaltedStocks = liveBoard.krHaltedStocks ?? [];
+  const closeBetCandidates = liveBoard.krCloseBetCandidates ?? [];
   // 정지된 대형주는 시장이 읽어야 할 사건이고 소형주는 목록입니다. 같은 크기로
   // 늘어놓으면 한화가 멈춘 것이 쉰 몇 번째 코스닥 종목과 나란히 묻힙니다.
   const notableHalts = krHaltedStocks.filter((stock) => stock.issuerType === "large-cap" || stock.issuerType === "mid-cap");
@@ -1706,6 +1707,47 @@ export function MarketBoard({
                   </div>
                 </article>
               </div>
+              {/* 종가배팅 후보. 조건은 50만 종목-밤에서 골라낸 것이고, 행마다
+                  그 등급이 과거에 실제로 어땠는지를 답니다 — 숫자 없이 종목만
+                  늘어놓으면 추천으로 읽히기 때문입니다. 앞세우는 값이 승률이
+                  아니라 초과폭인 것도 측정이 그렇게 말해서입니다. */}
+              {closeBetCandidates.length > 0 ? (
+                <article className={styles.themeSection}>
+                  <span>매매참고 · 종가배팅 후보 · {closeBetCandidates[0]?.sessionDate} 종가</span>
+                  <div>
+                    <h3>
+                      오늘 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />
+                      종가 매수 · 익일 시가 매도를 기준으로 잰 값입니다.
+                    </h3>
+                    <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 당일 10%↑ · 거래량 2배↑</strong>
+                    <ol>
+                      {closeBetCandidates.map((candidate) => (
+                        <li key={candidate.id}>
+                          <b>{candidate.name}</b>
+                          <span>{candidate.tier}등급 · 당일 +{candidate.changeRateValue.toFixed(2)}%</span>
+                          <span>거래량 {candidate.volumeRatio}배 · 고점 +{candidate.breakMargin}% 돌파</span>
+                          {candidate.measured ? (
+                            <i>
+                              같은 조건 과거 {candidate.measured.samples.toLocaleString("ko-KR")}건 ·
+                              시장 평균보다 {candidate.measured.excessMean >= 0 ? "+" : ""}
+                              {candidate.measured.excessMean.toFixed(2)}%p ·
+                              평균 상회 {Math.round(candidate.measured.beatRate * 100)}% ·
+                              갭상승 {Math.round(candidate.measured.gapUpRate * 100)}%
+                            </i>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ol>
+                    {/* 밤은 예측하지 않습니다. 예측할 수도 없으니 숫자에 섞지 않고
+                        옆에 적어 둡니다. */}
+                    <p className={styles.closeBetCaveat}>
+                      위 숫자는 <b>그날 밤 시장 평균 갭을 뺀 초과분</b>입니다. 밤 자체는 예측 대상이 아닙니다 —
+                      미국 증시가 무너지거나 전쟁이 나면 조건과 무관하게 전 종목이 갭하락합니다.
+                      {marketTrendItems.qqq ? ` 현재 NASDAQ 100 선물 ${marketChangeLabel(marketTrendItems.qqq)}.` : ""}
+                    </p>
+                  </div>
+                </article>
+              ) : null}
               {/* 급등 후보 reads last and alone. Every list above it is in the
                   past tense — what led, what rose, what was strong — and this
                   one is the only forward-looking list on the board, so it does

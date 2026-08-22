@@ -12,7 +12,16 @@ import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId 
 
 const refreshIntervalMs = 60_000;
 
-type DisclosureFilterId = "all" | "new" | "small-cap" | "ma" | "sale" | "issuance";
+/**
+ * "전체", "새 공시", "중소형주", and then one id per tag the day's filings
+ * actually carry, written as `tag:증자·지분`.
+ *
+ * The chips used to be a fixed list matched with English regexes, which for
+ * domestic filings meant 90% of a day matched nothing at all — pressing 소형주,
+ * 매각 or 인수합병 opened an empty box. Building them from the payload means a
+ * chip exists only when there is something behind it.
+ */
+type DisclosureFilterId = string;
 type LeaderFilterId = "turnover" | "gainers" | "volume" | "etf" | "risk";
 type NewsFilterId = "all" | "us" | "kr" | "theme" | "macro";
 type LeadingStock = MarketBoardData["usLeadingStocks"][number];
@@ -21,14 +30,25 @@ type Headline = MarketBoardData["headlineFlow"][number];
 type Disclosure = MarketBoardData["usDisclosures"][number];
 type CalendarEvent = MarketBoardData["calendarItems"][number];
 
-const disclosureFilters: Array<{ id: DisclosureFilterId; label: string }> = [
-  { id: "all", label: "전체" },
-  { id: "new", label: "새 공시" },
-  { id: "small-cap", label: "소형주" },
-  { id: "ma", label: "인수합병" },
-  { id: "sale", label: "매각" },
-  { id: "issuance", label: "증자·지분" }
-];
+function buildDisclosureFilters(items: Disclosure[]) {
+  const byTag = new Map<string, number>();
+
+  items.forEach((item) => {
+    (item.tags ?? []).forEach((tag) => byTag.set(tag, (byTag.get(tag) ?? 0) + 1));
+  });
+
+  const smallCaps = items.filter((item) => item.issuerType === "small-cap" || item.issuerType === "mid-cap").length;
+  const fresh = items.filter((item) => item.isNew).length;
+
+  return [
+    { count: items.length, id: "all", label: "전체" },
+    ...(fresh > 0 ? [{ count: fresh, id: "new", label: "새 공시" }] : []),
+    ...(smallCaps > 0 ? [{ count: smallCaps, id: "small-cap", label: "중소형주" }] : []),
+    ...[...byTag]
+      .sort((left, right) => right[1] - left[1])
+      .map(([tag, count]) => ({ count, id: `tag:${tag}`, label: tag }))
+  ];
+}
 
 const leaderFilters: Array<{ id: LeaderFilterId; label: string }> = [
   { id: "turnover", label: "거래대금" },
@@ -288,9 +308,13 @@ function ProviderStatusStrip({ board }: { board: MarketBoardData }) {
   );
 }
 
-function IssuerLabel({ issuerType }: { issuerType?: "large-cap" | "small-cap" | "unknown" }) {
+function IssuerLabel({ issuerType }: { issuerType?: Disclosure["issuerType"] }) {
   if (issuerType === "small-cap") {
     return <span>소형주</span>;
+  }
+
+  if (issuerType === "mid-cap") {
+    return <span>중형주</span>;
   }
 
   if (issuerType === "large-cap") {
@@ -300,15 +324,10 @@ function IssuerLabel({ issuerType }: { issuerType?: "large-cap" | "small-cap" | 
   return null;
 }
 
-function matchesDisclosureFilter(item: MarketBoardData["usDisclosures"][number], filterId: DisclosureFilterId) {
-  const eventType = item.eventType ?? "";
-  const labelText = `${item.urgency} ${item.formType} ${item.title} ${item.tags.join(" ")} ${eventType}`;
-
+function matchesDisclosureFilter(item: Disclosure, filterId: DisclosureFilterId) {
   if (filterId === "new") return Boolean(item.isNew);
-  if (filterId === "small-cap") return item.issuerType === "small-cap";
-  if (filterId === "ma") return /M&A|인수|합병|merger|acquisition|business combination|tender offer/i.test(labelText);
-  if (filterId === "sale") return /매각|자산처분|disposition|asset sale|sale of assets|divestiture/i.test(labelText);
-  if (filterId === "issuance") return /증자|발행|지분|13D|13G|S-1|424B/i.test(labelText);
+  if (filterId === "small-cap") return item.issuerType === "small-cap" || item.issuerType === "mid-cap";
+  if (filterId.startsWith("tag:")) return (item.tags ?? []).includes(filterId.slice(4));
 
   return true;
 }
@@ -895,7 +914,11 @@ export function MarketBoard({
   const newsProvider = liveBoard.providerStatuses.find((provider) => provider.id === "news");
   const newHeadlineCount = liveBoard.headlineFlow.filter((item) => item.isNew).length;
   const activeDisclosures = disclosureRegion === "us" ? liveBoard.usDisclosures : liveBoard.krDisclosures;
-  const filteredDisclosures = activeDisclosures.filter((item) => matchesDisclosureFilter(item, disclosureFilter));
+  const disclosureFilters = useMemo(() => buildDisclosureFilters(activeDisclosures), [activeDisclosures]);
+  // Switching region changes which chips exist, and a chip that is no longer
+  // offered must not keep filtering the list down to nothing.
+  const activeDisclosureFilter = disclosureFilters.some((filter) => filter.id === disclosureFilter) ? disclosureFilter : "all";
+  const filteredDisclosures = activeDisclosures.filter((item) => matchesDisclosureFilter(item, activeDisclosureFilter));
   const activeDisclosureDescription = liveBoard.disclosureTabs.find((tab) => tab.id === disclosureRegion)?.description;
   const effectiveLeaderRegion: LeaderRegion = leaderRegion === "us" && liveBoard.usLeadingStocks.length === 0 && liveBoard.krLeadingStocks.length > 0 ? "kr" : leaderRegion;
   const activeLeadingStocks = effectiveLeaderRegion === "us" ? liveBoard.usLeadingStocks : liveBoard.krLeadingStocks;
@@ -936,7 +959,7 @@ export function MarketBoard({
   const upcomingItems = upcomingCalendarItems(liveBoard.calendarItems, calendarToday);
   const secProvider = liveBoard.providerStatuses.find((provider) => provider.id === "sec");
   const newDisclosureCount = activeDisclosures.filter((item) => item.isNew).length;
-  const smallCapDisclosureCount = activeDisclosures.filter((item) => item.issuerType === "small-cap").length;
+  const smallCapDisclosureCount = activeDisclosures.filter((item) => item.issuerType === "small-cap" || item.issuerType === "mid-cap").length;
 
   return (
     <main className={styles.page}>
@@ -1182,14 +1205,14 @@ export function MarketBoard({
               <strong>{newDisclosureCount}건</strong>
             </div>
             <div>
-              <span>소형주 포함</span>
+              <span>중소형주</span>
               <strong>{smallCapDisclosureCount}건</strong>
             </div>
           </section>
           <div className={styles.disclosureFilters} role="group" aria-label="공시 필터">
             {disclosureFilters.map((filter) => (
-              <button aria-pressed={disclosureFilter === filter.id} key={filter.id} onClick={() => setDisclosureFilter(filter.id)} type="button">
-                {filter.label}
+              <button aria-pressed={activeDisclosureFilter === filter.id} key={filter.id} onClick={() => setDisclosureFilter(filter.id)} type="button">
+                {filter.label} <b>{filter.count}</b>
               </button>
             ))}
           </div>

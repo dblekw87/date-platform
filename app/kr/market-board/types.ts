@@ -82,7 +82,7 @@ export type DisclosureItemDto = {
   urgency: string;
   companyName?: string;
   symbol?: string;
-  issuerType?: "large-cap" | "small-cap" | "unknown";
+  issuerType?: "large-cap" | "mid-cap" | "small-cap" | "unknown";
   eventType?: string;
   accessionNumber?: string;
   isNew?: boolean;

@@ -375,8 +375,20 @@ function relatedHeadlineTags(item: Headline) {
   ];
 }
 
+/**
+ * The theme a row belongs to.
+ *
+ * `reason` is the backend's sentence and the theme is its first clause, which
+ * makes this parse the whole page's single point of failure: a row assembled
+ * without one took the board down with "Cannot read properties of undefined
+ * (reading 'split')". The DTO says the field is required and the backend is
+ * plain JavaScript, so nothing checks that promise at the boundary. Prefer the
+ * typed field, read the sentence only as a fallback, and never assume either.
+ */
 function leaderTheme(stock: LeadingStock) {
-  const [theme] = stock.reason.split(" · ");
+  if (stock.theme && stock.theme !== "미분류") return stock.theme;
+
+  const [theme] = (stock.reason ?? "").split(" · ");
 
   if (
     !theme ||
@@ -390,7 +402,7 @@ function leaderTheme(stock: LeadingStock) {
 
 function isEtfLeader(stock: LeadingStock) {
   return leaderTheme(stock) === "ETF" ||
-    /(^|\s)(KODEX|TIGER|ACE|RISE|SOL|PLUS|HANARO|KOSEF|KBSTAR|ARIRANG|TIMEFOLIO|히어로즈|마이티|HK)|ETF|ETN|인버스|레버리지|채권|회사채|국고채|액티브|Nifty|TOP10/i.test(`${stock.name} ${stock.reason}`);
+    /(^|\s)(KODEX|TIGER|ACE|RISE|SOL|PLUS|HANARO|KOSEF|KBSTAR|ARIRANG|TIMEFOLIO|히어로즈|마이티|HK)|ETF|ETN|인버스|레버리지|채권|회사채|국고채|액티브|Nifty|TOP10/i.test(`${stock.name ?? ""} ${stock.reason ?? ""}`);
 }
 
 function inferThemeFromLeader(stock: LeadingStock) {
@@ -634,17 +646,18 @@ function isLongMarketValue(item: MarketSnapshot) {
   return item.value.length >= 7;
 }
 
-function intradayParts(value: string) {
-  const [pricePart, changePart] = value.split(/\s*·\s*/);
+function intradayParts(value?: string) {
+  const text = value ?? "";
+  const [pricePart, changePart] = text.split(/\s*·\s*/);
 
   return {
-    price: pricePart?.trim() || value,
+    price: pricePart?.trim() || text,
     change: changePart?.trim() || ""
   };
 }
 
 function leaderVolumeOnly(stock: LeadingStock) {
-  return stock.burst
+  return (stock.burst ?? "")
     .replace(/상한가 도달\s*·\s*/g, "")
     .replace(/\s*·\s*[+-]\d+(?:\.\d+)?%/g, "")
     .replace(/\s*[+-]\d+(?:\.\d+)?%/g, "")

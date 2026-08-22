@@ -114,6 +114,19 @@ export type HaltedStockDto = {
   turnoverValue: number | null;
   /** The session this state was read on — a halt rarely clears in a day. */
   sessionDate: string;
+  /**
+   * Why the exchange stopped it, from the halt filing when one has been
+   * collected. Absent for the great majority right now: the filings only start
+   * accumulating from the day collection began, and most halts predate it.
+   *
+   * There is deliberately no resume date. No free source publishes one — KIND's
+   * halt list carries market, name and reason and no dates at all — and for
+   * most halt types it does not exist in advance, since 조회공시요구 lifts when
+   * the company answers and 실질심사 when the review ends.
+   */
+  haltReason?: string | null;
+  /** When that filing landed, which is the closest thing to a start date. */
+  haltedAt?: string | null;
 };
 
 export type FlowItemDto = {

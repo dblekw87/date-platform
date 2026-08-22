@@ -1617,7 +1617,11 @@ export function MarketBoard({
                             <strong>{stock.name}</strong>
                             <b>{issuerSizeLabels[stock.issuerType] ?? "규모 미상"}</b>
                             <span>시총 {formatKrwSize(stock.marketCapValue)}</span>
-                            <small>{stock.symbol} · {stock.market}</small>
+                            {/* 사유는 공시가 걸린 종목에만 있습니다. 없는 자리에
+                                "사유 미상"을 적으면 모르는 것을 아는 척하는 줄이
+                                한 줄 더 늘 뿐입니다. */}
+                            {stock.haltReason ? <i>{stock.haltReason}</i> : null}
+                            <small>{stock.symbol} · {stock.market}{stock.haltedAt ? ` · ${formatDateOnly(stock.haltedAt)} 공시` : ""}</small>
                           </li>
                         ))}
                       </ul>

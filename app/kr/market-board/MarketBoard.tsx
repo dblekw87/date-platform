@@ -993,12 +993,24 @@ export function MarketBoard({
   const ranksFor = (filterId: LeaderFilterId) =>
     filterId === "gainers" ? gainerRanks : filterId === "volume" ? volumeRanks : turnoverRanks;
   const leaderRankSet = { gainers: gainerRanks, turnover: turnoverRanks, volume: volumeRanks };
-  const filteredLeadingStocks = sortLeadingStocks(
-    leaderFilter === "etf"
-      ? etfLeadingStocks
-      : activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, leaderFilter, ranksFor(leaderFilter))),
-    leaderFilter
-  );
+  const membersOf = (filterId: LeaderFilterId) => filterId === "etf"
+    ? etfLeadingStocks
+    : activeLeadingStocks.filter((stock) => matchesLeaderFilter(stock, filterId, ranksFor(filterId)));
+  /*
+   * Tabs with something behind them, each carrying its count.
+   *
+   * 주의 is domestic by construction — the designations come from the exchange's
+   * own flags and no free US feed carries an equivalent — so on the US side that
+   * tab could only ever open empty. ETF was the same before the pool stopped
+   * requiring a 1% move. A tab that cannot fill should not be offered.
+   */
+  const availableLeaderFilters = leaderFilters
+    .map((filter) => ({ ...filter, count: membersOf(filter.id).length }))
+    .filter((filter) => filter.count > 0);
+  const activeLeaderFilter = availableLeaderFilters.some((filter) => filter.id === leaderFilter)
+    ? leaderFilter
+    : availableLeaderFilters[0]?.id ?? leaderFilter;
+  const filteredLeadingStocks = sortLeadingStocks(membersOf(activeLeaderFilter), activeLeaderFilter);
   const leaderDataUnavailable = activeLeadingStocks.length === 0;
   const selectedLeader = filteredLeadingStocks.find((stock) => stock.id === selectedLeaderId) ?? filteredLeadingStocks[0];
   const activeLeaderDisclosures = selectedLeader?.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures;
@@ -1348,9 +1360,9 @@ export function MarketBoard({
               </div>
             </section>
             <div className={styles.leaderFilterTabs} role="group" aria-label="거래 집중 필터">
-              {leaderFilters.map((filter) => (
-                <button aria-pressed={leaderFilter === filter.id} key={filter.id} onClick={() => setLeaderFilter(filter.id)} type="button">
-                  {filter.label}
+              {availableLeaderFilters.map((filter) => (
+                <button aria-pressed={activeLeaderFilter === filter.id} key={filter.id} onClick={() => setLeaderFilter(filter.id)} type="button">
+                  {filter.label} <b>{filter.count}</b>
                 </button>
               ))}
             </div>
@@ -1415,9 +1427,9 @@ export function MarketBoard({
                           <strong className={styles.leaderRate} data-change={changeTone(rate)}>{rate}</strong>
                         )}
                         <div className={styles.leaderReason}>
-                          <span>{leaderSignalForFilter(stock, leaderFilter)}</span>
+                          <span>{leaderSignalForFilter(stock, activeLeaderFilter)}</span>
                           <small>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? `뉴스 ${rowNews.length}건 · 테마 ${rowThemeNews.length}건 · 공시 ${rowDisclosures.length}건` : "토스증권 랭킹 데이터"}</small>
-                          {latestNews ? <small>{latestNewsLabel}: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, leaderFilter, leaderRankSet)}</small>}
+                          {latestNews ? <small>{latestNewsLabel}: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, activeLeaderFilter, leaderRankSet)}</small>}
                           <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "뉴스·공시 원문 확인 가능" : "뉴스·공시 매칭 대기"}</em>
                         </div>
                       </article>
@@ -1434,9 +1446,9 @@ export function MarketBoard({
                 <section className={styles.leaderInsightPanel} aria-labelledby="leader-insight-title">
                   <header>
                     <div>
-                      <span>{leaderSignalForFilter(selectedLeader, leaderFilter)}</span>
+                      <span>{leaderSignalForFilter(selectedLeader, activeLeaderFilter)}</span>
                       <h3 id="leader-insight-title">{selectedLeader.name} 랭킹 근거</h3>
-                      <p>{leaderReasonForFilter(selectedLeader, leaderFilter, leaderRankSet)}</p>
+                      <p>{leaderReasonForFilter(selectedLeader, activeLeaderFilter, leaderRankSet)}</p>
                     </div>
                     <strong>{selectedEvidenceCount > 0 ? `뉴스 ${selectedLeaderNews.length} · 테마 ${selectedThemeNews.length} · 공시 ${selectedDisclosures.length}` : "토스 랭킹만 수신"}</strong>
                   </header>

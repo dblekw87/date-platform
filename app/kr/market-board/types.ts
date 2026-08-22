@@ -94,6 +94,28 @@ export type DisclosureItemDto = {
   action: string;
 };
 
+/**
+ * A stock the exchange has stopped trading.
+ *
+ * Kept apart from the leader types because a halted stock has no turnover to be
+ * ranked by and so appears in no ranking — which is exactly why the board could
+ * not show one before. Size is the thing that makes it readable: 한화 at 5.9조
+ * halted and 삼부토건 at 797억 halted are not the same event.
+ */
+export type HaltedStockDto = {
+  id: string;
+  symbol: string;
+  name: string;
+  market: string;
+  issuerType: "large-cap" | "mid-cap" | "small-cap" | "unknown";
+  closePrice: number | null;
+  changeRateValue: number | null;
+  marketCapValue: number | null;
+  turnoverValue: number | null;
+  /** The session this state was read on — a halt rarely clears in a day. */
+  sessionDate: string;
+};
+
 export type FlowItemDto = {
   id: string;
   label: string;
@@ -123,6 +145,15 @@ export type LeadingStockDto = {
   /** Raw figures behind the formatted strings, for ranking without re-parsing. */
   turnoverValue?: number;
   changeRateValue?: number;
+  /**
+   * Each session's closing rate, kept apart.
+   *
+   * `changeRateValue` follows whichever book is open, so after 20:02 it reverts
+   * to the KRX close and reads +23.17% for a stock 토스 shows at +19.03% —
+   * both true, of different sessions. Absent for a symbol the collector has no
+   * samples of today, and `after` is absent until the evening has traded.
+   */
+  sessionChangeRates?: { after?: number; regular?: number };
   volumeValue?: number;
   /** Today's volume against its own average, which is what a burst means. */
   volumeRatioValue?: number;
@@ -397,6 +428,16 @@ export type MarketBoardData = {
   krEtfLeaders?: LeadingStockDto[];
   usEtfLeaders?: LeadingStockDto[];
   krPairTrades: PairTradeDto[];
+  krHaltedStocks?: HaltedStockDto[];
+  /**
+   * 강세 테마 source rows, one list per trading session.
+   *
+   * The live leader board follows whichever book is open, so a single list read
+   * as "today's strong themes" was describing the NXT evening after 15:40 and
+   * left the regular session with no panel. Grouping still happens here — the
+   * two-rising-names rule lives in one place — but the rows come pre-split.
+   */
+  krSessionThemeStocks?: { after: LeadingStockDto[]; regular: LeadingStockDto[] };
   usSurgeCandidates: SurgeCandidateDto[];
   usPremarketMovers: PremarketMoverDto[];
   smallCapScanner: ReactionCandidateDto[];

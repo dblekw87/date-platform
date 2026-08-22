@@ -462,6 +462,33 @@ function rankedThemeGroups(stocks: LeadingStock[]) {
     .slice(0, 3);
 }
 
+/**
+ * The two sessions a domestic stock traded in today, each with its hours named.
+ *
+ * The live rate follows whichever book is open, which is why the board read
+ * 쿠콘 at +23.17% while 토스, quoting the 19:59 book, read +19.03%. Rather than
+ * choosing, the row shows the regular close and the evening close side by side;
+ * the gap between them is the part worth reading, because a name that gave back
+ * its limit after hours does not open like one that held it.
+ *
+ * Returns null when there is no second figure to show — a US row, or a domestic
+ * one before the evening has traded — and the row falls back to one number.
+ */
+function sessionRatePair(stock: LeadingStock) {
+  const rates = stock.sessionChangeRates;
+
+  if (rates?.regular === undefined || rates.after === undefined) return null;
+
+  return [
+    { hours: "09:00–15:30", label: "정규장", value: rates.regular },
+    { hours: "15:40–20:00", label: "애프터", value: rates.after }
+  ];
+}
+
+function signedPercent(value: number) {
+  return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
 function leaderChangeRate(stock: LeadingStock) {
   const match = `${stock.burst} ${stock.intraday}`.match(/[+-]\d+(?:\.\d+)?%/);
 
@@ -665,6 +692,25 @@ function sortLeadingStocks(stocks: MarketBoardData["usLeadingStocks"], filterId:
 
   return [...stocks].sort((left, right) => (ranks.get(left.id) ?? 999) - (ranks.get(right.id) ?? 999));
 }
+
+/**
+ * 시가총액을 읽히는 단위로. 거래정지는 규모와 같이 봐야 뜻이 생깁니다 — 한화가
+ * 멈춘 것과 코스닥 소형주가 멈춘 것은 같은 사건이 아닙니다.
+ */
+function formatKrwSize(value: number | null) {
+  if (value === null || !Number.isFinite(value) || value <= 0) return "확인 중";
+
+  if (value >= 1_000_000_000_000) return `${(value / 1_000_000_000_000).toFixed(1)}조`;
+
+  return `${Math.round(value / 100_000_000).toLocaleString("ko-KR")}억`;
+}
+
+const issuerSizeLabels: Record<string, string> = {
+  "large-cap": "대형주",
+  "mid-cap": "중형주",
+  "small-cap": "소형주",
+  unknown: "규모 미상"
+};
 
 function normalizeForMatch(value: string) {
   return value.toLowerCase().replace(/\s+/g, "");
@@ -906,7 +952,17 @@ export function MarketBoard({
     btc: marketSnapshotById.get("btc")
   };
   const krAfterPairs = liveBoard.krAfterPairs ?? [];
-  const krThemeLeaders = rankedThemeGroups(liveBoard.krLeadingStocks);
+  // Each session gets the themes that were strong in it. The recorded rows are
+  // preferred because the live leader board only ever describes the book that
+  // is open right now; the live list stands in for the regular session while
+  // that is the open book, since its pool reaches names the sweep has not
+  // sampled yet.
+  const sessionThemeStocks = liveBoard.krSessionThemeStocks;
+  const krThemeLeaders = rankedThemeGroups(
+    (sessionThemeStocks?.regular?.length ?? 0) > 0 ? sessionThemeStocks!.regular : liveBoard.krLeadingStocks
+  );
+  const krAfterThemeLeaders = rankedThemeGroups(sessionThemeStocks?.after ?? []);
+  const krHaltedStocks = liveBoard.krHaltedStocks ?? [];
   const usThemeLeaders = rankedThemeGroups(liveBoard.usLeadingStocks);
   const latestHeadline = useMemo(() => [...liveBoard.headlineFlow].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0], [liveBoard.headlineFlow]);
   const headlineSourceCount = new Set(liveBoard.headlineFlow.map((item) => item.source)).size;
@@ -1346,7 +1402,18 @@ export function MarketBoard({
                         <span className={styles.leaderTheme}>{leaderTheme(stock)}</span>
                         <strong className={styles.leaderMetric}>{stock.turnover}</strong>
                         <span className={styles.leaderMetric}>{leaderVolumeOnly(stock)}</span>
-                        <strong className={styles.leaderRate} data-change={changeTone(rate)}>{rate}</strong>
+                        {sessionRatePair(stock) ? (
+                          <div className={styles.leaderSessionRates}>
+                            {sessionRatePair(stock)!.map((session) => (
+                              <span key={session.label} title={`${session.label} ${session.hours}`}>
+                                <small>{session.label}</small>
+                                <strong data-change={changeTone(signedPercent(session.value))}>{signedPercent(session.value)}</strong>
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <strong className={styles.leaderRate} data-change={changeTone(rate)}>{rate}</strong>
+                        )}
                         <div className={styles.leaderReason}>
                           <span>{leaderSignalForFilter(stock, leaderFilter)}</span>
                           <small>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? `뉴스 ${rowNews.length}건 · 테마 ${rowThemeNews.length}건 · 공시 ${rowDisclosures.length}건` : "토스증권 랭킹 데이터"}</small>
@@ -1495,14 +1562,14 @@ export function MarketBoard({
               </div>
               <div className={styles.themeAnalysisGrid}>
                 <article className={styles.themeSection}>
-                  <span>시황 · 국내 강세 테마</span>
+                  <span>시황 · 국내 강세 테마 · 정규장 09:00–15:30</span>
                   <div>
                     <h3>
-                      금일 강세 테마는 1위 {themeRankLabel(krThemeLeaders, 0)},<br />
+                      정규장 강세 테마는 1위 {themeRankLabel(krThemeLeaders, 0)},<br />
                       2위 {themeRankLabel(krThemeLeaders, 1)},<br />
                       3위 {themeRankLabel(krThemeLeaders, 2)}입니다.
                     </h3>
-                    <strong>국내 강세 테마 · 거래대금순위</strong>
+                    <strong>국내 강세 테마 · 정규장 · 거래대금순위</strong>
                     <ol>
                       {krThemeLeaders.map((group, index) => (
                         <li key={group.theme}>
@@ -1513,6 +1580,29 @@ export function MarketBoard({
                     {krThemeLeaders.length === 0 ? <p className={styles.emptyDisclosure}>{themeUnavailableMessage(liveBoard, "KR")}</p> : null}
                   </div>
                 </article>
+                {/* The evening is a different book with different liquidity, so
+                    it gets its own panel rather than replacing the day's. Hidden
+                    until 15:40, when there is an evening to describe. */}
+                {krAfterThemeLeaders.length > 0 ? (
+                  <article className={styles.themeSection}>
+                    <span>시황 · 국내 강세 테마 · NXT 애프터마켓 15:40–20:00</span>
+                    <div>
+                      <h3>
+                        애프터마켓 강세 테마는 1위 {themeRankLabel(krAfterThemeLeaders, 0)},<br />
+                        2위 {themeRankLabel(krAfterThemeLeaders, 1)},<br />
+                        3위 {themeRankLabel(krAfterThemeLeaders, 2)}입니다.
+                      </h3>
+                      <strong>국내 강세 테마 · NXT 애프터마켓 · 거래대금순위</strong>
+                      <ol>
+                        {krAfterThemeLeaders.map((group, index) => (
+                          <li key={group.theme}>
+                            <ThemeGroupRow group={group} nameOf={(stock) => stock.name} rankIndex={index} />
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </article>
+                ) : null}
                 <article className={styles.themeSection}>
                   <span>미국 강세 테마</span>
                   <div>
@@ -1533,6 +1623,32 @@ export function MarketBoard({
                   </div>
                 </article>
               </div>
+              {/* 거래정지. A halted stock has no turnover, so it is in no
+                  ranking and the board could not show one at all — and it is
+                  exactly the thing you must not find out about after buying.
+                  Largest first, because size is what makes the list readable. */}
+              {krHaltedStocks.length > 0 ? (
+                <article className={styles.themeSection}>
+                  <span>매매참고 · 거래정지 종목</span>
+                  <div>
+                    <h3>
+                      거래정지 {krHaltedStocks.length}종목입니다.<br />
+                      {krHaltedStocks[0]?.sessionDate} 기준이며, 해제까지 매수·매도가 모두 막힙니다.
+                    </h3>
+                    <strong>거래정지 · 시가총액순</strong>
+                    <ol>
+                      {krHaltedStocks.map((stock) => (
+                        <li key={stock.id}>
+                          <b>{stock.name}</b>
+                          <span>{stock.symbol} · {stock.market}</span>
+                          <span>{issuerSizeLabels[stock.issuerType] ?? "규모 미상"}</span>
+                          <span>시총 {formatKrwSize(stock.marketCapValue)}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </article>
+              ) : null}
               {/* 급등 후보 reads last and alone. Every list above it is in the
                   past tense — what led, what rose, what was strong — and this
                   one is the only forward-looking list on the board, so it does

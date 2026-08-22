@@ -29,3 +29,37 @@ select {
 button {
   color: inherit;
 }
+
+// One long unbreakable run - a "kakao_5036468766" nickname, a ticker, a pasted
+// URL - used to push the whole page sideways on a 360px phone. Titles and body
+// copy default to `overflow-wrap: normal`, which refuses to break a word even
+// when the word is wider than the screen. Measured across every route: a single
+// 29-character word dropped into a heading made 13 of 17 screens scroll
+// horizontally.
+//
+// `break-word`, not `anywhere`. `anywhere` also shrinks an element's intrinsic
+// width, which fixed the content pages and then wrecked the market board: with
+// every cell able to report a one-character minimum, the leader rows
+// redistributed and broke "+2.22%" across two lines. The pages that needed more
+// than this rule get `minmax(0, 1fr)` on the grid that was actually holding
+// them wide - that is where the fault was, not in the text.
+//
+// This pairs with the `word-break: keep-all` on Korean headings rather than
+// fighting it - keep-all still keeps Korean words whole, and this only steps in
+// for a word that cannot fit a line on its own.
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+dt,
+dd,
+th,
+td,
+figcaption,
+blockquote {
+  overflow-wrap: break-word;
+}

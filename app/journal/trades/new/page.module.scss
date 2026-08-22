@@ -90,6 +90,7 @@
 
 .form label {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   font-size: 13px;
   font-weight: 900;
@@ -135,6 +136,7 @@
 // happened rather than being split across the three-column grid.
 .timeStack {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-column: 1 / -1;
   max-width: 320px;
   gap: 16px;
@@ -155,12 +157,14 @@
 
 .editorGrid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-column: 1 / -1;
   gap: 16px;
 }
 
 .editorSection {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   border: 1px solid #111111;
   background: #ffffff;
@@ -211,6 +215,7 @@
 
 .editorImage {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
   border: 1px solid #111111;
   background: #ffffff;
@@ -302,7 +307,16 @@
   }
 
   .form {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  // The hint is long enough to sit beside a three-syllable heading and not a
+  // four-syllable one, so the four sections lined up differently from each
+  // other. Stacking makes them all read the same way.
+  .editorSection header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .actions {

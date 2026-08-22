@@ -1570,7 +1570,7 @@
 
 .leaderInsightGrid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -2129,7 +2129,7 @@
 }
 
 .leaderInsightGrid dl div:has(.leaderIntradayBadges) {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   align-items: start;
 }
@@ -2232,7 +2232,7 @@
   }
 
   .leaderWorkspace {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .leaderInsightPanel {
@@ -2253,7 +2253,7 @@
   .breakingList,
   .flowGrid,
   .scannerRows {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .summary {
@@ -2303,15 +2303,15 @@
   }
 
   .calendarEvents dl {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .liveDisclosureBar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .newsSignalBar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .realtimeNews header {
@@ -2334,7 +2334,7 @@
   }
 
   .leaderSignalBar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .leaderRowHeader {
@@ -2485,7 +2485,7 @@
 
 .summary {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 50px;
   padding: 60px 0 0;
 }
@@ -2902,7 +2902,7 @@
 .newsSignalBar {
   width: max-content;
   max-width: 100%;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   margin: -70px 0 20px auto;
 }
@@ -3040,6 +3040,12 @@
 .realtimeNews time,
 .realtimeNews a {
   justify-self: center;
+}
+
+// The arrow is a separate span after the word, so the meta line kept breaking
+// between them and left "↗" alone on its own line under every disclosure card.
+.originalLink {
+  white-space: nowrap;
 }
 
 .linkIcon {
@@ -4150,7 +4156,7 @@ a.dayLeaderReason:hover {
 
 @media (max-width: 1180px) {
   .statusBox {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 32px;
   }
 
@@ -4232,7 +4238,7 @@ a.dayLeaderReason:hover {
 
   .macroGrid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     overflow: visible;
   }
 
@@ -4244,7 +4250,7 @@ a.dayLeaderReason:hover {
   .adGrid,
   .trendSectionGrid,
   .themeAnalysisGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .trendContent > div,
@@ -4282,7 +4288,7 @@ a.dayLeaderReason:hover {
   }
 
   .realtimeNews li {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 8px;
     min-height: 0;
     padding: 12px 0;
@@ -4555,7 +4561,7 @@ a.dayLeaderReason:hover {
   .adGrid,
   .trendSectionGrid,
   .themeAnalysisGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
   }
 
@@ -4729,7 +4735,7 @@ a.dayLeaderReason:hover {
   }
 
   .calendarEvents dl {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .leaderWorkspace {
@@ -4777,7 +4783,7 @@ a.dayLeaderReason:hover {
 
   .leaderInsightPanel header,
   .leaderInsightGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
   }
 
@@ -4811,6 +4817,14 @@ a.dayLeaderReason:hover {
   .themeSection li small,
   .themeSection li b {
     white-space: normal;
+  }
+
+  // Letting the theme name wrap is right; letting it wrap mid-word is not.
+  // Korean breaks between any two syllables by default, so "AI·소프트웨어" came
+  // out as "AI·소프 / 트웨어" on a phone. keep-all moves the whole name to the
+  // next line instead - the row already wraps, so there is a line for it.
+  .themeSection li small {
+    word-break: keep-all;
   }
 
   // Both surge lists auto-fill their columns, and both hold a row that cannot
@@ -4907,7 +4921,7 @@ a.dayLeaderReason:hover {
   }
 
   .macroGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   // 280px of usable width against a row that wants 322px: below 360 the break
@@ -5249,7 +5263,7 @@ a.dayLeaderReason:hover {
 
 @media (max-width: 760px) {
   .tabPanel[data-tab="calendar"] {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
 
@@ -5283,7 +5297,7 @@ a.dayLeaderReason:hover {
   }
 
   .liveDisclosureBar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .disclosureFilters,

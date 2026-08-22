@@ -15,6 +15,7 @@
 
 .post {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   border: 1px solid #111111;
   background: #ffffff;
@@ -80,6 +81,7 @@
 
 .sidebar {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -98,11 +100,13 @@
 
 .sidebar section {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
 
 .sidebar a {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 7px;
   border-top: 1px solid #eeeeee;
   color: inherit;
@@ -124,6 +128,7 @@
 
 .comments {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   margin-top: 18px;
 }
@@ -131,6 +136,10 @@
 .comments header {
   align-items: baseline;
   justify-content: space-between;
+}
+
+.comments header h2 {
+  min-width: 0;
 }
 
 .comments header span,
@@ -142,6 +151,7 @@
 
 .commentForm {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -166,6 +176,7 @@
 
 .commentList {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -208,7 +219,7 @@
   }
 
   .layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     margin-top: 28px;
   }
 

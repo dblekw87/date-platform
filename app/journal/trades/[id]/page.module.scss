@@ -7,6 +7,7 @@
 
 .detail {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
   margin-top: 40px;
 }
@@ -36,6 +37,7 @@
 
 .detail header {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
 
@@ -70,11 +72,20 @@
 }
 
 .detail header strong {
-  width: max-content;
+  // justify-self rather than `width: max-content`, which is what this was. The
+  // result is free text up to 50 characters (backend validate.mjs), and
+  // max-content made the badge's minimum width equal to its longest line - so
+  // the grid column grew with it and carried the whole page off a 360px phone.
+  // Capping with max-width does not help: percentages are ignored while the
+  // column is being sized. justify-self hugs the text without ever setting a
+  // width, so the column stays the width of the card.
+  justify-self: start;
+  max-width: 100%;
   border: 1px solid #111111;
   background: #e8f8ef;
   padding: 9px 11px;
   font-size: 20px;
+  overflow-wrap: anywhere;
 }
 
 .detail header strong[data-loss="true"] {
@@ -103,6 +114,6 @@
   }
 
   .contentGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

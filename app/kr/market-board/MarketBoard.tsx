@@ -238,7 +238,7 @@ function formatTimeOnly(value?: string) {
 
 function OriginalLink({ href }: { href?: string }) {
   return href && href !== "#" ? (
-    <a href={href} rel="noreferrer" target="_blank">
+    <a className={styles.originalLink} href={href} rel="noreferrer" target="_blank">
       링크
       <span className={styles.linkIcon} aria-hidden="true">↗</span>
     </a>

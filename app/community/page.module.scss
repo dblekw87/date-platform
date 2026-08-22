@@ -63,6 +63,13 @@
   color: #ffffff;
 }
 
+// The 글쓰기 button is a grid item, so it stretches the full width of the box
+// while its label stayed at the left edge. The matching CTA on the trade
+// journal is centred; this one just never was.
+.hero aside a {
+  text-align: center;
+}
+
 .desktopNav span {
   background: #eef2ff;
 }
@@ -102,6 +109,7 @@
 
 .hero aside {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   border: 1px solid #111111;
   background: #ffffff;
@@ -154,6 +162,7 @@
 
 .postList a {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 178px;
   align-content: space-between;
   border: 1px solid #111111;
@@ -259,6 +268,7 @@
     right: 0;
     z-index: 20;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     width: min(220px, calc(100vw - 28px));
     border: 1px solid #111111;
     background: #ffffff;
@@ -289,7 +299,7 @@
 
   .hero,
   .layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .hero {
@@ -311,6 +321,6 @@
 
 @media (max-width: 520px) {
   .postList {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

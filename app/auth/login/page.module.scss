@@ -7,6 +7,7 @@
 
 .card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: min(100% - 48px, 360px);
   gap: 18px;
   align-content: center;
@@ -124,6 +125,7 @@
 
 .errorMessage {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
   border: 1px solid rgba(202, 59, 59, 0.24);
   border-radius: 8px;
@@ -141,6 +143,7 @@
 
 .providers {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -203,7 +206,7 @@
 
 @media (max-width: 860px) {
   .page {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .visualPanel {

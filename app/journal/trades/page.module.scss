@@ -124,6 +124,7 @@
 
 .summaryGrid article {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -142,6 +143,7 @@
 
 .list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -153,16 +155,26 @@
 }
 
 .list h2 {
+  // The journal title, typed by whoever wrote the entry. It sits one level
+  // inside a flex row, and there `min-width: 0` on the row's item changes
+  // nothing - measured - because the item is still sized by this heading's
+  // longest word. `anywhere` is what shrinks that word; `break-word` from
+  // globals.scss does not, it only breaks a word once the line is already
+  // narrow enough to force it.
   margin: 8px 0;
   font-size: 24px;
   line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .list header > strong {
+  // Flex item holding free text (the result, up to 50 characters). Without a
+  // shrink allowance it refused to narrow and pushed the card off the phone.
   border: 1px solid #111111;
   background: #e8f8ef;
   padding: 9px 11px;
   font-size: 20px;
+  overflow-wrap: anywhere;
 }
 
 .list header > strong[data-loss="true"] {
@@ -191,6 +203,7 @@
 
 .list dl div {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
 }
 
@@ -239,7 +252,7 @@
 
   .summaryGrid,
   .list dl {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .list header {

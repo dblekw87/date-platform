@@ -41,6 +41,7 @@
 .avatarPanel,
 .form label {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   font-size: 13px;
   font-weight: 900;
@@ -116,7 +117,7 @@
   }
 
   .form {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .avatarPanel {

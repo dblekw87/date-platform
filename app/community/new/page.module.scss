@@ -33,6 +33,7 @@
 
 .form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   padding-top: 24px;
 }
@@ -63,6 +64,7 @@
 
 .form > label {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -90,6 +92,7 @@
 
 .editorSection {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   border: 1px solid #111111;
   background: #ffffff;
@@ -154,6 +157,7 @@
 
 .editorImage {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
   border: 1px solid #111111;
   background: #ffffff;

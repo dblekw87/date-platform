@@ -158,6 +158,16 @@ export type CloseBetCandidateDto = {
   breakMargin: number;
   sessionDate: string;
   /**
+   * 장중 값인가.
+   *
+   * 종가배팅은 마감 30분 전에 결정하는 매매라 목록이 그 시간에 살아 있어야 하고,
+   * 그때 값은 아직 닫히지 않은 캔들에서 나옵니다 — 종가도 윗꼬리도 15:30까지
+   * 바뀝니다. 확정된 일봉으로 계산했을 때만 false입니다.
+   */
+  provisional: boolean;
+  /** 장중 값이 어느 시각 기준인지. 확정 후에는 null입니다. */
+  observedAt: string | null;
+  /**
    * 이 등급이 과거에 실제로 어땠는가. 캘리브레이션이 없으면 null이고, 그때는 후보
    * 자체를 내보내지 않습니다.
    */

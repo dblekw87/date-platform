@@ -1713,11 +1713,15 @@ export function MarketBoard({
                   아니라 초과폭인 것도 측정이 그렇게 말해서입니다. */}
               {closeBetCandidates.length > 0 ? (
                 <article className={styles.themeSection}>
-                  <span>매매참고 · 종가배팅 후보 · {closeBetCandidates[0]?.sessionDate} 종가</span>
+                  <span>
+                    매매참고 · 종가배팅 후보 · {closeBetCandidates[0]?.sessionDate}
+                    {closeBetCandidates[0]?.provisional ? " 장중" : " 종가"}
+                  </span>
                   <div>
                     <h3>
-                      오늘 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />
-                      종가 매수 · 익일 시가 매도를 기준으로 잰 값입니다.
+                      {closeBetCandidates[0]?.provisional
+                        ? <>지금 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />마감까지 계속 바뀝니다.</>
+                        : <>오늘 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />종가 매수 · 익일 시가 매도를 기준으로 잰 값입니다.</>}
                     </h3>
                     <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 당일 10%↑ · 거래량 2배↑</strong>
                     <ol>
@@ -1741,6 +1745,12 @@ export function MarketBoard({
                     {/* 밤은 예측하지 않습니다. 예측할 수도 없으니 숫자에 섞지 않고
                         옆에 적어 둡니다. */}
                     <p className={styles.closeBetCaveat}>
+                      {closeBetCandidates[0]?.provisional ? (
+                        <>
+                          <b>{formatTimeOnly(closeBetCandidates[0]?.observedAt ?? undefined)} 기준 장중 값입니다.</b>{" "}
+                          종가와 윗꼬리는 마감까지 바뀌므로 목록도 바뀝니다.{" "}
+                        </>
+                      ) : null}
                       위 숫자는 <b>그날 밤 시장 평균 갭을 뺀 초과분</b>입니다. 밤 자체는 예측 대상이 아닙니다 —
                       미국 증시가 무너지거나 전쟁이 나면 조건과 무관하게 전 종목이 갭하락합니다.
                       {marketTrendItems.qqq ? ` 현재 NASDAQ 100 선물 ${marketChangeLabel(marketTrendItems.qqq)}.` : ""}

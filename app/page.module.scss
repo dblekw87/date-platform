@@ -403,8 +403,13 @@
 .tabs button,
 .disclosureTabs button,
 .leaderTabs button {
+  // min-width: 0 is already here and is not enough on its own - it lets the
+  // grid item narrow, but the label's own minimum is still its longest word.
+  // The labels are fixed in the source today, so nothing can grow them; this is
+  // here so a longer one added later cannot take the page sideways.
   min-width: 0;
   min-height: 38px;
+  overflow-wrap: anywhere;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;

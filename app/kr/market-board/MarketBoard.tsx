@@ -651,10 +651,37 @@ function normalizeForMatch(value: string) {
   return value.toLowerCase().replace(/\s+/g, "");
 }
 
+// A US ticker is two or three letters, and looking for it as a bare substring
+// finds it inside ordinary words: "MP" sits in "Tempus" and "employment", "MU"
+// in "communication", "TEM" in "system". That is how every MP Materials row
+// ended up captioned with a Tempus AI headline - 18 matches, none of them about
+// the company. Latin aliases now need a word boundary on both sides, which also
+// means they have to be tested against the text as written rather than the
+// space-stripped form. Korean has no word boundaries to find, so Korean aliases
+// keep the old match.
+function aliasMatchesText(alias: string, raw: string, matchCase = false) {
+  if (/[가-힣]/.test(alias)) return normalizeForMatch(raw).includes(normalizeForMatch(alias));
+
+  const haystack = matchCase ? raw : raw.toLowerCase();
+  const needle = matchCase ? alias : alias.toLowerCase();
+  const isWordCharacter = (character: string) => /[a-z0-9]/i.test(character);
+
+  for (let at = haystack.indexOf(needle); at !== -1; at = haystack.indexOf(needle, at + 1)) {
+    const before = at === 0 ? "" : haystack[at - 1];
+    const after = haystack[at + needle.length] ?? "";
+
+    if (!isWordCharacter(before) && !isWordCharacter(after)) return true;
+  }
+
+  return false;
+}
+
 function stockNameAliases(stock: LeadingStock) {
   const aliases = new Set([
     stock.name,
-    stock.name.replace(/\s+(inc\.?|corporation|corp\.?|ltd\.?|plc|co\.?)$/i, ""),
+    // The comma belongs to the suffix: "Moderna, Inc." was leaving "Moderna,"
+    // behind, which matches no headline, because headlines write "Moderna and".
+    stock.name.replace(/[,\s]+(inc\.?|corporation|corp\.?|ltd\.?|plc|co\.?)$/i, "").replace(/[,\s]+$/, ""),
     stock.symbol
   ]);
 
@@ -673,12 +700,18 @@ function headlineMatchesLeader(item: Headline, stock: LeadingStock) {
   if (item.region !== stock.market) return false;
   if (item.relatedSymbols?.includes(stock.symbol)) return true;
 
-  const text = normalizeForMatch(`${item.source} ${item.label} ${item.text} ${item.originalText ?? ""}`);
+  const text = `${item.source} ${item.label} ${item.text} ${item.originalText ?? ""}`;
 
   return stockNameAliases(stock).some((alias) => {
     if (/^\d+$/.test(alias) && alias.length < 5) return false;
 
-    return text.includes(normalizeForMatch(alias));
+    // The ticker itself is matched case-sensitively: lowercased, "MRNA" is the
+    // ordinary word "mRNA" and "MP" is inside "employment". The same guard
+    // exists in the backend's tagger, which is where the Moderna row was
+    // actually getting a Tempus AI headline from; this is the fallback path for
+    // headlines the backend did not tag. Company names stay case-insensitive,
+    // since headlines are inconsistent about those.
+    return aliasMatchesText(alias, text, alias === stock.symbol);
   });
 }
 
@@ -736,12 +769,12 @@ function relatedThemeNews(stock: LeadingStock, headlines: Headline[]) {
 }
 
 function relatedDisclosures(stock: LeadingStock, disclosures: Disclosure[]) {
-  const aliases = stockNameAliases(stock).map(normalizeForMatch);
+  const aliases = stockNameAliases(stock);
 
   return disclosures.filter((item) => {
-    const text = normalizeForMatch(`${item.symbol ?? ""} ${item.companyName ?? ""} ${item.title} ${item.tags.join(" ")} ${item.eventType ?? ""}`);
+    const text = `${item.symbol ?? ""} ${item.companyName ?? ""} ${item.title} ${item.tags.join(" ")} ${item.eventType ?? ""}`;
 
-    return item.symbol === stock.symbol || aliases.some((alias) => alias && text.includes(alias));
+    return item.symbol === stock.symbol || aliases.some((alias) => alias && aliasMatchesText(alias, text));
   });
 }
 
@@ -1259,6 +1292,12 @@ export function MarketBoard({
                     const rowThemeNews = relatedThemeNews(stock, sortedHeadlines);
                     const rowDisclosures = relatedDisclosures(stock, stock.market === "US" ? liveBoard.usDisclosures : liveBoard.krDisclosures);
                     const latestNews = rowNews[0] ?? rowThemeNews[0];
+                    // A theme match is a headline about the sector, not about
+                    // this company - Moderna's row was showing a story on an
+                    // unrelated biotech under the caption 최신 뉴스. The counts
+                    // beside it already say 뉴스 0건 · 테마 1건; the caption was
+                    // the only part still claiming more than it had.
+                    const latestNewsLabel = rowNews[0] ? "최신 뉴스" : "테마 뉴스";
                     const rate = leaderChangeRate(stock);
 
                     return (
@@ -1288,7 +1327,7 @@ export function MarketBoard({
                         <div className={styles.leaderReason}>
                           <span>{leaderSignalForFilter(stock, leaderFilter)}</span>
                           <small>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? `뉴스 ${rowNews.length}건 · 테마 ${rowThemeNews.length}건 · 공시 ${rowDisclosures.length}건` : "토스증권 랭킹 데이터"}</small>
-                          {latestNews ? <small>최신 뉴스: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, leaderFilter, leaderRankSet)}</small>}
+                          {latestNews ? <small>{latestNewsLabel}: {latestNews.text}</small> : <small>{leaderReasonForFilter(stock, leaderFilter, leaderRankSet)}</small>}
                           <em>{rowNews.length + rowThemeNews.length + rowDisclosures.length > 0 ? "뉴스·공시 원문 확인 가능" : "뉴스·공시 매칭 대기"}</em>
                         </div>
                       </article>

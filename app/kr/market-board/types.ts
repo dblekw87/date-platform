@@ -168,7 +168,14 @@ export type CloseBetCandidateDto = {
   closePrice: number;
   turnoverValue: number;
   marketCapValue: number | null;
-  /** 20일 평균 거래량 대비. */
+  /**
+   * 회전율 — 상장주식수의 몇 %가 그날 손바뀌었는가. 진입 조건입니다(5%↑).
+   *
+   * 20일 평균 대비 거래량 배수를 대체했습니다. 배수는 크기를 못 걸러내서 규모별로
+   * 문턱이 셋이어야 했는데, 회전율은 애초에 주식수로 나눈 값이라 하나로 됩니다.
+   */
+  turnoverRatio: number;
+  /** 20일 평균 거래량 대비. 조건이 아니라 참고값입니다. */
   volumeRatio: number;
   /** 0에 가까울수록 종가가 고가에 붙었다는 뜻입니다. */
   upperShadow: number;

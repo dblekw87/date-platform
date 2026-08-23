@@ -1876,7 +1876,7 @@ export function MarketBoard({
                         ? <>지금 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />마감까지 계속 바뀝니다.</>
                         : <>오늘 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />종가 매수 · 익일 시가 매도를 기준으로 잰 값입니다.</>}
                     </h3>
-                    <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 대·중형 당일 5%↑·거래량 1.5배↑ · 소형 10%↑·2배↑</strong>
+                    <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 회전율 5%↑ · 당일 대·중형 5%↑ 소형 10%↑</strong>
                     {groupByTier(closeBetCandidates).map((group) => (
                       <div className={styles.candidateGroup} key={group.tier}>
                         <p className={styles.candidateGrade}>
@@ -1897,7 +1897,7 @@ export function MarketBoard({
                               <span className={styles.candidateName}>{candidate.name}</span>
                               <span className={styles.candidateMove}>+{candidate.changeRateValue.toFixed(2)}%</span>
                               <span className={styles.candidateFacts}>
-                                <span className={styles.candidateLead}>거래량 {candidate.volumeRatio}배</span>
+                                <span className={styles.candidateLead}>회전율 {candidate.turnoverRatio}%</span>
                                 <span className={styles.candidateGap}>60일 고점 +{candidate.breakMargin}% 돌파</span>
                               </span>
                             </li>
@@ -1914,8 +1914,10 @@ export function MarketBoard({
                           종가와 윗꼬리는 마감까지 바뀌므로 목록도 바뀝니다.{" "}
                         </>
                       ) : null}
-                      위 숫자는 <b>그날 밤 시장 평균 갭을 뺀 초과분</b>입니다. 밤 자체는 이 목록이
-                      답하지 않는 부분입니다 — 시장 전체가 내리는 밤에는 조건과 무관하게 같이 내립니다.
+                      위 숫자는 <b>그날 밤 시장 평균 갭을 뺀 초과분</b>이고, <b>갭이 오르든 내리든
+                      익일 시가에 그냥 판다</b>는 전제로 잰 것입니다 — 갭하락까지 손절로 포함한
+                      숫자라 버티는 경우는 여기에 없습니다. 밤 자체는 이 목록이 답하지 않는
+                      부분입니다 — 시장 전체가 내리는 밤에는 조건과 무관하게 같이 내립니다.
                       {marketTrendItems.qqq ? ` 현재 NASDAQ 100 선물 ${marketChangeLabel(marketTrendItems.qqq)}.` : ""}
                       <NightTriggerNote candidates={closeBetCandidates} items={marketTrendItems} />
                     </p>

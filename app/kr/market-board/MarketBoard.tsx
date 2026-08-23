@@ -8,7 +8,7 @@ import { DayLeaders } from "./DayLeaders";
 import { PairTrades } from "./PairTrades";
 import { SurgeCandidates } from "./SurgeCandidates";
 import styles from "../../page.module.scss";
-import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId } from "./types";
+import type { DisclosureRegion, LeaderRegion, MarketBoardData, MarketBoardTabId, NightTriggerDto } from "./types";
 
 const refreshIntervalMs = 60_000;
 
@@ -52,6 +52,55 @@ function groupByTier<T extends { tier: string }>(rows: T[]) {
   });
 
   return groups;
+}
+
+/**
+ * 후보들의 테마에 맞는 밤 지표.
+ *
+ * 두 후보 화면 모두 오늘 종가에 사서 밤을 넘깁니다. 그런데 밤 맥락으로 내놓던 것은
+ * 나스닥 선물 하나뿐이었습니다 — 나스닥은 시장 전체의 밤이지 이 종목의 밤이
+ * 아닙니다. 반도체에는 SOX가, 코인에는 비트코인이 더 맞는다는 것을 이미 재 놓고도
+ * 화면이 그 답을 안 쓰고 있었습니다.
+ *
+ * 오늘 목록에 실제로 걸린 갈래만 말합니다. 재 놓은 두 갈래 밖이면 아무 줄도 나오지
+ * 않고 나스닥만 남습니다.
+ */
+function NightTriggerNote({ candidates, items }: {
+  candidates: { nightTrigger: NightTriggerDto | null }[];
+  items: { btc?: MarketSnapshot; qqq?: MarketSnapshot; soxx?: MarketSnapshot };
+}) {
+  const present = new Set(candidates.map((row) => row.nightTrigger?.id).filter(Boolean));
+  // 방향이 갈렸는지는 tone으로 봅니다. 문자열을 파싱하면 부호와 소수점 표기에
+  // 끌려다닙니다.
+  const diverged = items.soxx && items.qqq
+    && items.soxx.tone !== "flat" && items.qqq.tone !== "flat"
+    && items.soxx.tone !== items.qqq.tone;
+
+  return (
+    <>
+      {present.has("sox") ? (
+        <>
+          {" "}반도체 후보가 있습니다 — 국내 반도체는 나스닥(0.36)보다{" "}
+          <EnglishText text={items.soxx?.symbol ?? "SOXX"} />(0.42)를 더 따라갑니다.
+          현재 {marketChangeLabel(items.soxx)}.
+          {diverged ? (
+            <>
+              {" "}<b>지금 둘이 갈려 있습니다.</b> 2년 실측에서 갈린 밤 다음 국내 반도체는
+              동반 상승 때의 절반 이하였습니다(하이닉스 +2.01% → +0.93%·+0.25%).
+            </>
+          ) : null}
+        </>
+      ) : null}
+      {present.has("btc") ? (
+        <>
+          {" "}가상화폐 후보가 있습니다 — 미국 코인주보다 <b>비트코인 자체</b>가 낫습니다
+          (BTC +5%↑ 다음날 국내 중앙값 +1.41%, 미국 코인주 +5%↑는 +0.56%).
+          현재 {marketChangeLabel(items.btc)}. 다만 표본 14일로 얇고, 실제로 반응한 것은
+          지분·창투사·발행 계열이라 결제 쪽 종목은 덜합니다.
+        </>
+      ) : null}
+    </>
+  );
 }
 
 function buildDisclosureFilters(items: Disclosure[]) {
@@ -1806,6 +1855,7 @@ export function MarketBoard({
                       사실상 0이었습니다. 1등주 높이로만 보면 20~25% −0.10%p · 25~27% +0.40%p ·
                       27~29% +0.79%p로 오르다가 <b>잠기는 순간 +2.58%p로 뜁니다</b> — 문턱을 27%에
                       둔 이유이고, 그 아래가 마이너스인 이유이기도 합니다.
+                      <NightTriggerNote candidates={limitPairs} items={marketTrendItems} />
                     </p>
                   </div>
                 </article>
@@ -1867,6 +1917,7 @@ export function MarketBoard({
                       위 숫자는 <b>그날 밤 시장 평균 갭을 뺀 초과분</b>입니다. 밤 자체는 이 목록이
                       답하지 않는 부분입니다 — 시장 전체가 내리는 밤에는 조건과 무관하게 같이 내립니다.
                       {marketTrendItems.qqq ? ` 현재 NASDAQ 100 선물 ${marketChangeLabel(marketTrendItems.qqq)}.` : ""}
+                      <NightTriggerNote candidates={closeBetCandidates} items={marketTrendItems} />
                     </p>
                   </div>
                 </article>

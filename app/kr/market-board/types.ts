@@ -130,6 +130,21 @@ export type HaltedStockDto = {
 };
 
 /**
+ * 이 종목의 밤을 좌우하는 미국 지표.
+ *
+ * 나스닥은 시장 전체의 밤이지 이 종목의 밤이 아닙니다. 실측으로 갈라놓은 두 갈래만
+ * 값이 붙고 나머지는 null입니다 — 근거 없는 짝을 지어 주느니 말을 안 합니다.
+ *
+ *   sox  반도체. 2년 500거래일, 하이닉스 상관 SOX 0.42 vs 나스닥 0.36
+ *   btc  가상화폐. 상관 0.24에 표본 14일이라 얇습니다
+ */
+export type NightTriggerDto = {
+  id: "btc" | "sox";
+  /** `thin`이면 화면이 표본이 얇다는 말을 같이 합니다. */
+  strength: "measured" | "thin";
+};
+
+/**
  * 종가배팅 후보 — 오늘 종가에 사서 내일 시가에 팔 만한 자리.
  *
  * `measured`가 타입의 일부인 이유는 미국 급등 후보와 같습니다: 숫자 없이 종목만
@@ -144,8 +159,11 @@ export type CloseBetCandidateDto = {
   symbol: string;
   name: string;
   market: string;
-  /** 당일 상승률로 나눈 등급. 위로 갈수록 후보가 줄고 초과가 커집니다. */
-  tier: "강" | "중" | "약";
+  /**
+   * 규모 등급. 문턱도 성적도 규모마다 따로 재기 때문에 상승률이 아니라 규모입니다 —
+   * 대형주 5%와 소형주 15%를 한 등급표에 놓을 수 없습니다.
+   */
+  tier: "대형" | "소형" | "중형";
   changeRateValue: number;
   closePrice: number;
   turnoverValue: number;
@@ -156,6 +174,7 @@ export type CloseBetCandidateDto = {
   upperShadow: number;
   /** 60일 고점을 몇 % 넘겼는가. */
   breakMargin: number;
+  nightTrigger: NightTriggerDto | null;
   sessionDate: string;
   /**
    * 장중 값인가.
@@ -200,10 +219,10 @@ export type LimitPairDto = {
   /**
    * 잠겼는가와 얼마나 붙어 있는가, 두 축입니다.
    *
-   *   상한가·밀착  817건  +5.946%p  상회 77%
-   *   상한가·근접  178건  -0.419%p  상회 40%
-   *   상한가·여유 1,243건 +0.544%p  상회 49%
-   *   상한가 근접   106건  +0.923%p  상회 60%   (27~29%, 잠기지 않음)
+   *   상한가·밀착   612건  +5.550%p  상회 76%
+   *   상한가·근접   123건  +0.162%p  상회 46%
+   *   상한가·여유   962건  +0.403%p  상회 49%
+   *   상한가 근접    77건  — 표본이 100건에 못 미쳐 성적을 붙이지 않습니다
    */
   tier: "상한가·밀착" | "상한가·근접" | "상한가·여유" | "상한가 근접";
   /** 1등주가 실제로 상한가에 잠겼는가. 근접(27~29%)과 성적이 다릅니다. */
@@ -214,6 +233,7 @@ export type LimitPairDto = {
   second: { symbol: string; name: string; changeRateValue: number; turnoverValue: number; closePrice?: number };
   market: string;
   marketCapValue: number | null;
+  nightTrigger: NightTriggerDto | null;
   sessionDate: string;
   provisional: boolean;
   observedAt: string | null;

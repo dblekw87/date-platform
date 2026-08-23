@@ -30,6 +30,30 @@ type Headline = MarketBoardData["headlineFlow"][number];
 type Disclosure = MarketBoardData["usDisclosures"][number];
 type CalendarEvent = MarketBoardData["calendarItems"][number];
 
+/**
+ * 등급이 같은 행을 한 덩어리로 묶습니다.
+ *
+ * 성적은 종목이 아니라 등급에 붙는 값이라, 행마다 적으면 같은 문장이 후보 수만큼
+ * 반복됩니다 -- 화면에 뜬 세 종목이 모두 소형이면 똑같은 줄이 세 번 나오고,
+ * 정작 종목마다 다른 숫자가 그 사이에 파묻힙니다. 등급을 머리에 한 번 적고 그
+ * 아래에 종목을 답니다.
+ *
+ * 순서는 먼저 나온 등급이 먼저입니다. 목록은 이미 좋은 순으로 정렬돼 있으므로
+ * 등급으로 다시 정렬하면 그 순서를 뒤엎게 됩니다.
+ */
+function groupByTier<T extends { tier: string }>(rows: T[]) {
+  const groups: { rows: T[]; tier: string }[] = [];
+
+  rows.forEach((row) => {
+    const last = groups[groups.length - 1];
+
+    if (last && last.tier === row.tier) last.rows.push(row);
+    else groups.push({ rows: [row], tier: row.tier });
+  });
+
+  return groups;
+}
+
 function buildDisclosureFilters(items: Disclosure[]) {
   const byTag = new Map<string, number>();
 
@@ -1732,25 +1756,36 @@ export function MarketBoard({
                       그 테마의 2등주를 봅니다.
                     </h3>
                     <strong>같은 테마 · 상승률 1등주 27%↑ · 2등주 15%↑ · 간격 좁은 순</strong>
-                    <ol>
-                      {limitPairs.map((pair) => (
-                        <li className={styles.measuredRow} key={pair.id}>
-                          <b>{pair.second.name}</b>
-                          <span>{pair.tier} · 간격 {pair.leadGap.toFixed(2)}%p</span>
-                          <span>
-                            {pair.theme} · 1등주 {pair.leader.name} +{pair.leader.changeRateValue.toFixed(2)}%
-                            → 2등주 +{pair.second.changeRateValue.toFixed(2)}%
-                          </span>
-                          {pair.measured ? (
-                            <em className={styles.measuredNote}>
-                              같은 등급 과거 {pair.measured.samples.toLocaleString("ko-KR")}건 ·
-                              익일 시가까지 시장 평균보다 {pair.measured.excessMean >= 0 ? "+" : ""}
-                              {pair.measured.excessMean.toFixed(2)}%p · 평균 상회 {Math.round(pair.measured.beatRate * 100)}%
-                            </em>
+                    {groupByTier(limitPairs).map((group) => (
+                      <div className={styles.candidateGroup} key={group.tier}>
+                        <p className={styles.candidateGrade}>
+                          <span className={styles.candidateGradeName}>{group.tier}</span>
+                          {group.rows[0]?.measured ? (
+                            <span className={styles.candidateGradeScore}>
+                              과거 {group.rows[0].measured.samples.toLocaleString("ko-KR")}건 · 익일 시가까지
+                              시장 평균보다 {group.rows[0].measured.excessMean >= 0 ? "+" : ""}
+                              {group.rows[0].measured.excessMean.toFixed(2)}%p ·
+                              상회 {Math.round(group.rows[0].measured.beatRate * 100)}%
+                            </span>
                           ) : null}
-                        </li>
-                      ))}
-                    </ol>
+                        </p>
+                        <ol className={styles.candidateList}>
+                          {group.rows.map((pair) => (
+                            <li className={styles.candidateRow} key={pair.id}>
+                              <span className={styles.candidateName}>{pair.second.name}</span>
+                              <span className={styles.candidateMove}>+{pair.second.changeRateValue.toFixed(2)}%</span>
+                              <span className={styles.candidateFacts}>
+                                <span className={styles.candidateLead}>
+                                  1등주 {pair.leader.name} +{pair.leader.changeRateValue.toFixed(2)}%
+                                </span>
+                                <span className={styles.candidateGap}>간격 {pair.leadGap.toFixed(2)}%p</span>
+                                <span className={styles.candidateTheme}>{pair.theme}</span>
+                              </span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    ))}
                     <p className={styles.closeBetCaveat}>
                       {limitPairs[0]?.provisional ? (
                         <>
@@ -1785,24 +1820,34 @@ export function MarketBoard({
                         : <>오늘 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />종가 매수 · 익일 시가 매도를 기준으로 잰 값입니다.</>}
                     </h3>
                     <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 대·중형 당일 5%↑·거래량 1.5배↑ · 소형 10%↑·2배↑</strong>
-                    <ol>
-                      {closeBetCandidates.map((candidate) => (
-                        <li className={styles.measuredRow} key={candidate.id}>
-                          <b>{candidate.name}</b>
-                          <span>{candidate.tier}등급 · 당일 +{candidate.changeRateValue.toFixed(2)}%</span>
-                          <span>거래량 {candidate.volumeRatio}배 · 고점 +{candidate.breakMargin}% 돌파</span>
-                          {candidate.measured ? (
-                            <em className={styles.measuredNote}>
-                              같은 조건 과거 {candidate.measured.samples.toLocaleString("ko-KR")}건 ·
-                              시장 평균보다 {candidate.measured.excessMean >= 0 ? "+" : ""}
-                              {candidate.measured.excessMean.toFixed(2)}%p ·
-                              평균 상회 {Math.round(candidate.measured.beatRate * 100)}% ·
-                              갭상승 {Math.round(candidate.measured.gapUpRate * 100)}%
-                            </em>
+                    {groupByTier(closeBetCandidates).map((group) => (
+                      <div className={styles.candidateGroup} key={group.tier}>
+                        <p className={styles.candidateGrade}>
+                          <span className={styles.candidateGradeName}>{group.tier}주</span>
+                          {group.rows[0]?.measured ? (
+                            <span className={styles.candidateGradeScore}>
+                              과거 {group.rows[0].measured.samples.toLocaleString("ko-KR")}건 ·
+                              시장 평균보다 {group.rows[0].measured.excessMean >= 0 ? "+" : ""}
+                              {group.rows[0].measured.excessMean.toFixed(2)}%p ·
+                              상회 {Math.round(group.rows[0].measured.beatRate * 100)}% ·
+                              갭상승 {Math.round(group.rows[0].measured.gapUpRate * 100)}%
+                            </span>
                           ) : null}
-                        </li>
-                      ))}
-                    </ol>
+                        </p>
+                        <ol className={styles.candidateList}>
+                          {group.rows.map((candidate) => (
+                            <li className={styles.candidateRow} key={candidate.id}>
+                              <span className={styles.candidateName}>{candidate.name}</span>
+                              <span className={styles.candidateMove}>+{candidate.changeRateValue.toFixed(2)}%</span>
+                              <span className={styles.candidateFacts}>
+                                <span className={styles.candidateLead}>거래량 {candidate.volumeRatio}배</span>
+                                <span className={styles.candidateGap}>60일 고점 +{candidate.breakMargin}% 돌파</span>
+                              </span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    ))}
                     {/* 밤은 예측하지 않습니다. 예측할 수도 없으니 숫자에 섞지 않고
                         옆에 적어 둡니다. */}
                     <p className={styles.closeBetCaveat}>

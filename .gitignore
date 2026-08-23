@@ -13,3 +13,6 @@ test-results/
 data/runtime/
 
 .vercel
+
+# 개발 서버를 백그라운드로 띄울 때 쓰는 로그. 기계 상태입니다.
+*.log

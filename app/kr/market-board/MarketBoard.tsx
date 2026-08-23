@@ -1742,11 +1742,11 @@ export function MarketBoard({
                             → 2등주 +{pair.second.changeRateValue.toFixed(2)}%
                           </span>
                           {pair.measured ? (
-                            <i>
+                            <em className={styles.measuredNote}>
                               같은 등급 과거 {pair.measured.samples.toLocaleString("ko-KR")}건 ·
                               익일 시가까지 시장 평균보다 {pair.measured.excessMean >= 0 ? "+" : ""}
                               {pair.measured.excessMean.toFixed(2)}%p · 평균 상회 {Math.round(pair.measured.beatRate * 100)}%
-                            </i>
+                            </em>
                           ) : null}
                         </li>
                       ))}
@@ -1784,7 +1784,7 @@ export function MarketBoard({
                         ? <>지금 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />마감까지 계속 바뀝니다.</>
                         : <>오늘 조건을 만족한 종목은 {closeBetCandidates.length}개입니다.<br />종가 매수 · 익일 시가 매도를 기준으로 잰 값입니다.</>}
                     </h3>
-                    <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 당일 10%↑ · 거래량 2배↑</strong>
+                    <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 대·중형 당일 5%↑·거래량 1.5배↑ · 소형 10%↑·2배↑</strong>
                     <ol>
                       {closeBetCandidates.map((candidate) => (
                         <li key={candidate.id}>
@@ -1792,13 +1792,13 @@ export function MarketBoard({
                           <span>{candidate.tier}등급 · 당일 +{candidate.changeRateValue.toFixed(2)}%</span>
                           <span>거래량 {candidate.volumeRatio}배 · 고점 +{candidate.breakMargin}% 돌파</span>
                           {candidate.measured ? (
-                            <i>
+                            <em className={styles.measuredNote}>
                               같은 조건 과거 {candidate.measured.samples.toLocaleString("ko-KR")}건 ·
                               시장 평균보다 {candidate.measured.excessMean >= 0 ? "+" : ""}
                               {candidate.measured.excessMean.toFixed(2)}%p ·
                               평균 상회 {Math.round(candidate.measured.beatRate * 100)}% ·
                               갭상승 {Math.round(candidate.measured.gapUpRate * 100)}%
-                            </i>
+                            </em>
                           ) : null}
                         </li>
                       ))}

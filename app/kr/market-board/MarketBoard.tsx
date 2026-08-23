@@ -1734,7 +1734,7 @@ export function MarketBoard({
                     <strong>같은 테마 · 상승률 1등주 27%↑ · 2등주 15%↑ · 간격 좁은 순</strong>
                     <ol>
                       {limitPairs.map((pair) => (
-                        <li key={pair.id}>
+                        <li className={styles.measuredRow} key={pair.id}>
                           <b>{pair.second.name}</b>
                           <span>{pair.tier} · 간격 {pair.leadGap.toFixed(2)}%p</span>
                           <span>
@@ -1787,7 +1787,7 @@ export function MarketBoard({
                     <strong>60일 고점 돌파 직후 · 윗꼬리 30% 미만 · 대·중형 당일 5%↑·거래량 1.5배↑ · 소형 10%↑·2배↑</strong>
                     <ol>
                       {closeBetCandidates.map((candidate) => (
-                        <li key={candidate.id}>
+                        <li className={styles.measuredRow} key={candidate.id}>
                           <b>{candidate.name}</b>
                           <span>{candidate.tier}등급 · 당일 +{candidate.changeRateValue.toFixed(2)}%</span>
                           <span>거래량 {candidate.volumeRatio}배 · 고점 +{candidate.breakMargin}% 돌파</span>

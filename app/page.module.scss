@@ -3429,8 +3429,22 @@
  *
  * `.themeSection li` 안에서는 엘리먼트 셀렉터를 쓰지 말고 클래스를 겁니다.
  */
+/*
+ * 실측선을 단 행은 줄을 바꿉니다.
+ *
+ * `.themeSection li`는 flex-wrap 없이 한 줄이라, 1280px에서 성적선이 같은 줄에
+ * 들어가며 앞의 값들을 "당일 ..."로 잘라먹었습니다. 좁은 화면에서만 멀쩡해 보여서
+ * 760px 확인으로는 안 잡히는 종류입니다.
+ *
+ * 다른 테마 목록은 한 줄이 맞으므로 이 두 패널의 행에만 겁니다.
+ */
+.measuredRow {
+  flex-wrap: wrap;
+}
+
 .measuredNote {
   display: block;
+  flex: 0 0 100%;
   width: 100%;
   color: #4b5563;
   font-size: 12px;

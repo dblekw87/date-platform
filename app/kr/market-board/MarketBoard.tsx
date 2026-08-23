@@ -1571,14 +1571,22 @@ export function MarketBoard({
                   leaders={liveBoard.usDayLeaders ?? []}
                 />
               </div>
-              {/* 짝꿍매매 sits between the two lists it is derived from and
-                  belongs to neither. 주도주 ranks the turnover top of the
-                  market; a 짝꿍 is smaller than the stock it follows and is
-                  almost never in that ranking, so it needs its own row. */}
+              {/* 이 패널은 짝꿍매매가 아닙니다.
+                  
+                  짝꿍매매는 같은 테마 1등주가 상한가에 잠겼을 때 2등주를 잡는
+                  매매이고, 그것은 아래 "짝꿍매매 후보"가 상한가를 조건으로 걸어
+                  따로 냅니다. 여기는 상한가를 요구하지 않으므로 그 이름을 쓰면
+                  안 됩니다 — 두 패널이 같은 이름을 달고 하나는 상한가가 아닌
+                  종목을 보여주면, 읽는 쪽은 조건이 지켜지지 않는다고 읽습니다.
+
+                  여기가 보여주는 것은 함께 움직인 테마와 그 안에서 오른 종목들이고,
+                  그 자체로 값이 있습니다 — 1등주가 달린 테마의 상승 멤버는 익일
+                  시가 갭이 +0.46%p로, 그날 오르기만 한 종목(+0.07%p)의 여섯 배입니다.
+                  다른 트레이드일 뿐입니다. */}
               <div className={`${styles.pairTradeRow} ${krAfterPairs.length > 0 ? styles.pairTradeRowSplit : ""}`}>
                 <PairTrades
                   emptyMessage={leaderUnavailableMessage(liveBoard, "KR")}
-                  label="시황 · 국내 짝꿍매매 · 정규장 09:00–15:30"
+                  label="시황 · 함께 움직인 테마 · 정규장 09:00–15:30"
                   pairs={liveBoard.krPairTrades ?? []}
                 />
                 {/* The NXT evening, which is a different book with different
@@ -1586,7 +1594,7 @@ export function MarketBoard({
                     Hidden until 15:40, when there is an evening to describe. */}
                 {krAfterPairs.length > 0 ? (
                   <PairTrades
-                    label="시황 · 국내 짝꿍매매 · NXT 애프터마켓 15:40–20:00"
+                    label="시황 · 함께 움직인 테마 · NXT 애프터마켓 15:40–20:00"
                     pairs={krAfterPairs}
                   />
                 ) : null}
@@ -1720,10 +1728,10 @@ export function MarketBoard({
                   </span>
                   <div>
                     <h3>
-                      1등주가 상한가에 잠긴 테마 {limitPairs.length}개입니다.<br />
+                      1등주가 상한가에 가거나 근처까지 간 테마 {limitPairs.length}개입니다.<br />
                       그 테마의 2등주를 봅니다.
                     </h3>
-                    <strong>같은 테마 · 상승률 1등주 상한가 · 2등주 15%↑ · 간격 좁은 순</strong>
+                    <strong>같은 테마 · 상승률 1등주 27%↑ · 2등주 15%↑ · 간격 좁은 순</strong>
                     <ol>
                       {limitPairs.map((pair) => (
                         <li key={pair.id}>
@@ -1752,8 +1760,10 @@ export function MarketBoard({
                       ) : null}
                       성적은 <b>종가 매수·익일 시가 매도</b>를 잰 값입니다 — 실제 짝꿍매매는 장중에 들고
                       장중에 나오는 매매라 같은 자리를 재긴 했어도 같은 보유구간은 아닙니다. 분봉 이력이
-                      쌓이면 그쪽으로 다시 잽니다. 간격이 <b>2%p 이내(밀착)</b>일 때만 크게 좋았고
-                      (817건 +5.95%p·상회 77%), 2~5%p는 −0.42%p로 오히려 나빴습니다.
+                      쌓이면 그쪽으로 다시 잽니다. 1등주가 <b>실제로 잠기고 간격이 2%p 이내</b>일 때만
+                      크게 좋았고(817건 +5.95%p·상회 77%), 같은 상한가라도 간격 2~5%p는 −0.42%p였습니다.
+                      잠기지 않은 27~29%는 +0.92%p이고, <b>25~27%는 사실상 0, 그 아래는 마이너스</b>라
+                      후보에서 뺐습니다.
                     </p>
                   </div>
                 </article>

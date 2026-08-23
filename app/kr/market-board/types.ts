@@ -197,8 +197,17 @@ export type CloseBetCandidateDto = {
 export type LimitPairDto = {
   id: string;
   theme: string;
-  /** 간격으로 나눈 등급. 좁을수록 좋았습니다. */
-  tier: "밀착" | "근접" | "여유";
+  /**
+   * 잠겼는가와 얼마나 붙어 있는가, 두 축입니다.
+   *
+   *   상한가·밀착  817건  +5.946%p  상회 77%
+   *   상한가·근접  178건  -0.419%p  상회 40%
+   *   상한가·여유 1,243건 +0.544%p  상회 49%
+   *   상한가 근접   106건  +0.923%p  상회 60%   (27~29%, 잠기지 않음)
+   */
+  tier: "상한가·밀착" | "상한가·근접" | "상한가·여유" | "상한가 근접";
+  /** 1등주가 실제로 상한가에 잠겼는가. 근접(27~29%)과 성적이 다릅니다. */
+  locked: boolean;
   /** 1등주 상승률 − 2등주 상승률. 0에 가까울수록 둘이 나란히 달린다는 뜻입니다. */
   leadGap: number;
   leader: { symbol: string; name: string; changeRateValue: number; turnoverValue: number };
@@ -468,7 +477,10 @@ export type PairCandidateDto = {
 };
 
 /**
- * 짝꿍매매 — a theme's leader and the stocks that have not moved with it yet.
+ * 함께 움직인 테마 — 1등주와 같이 오른 멤버들.
+ *
+ * 이름이 짝꿍매매가 아닌 이유: 짝꿍매매는 1등주가 상한가에 잠겼을 때 2등주를 잡는
+ * 매매이고 그것은 LimitPairDto가 따로 냅니다. 여기는 상한가를 요구하지 않습니다.
  *
  * Grouped by theme rather than by leader because that is the unit the trade is
  * read in: 반도체 is moving, and here is what is still behind it. The 주도주

@@ -1804,7 +1804,7 @@ export function MarketBoard({
                       1등주가 상한가에 가거나 근처까지 간 테마 {limitPairs.length}개입니다.<br />
                       그 테마의 2등주를 봅니다.
                     </h3>
-                    <strong>같은 테마 · 상승률 1등주 27%↑ · 2등주 15%↑ · 간격 좁은 순</strong>
+                    <strong>같은 테마 · 1등주 상한가 또는 15%↑ 진행중 · 간격 좁은 순</strong>
                     {groupByTier(limitPairs).map((group) => (
                       <div className={styles.candidateGroup} key={group.tier}>
                         <p className={styles.candidateGrade}>
@@ -1815,6 +1815,14 @@ export function MarketBoard({
                               시장 평균보다 {group.rows[0].measured.excessMean >= 0 ? "+" : ""}
                               {group.rows[0].measured.excessMean.toFixed(2)}%p ·
                               상회 {Math.round(group.rows[0].measured.beatRate * 100)}%
+                            </span>
+                          ) : group.tier === "상한가 진행중" ? (
+                            /* 잠기기 전에 잡는 자리라 일봉 성적표가 없습니다 — 종가로는
+                               "가는 중"과 "못 간 것"이 구분되지 않습니다. 대신 분봉으로
+                               본 것만 말합니다. 4일이라 통계가 아니라 관찰입니다. */
+                            <span className={styles.candidateGradeScore}>
+                              잠기기 전 · 성적표 없음 · 분봉 4일 관찰으로는 이 자리 뒤 1등주가 상한가에
+                              닿은 것이 16%뿐이고, 2등주는 평균 +4.0%p 더 갔습니다(3%p 이상 51%)
                             </span>
                           ) : (
                             /* 성적이 없으면 비워 두지 않고 없다고 적습니다. 빈 자리는

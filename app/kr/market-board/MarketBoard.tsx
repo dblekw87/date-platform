@@ -80,7 +80,7 @@ function NightTriggerNote({ candidates, items }: {
     <>
       {present.has("sox") ? (
         <>
-          {" "}반도체 후보가 있습니다 — 국내 반도체는 나스닥(0.36)보다{" "}
+          {" "}반도체 후보가 있습니다. 국내 반도체는 나스닥(0.36)보다{" "}
           <EnglishText text={items.soxx?.symbol ?? "SOXX"} />(0.42)를 더 따라갑니다.
           현재 {marketChangeLabel(items.soxx)}.
           {diverged ? (
@@ -93,7 +93,7 @@ function NightTriggerNote({ candidates, items }: {
       ) : null}
       {present.has("btc") ? (
         <>
-          {" "}가상화폐 후보가 있습니다 — 미국 코인주보다 <b>비트코인 자체</b>가 낫습니다
+          {" "}가상화폐 후보가 있습니다. 미국 코인주보다 비트코인 자체가 낫습니다
           (BTC +5%↑ 다음날 국내 중앙값 +1.41%, 미국 코인주 +5%↑는 +0.56%).
           현재 {marketChangeLabel(items.btc)}. 다만 표본 14일로 얇고, 실제로 반응한 것은
           지분·창투사·발행 계열이라 결제 쪽 종목은 덜합니다.
@@ -1186,6 +1186,14 @@ export function MarketBoard({
                     <Image alt="" aria-hidden="true" className={styles.marketTrendIcon} height={16} src={trendIconByTone[item.tone]} width={16} />
                   ) : null}
                 </div>
+                {/* 전일 대비. 값과 화살표만 있으면 방향은 알아도 크기를 모릅니다 --
+                    KOSPI 6,912.95에 빨간 화살표가 붙은 것과 +0.88%는 다른 정보입니다.
+                    DTO에 처음부터 있던 값인데 카드가 안 읽고 있었습니다. */}
+                {item.changeRate ? (
+                  <span className={styles.marketChangeRate} data-rate={changeTone(item.changeRate)}>
+                    {item.changeRate}
+                  </span>
+                ) : null}
                 {/* The instrument note is dropped on purpose — "KIS 국내업종
                     현재지수", "SOX 원지수에는 선물이 없어 SOXX" — it is reference
                     material rather than a reading, and its length varied enough
@@ -1856,13 +1864,12 @@ export function MarketBoard({
                           1등주가 상한가에서 풀리거나 2등주가 더 가면 목록이 바뀝니다.{" "}
                         </>
                       ) : null}
-                      성적은 <b>종가 매수·익일 시가 매도</b>를 잰 값입니다 — 실제 짝꿍매매는 장중에 들고
-                      장중에 나오는 매매라 같은 자리를 재긴 했어도 같은 보유구간은 아닙니다. 분봉 이력이
-                      쌓이면 그쪽으로 다시 잽니다. 1등주가 <b>실제로 잠기고 간격이 2%p 이내</b>일 때만
-                      크게 좋았고(612건 +5.55%p·상회 76%), 같은 상한가라도 간격 2~5%p는 +0.16%p로
-                      사실상 0이었습니다. 1등주 높이로만 보면 20~25% −0.10%p · 25~27% +0.40%p ·
-                      27~29% +0.79%p로 오르다가 <b>잠기는 순간 +2.58%p로 뜁니다</b> — 문턱을 27%에
-                      둔 이유이고, 그 아래가 마이너스인 이유이기도 합니다.
+                      성적은 종가에 사서 익일 시가에 판 값입니다. 실제 짝꿍매매는 장중에 들어가 장중에
+                      나오니, 같은 자리를 재긴 했어도 보유구간은 다릅니다. 분봉이 쌓이면 그쪽으로 다시
+                      잽니다. 1등주가 <b>실제로 잠기고 간격이 2%p 이내</b>일 때만 크게 좋았습니다
+                      (612건 +5.55%p·상회 76%). 같은 상한가라도 간격 2~5%p는 +0.16%p로 사실상 0입니다.
+                      1등주 높이로만 보면 20~25% −0.10%p, 25~27% +0.40%p, 27~29% +0.79%p로 오르다가
+                      잠기는 순간 +2.58%p로 뜁니다. 문턱을 27%에 둔 이유입니다.
                       <NightTriggerNote candidates={limitPairs} items={marketTrendItems} />
                     </p>
                   </div>
@@ -1922,10 +1929,10 @@ export function MarketBoard({
                           종가와 윗꼬리는 마감까지 바뀌므로 목록도 바뀝니다.{" "}
                         </>
                       ) : null}
-                      위 숫자는 <b>그날 밤 시장 평균 갭을 뺀 초과분</b>이고, <b>갭이 오르든 내리든
-                      익일 시가에 그냥 판다</b>는 전제로 잰 것입니다 — 갭하락까지 손절로 포함한
-                      숫자라 버티는 경우는 여기에 없습니다. 밤 자체는 이 목록이 답하지 않는
-                      부분입니다 — 시장 전체가 내리는 밤에는 조건과 무관하게 같이 내립니다.
+                      위 숫자는 그날 밤 시장 평균 갭을 뺀 초과분입니다. <b>갭이 오르든 내리든 익일
+                      시가에 그냥 판다</b>는 전제로 쟀으니 갭하락도 손절로 들어가 있고, 버티는 경우는
+                      여기 없습니다. 밤 자체는 이 목록이 답하지 못합니다. 시장 전체가 내리는 밤엔
+                      조건과 무관하게 같이 내립니다.
                       {marketTrendItems.qqq ? ` 현재 NASDAQ 100 선물 ${marketChangeLabel(marketTrendItems.qqq)}.` : ""}
                       <NightTriggerNote candidates={closeBetCandidates} items={marketTrendItems} />
                     </p>

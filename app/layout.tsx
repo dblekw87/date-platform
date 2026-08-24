@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     description: siteDescription,
     locale: "ko_KR",
     siteName,
-    title: `${siteName} — 투자 판단 전 확인 흐름`,
+    title: `${siteName} · 투자 판단 전 확인 흐름`,
     type: "website",
     url: "/"
   },
@@ -41,13 +41,13 @@ export const metadata: Metadata = {
     index: true
   },
   title: {
-    default: `${siteName} — 투자 판단 전 확인 흐름`,
+    default: `${siteName} · 투자 판단 전 확인 흐름`,
     template: `%s · ${siteName}`
   },
   twitter: {
     card: "summary_large_image",
     description: siteDescription,
-    title: `${siteName} — 투자 판단 전 확인 흐름`
+    title: `${siteName} · 투자 판단 전 확인 흐름`
   }
 };
 

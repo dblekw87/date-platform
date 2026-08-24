@@ -16,7 +16,7 @@ import { ImageResponse } from "next/og";
  * 배포 환경에서 되는 것이 같다는 보장은 글꼴 쪽에서 특히 약합니다.
  */
 
-export const alt = "DATE — 투자 판단 전 확인 흐름을 돕는 시장 정보 보드";
+export const alt = "DATE · 투자 판단 전 확인 흐름을 돕는 시장 정보 보드";
 export const size = { height: 630, width: 1200 };
 export const contentType = "image/png";
 

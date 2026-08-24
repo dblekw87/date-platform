@@ -3340,8 +3340,18 @@
   list-style: none;
 }
 
+/*
+ * 카드 높이는 한 줄에서 제일 긴 것에 맞춰집니다. 사유가 두 줄인 카드(카프로)와
+ * 사유가 아예 없는 카드(한화3우B)가 나란히 서면 높이 차가 그대로 남는데, 기본
+ * `align-content: stretch`는 그 남는 높이를 **행 사이에 나눠** 넣습니다. 그래서
+ * 종목명과 시총 사이가 카드마다 다르게 벌어져 가운데가 비어 보였습니다.
+ *
+ * 위는 붙여 쌓고(`start`), 출처 줄만 `margin-top: auto`로 바닥에 내립니다. 그러면
+ * 남는 높이가 전부 한 자리로 모여 카드끼리 첫 줄과 마지막 줄이 맞습니다.
+ */
 .haltCards li {
   display: grid;
+  align-content: start;
   gap: 4px;
   min-width: 0;
   border: 1px solid #e5b3ab;
@@ -3388,6 +3398,8 @@
 }
 
 .haltCards small {
+  margin-top: auto;
+  padding-top: 4px;
   color: #6b7280;
   font-size: 11px;
   font-weight: 700;

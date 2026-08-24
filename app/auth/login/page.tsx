@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DateLogo } from "../../_components/DateLogo";
 import type { OAuthProvider } from "../oauth";
@@ -9,6 +10,11 @@ const providers: Array<{ key: OAuthProvider; label: string }> = [
   { label: "Naver로 계속하기", key: "naver" },
   { label: "Kakao로 계속하기", key: "kakao" }
 ];
+
+export const metadata: Metadata = {
+  robots: { follow: false, index: false },
+  title: "로그인"
+};
 
 export default async function LoginPage({
   searchParams

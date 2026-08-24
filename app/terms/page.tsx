@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "./page.module.scss";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/terms" },
+  description: "DATE 서비스 이용약관입니다.",
+  openGraph: { description: "DATE 서비스 이용약관입니다.", title: "이용약관", url: "/terms" },
+  title: "이용약관"
+};
 
 export default function TermsPage() {
   return (

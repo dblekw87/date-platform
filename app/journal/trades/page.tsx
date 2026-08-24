@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot, SideAdRails } from "../../_components/AdSlot";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { getCurrentUser } from "../../auth/session";
 import { TradeJournalInfiniteList } from "./TradeJournalInfiniteList";
 import styles from "./page.module.scss";
+
+export const metadata: Metadata = {
+  robots: { follow: false, index: false },
+  title: "매매 복기"
+};
 
 export default async function TradeJournalPage() {
   const user = await getCurrentUser();

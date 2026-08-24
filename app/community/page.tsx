@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot, SideAdRails } from "../_components/AdSlot";
 import { SiteHeader } from "../_components/SiteHeader";
 import { requireCurrentUser } from "../auth/session";
 import { CommunityInfiniteFeed } from "./CommunityInfiniteFeed";
 import styles from "./page.module.scss";
+
+export const metadata: Metadata = {
+  robots: { follow: false, index: false },
+  title: "커뮤니티"
+};
 
 export default async function CommunityPage() {
   const user = await requireCurrentUser("/community");

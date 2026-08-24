@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "../terms/page.module.scss";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/privacy" },
+  description: "DATE가 수집하는 개인정보와 처리 방식입니다.",
+  openGraph: { description: "DATE가 수집하는 개인정보와 처리 방식입니다.", title: "개인정보처리방침", url: "/privacy" },
+  title: "개인정보처리방침"
+};
 
 export default function PrivacyPage() {
   return (

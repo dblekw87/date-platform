@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { SiteHeader } from "../_components/SiteHeader";
 import { fetchBackendJson } from "../_lib/backend";
 import { requireCurrentUser } from "../auth/session";
@@ -12,6 +13,11 @@ type BackendMe = {
     nickname?: string | null;
     public_memo?: string | null;
   } | null;
+};
+
+export const metadata: Metadata = {
+  robots: { follow: false, index: false },
+  title: "프로필"
 };
 
 export default async function ProfilePage() {

@@ -289,6 +289,39 @@ function upcomingCalendarItems(items: CalendarEvent[], fromDate: string) {
     .slice(0, 8);
 }
 
+/**
+ * 이 값이 오늘 것인가, 며칠 전 것인가.
+ *
+ * 선물과 BTC는 밤에도 거래돼서 시황 카드 대부분은 실시간입니다. 그런데 10Y 금리는
+ * 미국 정규장에만 갱신되므로, 주말이 끼면 이틀 묵은 값이 방금 값과 **똑같이 생긴
+ * 카드**로 나란히 섭니다. 시각이 적혀 있긴 하지만 읽어야만 알 수 있습니다.
+ *
+ * 기준은 서울 날짜입니다 -- 보는 사람이 한국에 있고, "어제 값이냐"는 물음도 서울
+ * 날짜로 하는 물음입니다.
+ */
+function readingAgeDays(timestamp?: string) {
+  if (!timestamp) return 0;
+
+  const date = new Date(timestamp);
+
+  if (Number.isNaN(date.getTime())) return 0;
+
+  const day = new Intl.DateTimeFormat("sv-SE", {
+    day: "2-digit", month: "2-digit", timeZone: "Asia/Seoul", year: "numeric"
+  }).format(date);
+  const gap = Math.round(
+    (Date.parse(`${todaySeoulDate()}T00:00:00Z`) - Date.parse(`${day}T00:00:00Z`)) / 86_400_000
+  );
+
+  return gap > 0 ? gap : 0;
+}
+
+function readingAgeLabel(days: number) {
+  if (days <= 0) return null;
+
+  return days === 1 ? "어제 값" : `${days}일 전 값`;
+}
+
 function formatDateTimeMinute(value?: string) {
   if (!value) return "확인 대기";
 
@@ -1199,7 +1232,12 @@ export function MarketBoard({
                     material rather than a reading, and its length varied enough
                     to leave neighbouring cards misaligned. Source and time still
                     say where the number came from. */}
-                <em>{displaySource(item.source)} · {formatDateTimeMinute(item.timestamp)}</em>
+                <em>
+                  {displaySource(item.source)} · {formatDateTimeMinute(item.timestamp)}
+                  {readingAgeLabel(readingAgeDays(item.timestamp)) ? (
+                    <span className={styles.marketStale}>{readingAgeLabel(readingAgeDays(item.timestamp))}</span>
+                  ) : null}
+                </em>
               </article>
             ))}
           </div>

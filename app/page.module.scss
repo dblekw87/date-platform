@@ -2852,6 +2852,23 @@
   color: #1261c4;
 }
 
+/*
+ * 오늘 값이 아니라는 표시. 시각만으로는 눈에 안 들어와서, 며칠 전인지를 말로
+ * 적고 색을 줍니다. 값 자체는 지우지 않습니다 -- 마지막에 얼마였는지가 개장 전
+ * 기준점으로 쓰입니다.
+ */
+.macroGrid .marketStale {
+  display: inline-block;
+  margin-left: 6px;
+  border-radius: 3px;
+  background: #f3e3c8;
+  padding: 1px 5px;
+  color: #7a5a1e;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .marketTrendIcon {
   width: 12px;
   height: 12px;

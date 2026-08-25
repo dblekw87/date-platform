@@ -41,6 +41,38 @@ function gapLabel(leadGap: number) {
   return `1등주보다 ${leadGap.toFixed(1)}%p 뒤`;
 }
 
+/**
+ * 테마 자체가 움직였는가.
+ *
+ * 아래 목록은 오른 종목만 걸러 놓은 것이라, 그것만 보면 어떤 테마든 움직인 것처럼
+ * 읽힙니다. 중앙값은 하락한 멤버까지 세므로 "한 종목만 갔다"를 드러냅니다 —
+ * SI(시스템통합)에서 비트플래닛 혼자 +30%였던 날 중앙값은 +0.79%였습니다.
+ *
+ * 거르지는 않습니다. 270,638 종목-날 실측에서 거의 안 오른 멤버도 익일 시가 갭이
+ * +0.210%p(대조군 +0.089%p)라 빼야 할 근거가 없습니다. 말해 줄 근거만 있습니다.
+ */
+function ThemeMoveNote({ breadth, move }: { breadth?: number | null; move?: number | null }) {
+  if (move === null || move === undefined) return null;
+
+  /*
+   * 상승 red · 하락 blue · 보합 gray. 여기서 "보합"은 0이 아니라 **1% 미만**입니다 —
+   * 이 값이 답하는 질문은 "테마가 움직였나"이고, +0.59%는 안 움직인 것입니다.
+   * 그것까지 빨강으로 칠하면 카드가 또 오른 것처럼 읽힙니다.
+   *
+   * 마이너스는 회색이 아니라 파랑입니다. 2026-08-25 2차전지가 중앙값 -0.28%인데
+   * 나노팀·이노메트리는 20%씩 갔습니다. 테마가 내렸다는 건 안 움직인 것과 다른
+   * 사실이고, 그 차이가 이 값을 넣은 이유입니다.
+   */
+  const tone = move < 0 ? "down" : move < 1 ? "flat" : "up";
+
+  return (
+    <em className={styles.pairThemeMove} data-tone={tone}>
+      테마 중앙값 {formatChangeRate(move)}
+      {breadth ? ` · ${breadth}종목` : ""}
+    </em>
+  );
+}
+
 function PairCandidateRow({ candidate }: { candidate: PairCandidateDto }) {
   return (
     <li>
@@ -68,6 +100,7 @@ function PairTradeRow({ pair }: { pair: PairTradeDto }) {
       <div className={styles.pairTradeDetail}>
         <p>
           1등주 <b>{pair.leader.name}</b> 거래대금 {pair.leader.turnover} · 함께 오른 {pair.candidates.length}종목
+          <ThemeMoveNote breadth={pair.themeBreadth} move={pair.themeMove} />
         </p>
         <ol>
           {pair.candidates.map((candidate) => (

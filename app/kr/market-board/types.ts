@@ -521,6 +521,19 @@ export type PairCandidateDto = {
 export type PairTradeDto = {
   id: string;
   candidates: PairCandidateDto[];
+  /**
+   * 테마 자체가 얼마나 움직였는지 — 견적이 있는 멤버 전체의 중앙값이며 하락한
+   * 멤버도 셉니다. 카드에 보이는 목록은 오른 종목만 걸러 놓은 것이라, 그것만으로는
+   * 테마가 움직였는지 한 종목이 움직였는지 구분되지 않습니다.
+   *
+   * SI(시스템통합)가 이 값이 필요한 이유입니다 — 비트플래닛 한 종목이 +30%,
+   * 나머지는 +0.5~1%. 중앙값 +0.79%가 그 사실을 한 줄로 말합니다.
+   *
+   * null이면 셀 멤버가 없었다는 뜻이고, 화면은 아무 말도 하지 않습니다.
+   */
+  themeMove?: number | null;
+  /** 중앙값을 낸 표본 수. 몇 종목을 보고 한 말인지 없으면 읽을 수 없습니다. */
+  themeBreadth?: number | null;
   leader: {
     changeRateValue: number;
     name: string;

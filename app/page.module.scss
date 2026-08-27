@@ -3775,6 +3775,70 @@
 // Selectors here carry the extra `ol` for the same reason the caution text does:
 // `.themeSection li b` paints slate #526077, scores the same (0,1,2), and is
 // declared further down the file, so it won on order and the badge read grey.
+/*
+ * 실측으로 갈린 두 조건. 프리마켓 상승 폭이 50~150%이고 첫 5분봉이 양봉인 자리.
+ *
+ * 조건이 맞는 줄만 테두리로 세웁니다. 색만 바꾸면 흑백에서 사라지고, 전부 칠하면
+ * 아무것도 강조되지 않습니다.
+ */
+.premarketStrip .openSignal {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-left: 6px;
+}
+
+.premarketStrip .openSignal b,
+.premarketStrip .openSignal i {
+  border-radius: 3px;
+  background: #eef1f5;
+  padding: 1px 5px;
+  color: #6b7280;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+// 값이 있는 구간에 들어온 상승 폭.
+.premarketStrip .openSignal b[data-band="true"] {
+  background: #e8f0fe;
+  color: #1f4fa8;
+}
+
+.premarketStrip .openSignal i[data-bar="green"] {
+  background: #fdeaea;
+  color: #b42318;
+}
+
+.premarketStrip .openSignal i[data-bar="red"] {
+  background: #e8effb;
+  color: #1f4fa8;
+}
+
+// 아직 모르는 것은 흐리게. 아니라고 말하는 것과 다릅니다.
+.premarketStrip .openSignal i[data-bar="before"],
+.premarketStrip .openSignal i[data-bar="forming"] {
+  color: #9ca3af;
+}
+
+.premarketStrip .openSignal[data-hit="true"] {
+  border-radius: 4px;
+  outline: 2px solid #111827;
+  outline-offset: 1px;
+}
+
+.premarketStrip .openSignalCount {
+  margin-left: 6px;
+  border-radius: 3px;
+  background: #111827;
+  padding: 1px 6px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .premarketStrip ol li b {
   flex: 0 0 auto;
   min-width: 62px;

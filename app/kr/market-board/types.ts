@@ -491,6 +491,22 @@ export type PremarketMoverDto = {
   changeRate: number;
   /** What the candidate list scored it at before it moved. Null if it dropped off. */
   probability: number | null;
+  /**
+   * 개장까지 프리마켓에서 오른 폭. 정규장에 남아 있는 것이 이 값에 달렸습니다 —
+   * 1,503건 실측에서 50~100%는 개장 30분 뒤 종가 +21.2%였고, 300%↑는 −5.7%였습니다.
+   * 개장 전이면 진행 중인 값이고, 프리마켓 거래가 없었으면 null입니다.
+   */
+  preGain: number | null;
+  /**
+   * 정규장 첫 5분봉의 방향. 같은 실측에서 프리 150~300% 구간의 30분 종가가
+   * 양봉이면 +3.7%(승률 56%), 음봉이면 −9.8%(33%)로 갈렸습니다.
+   *
+   * `forming`은 아직 5분이 안 지난 것이고 `before`는 개장 전입니다. 둘을 `red`와
+   * 같이 두면 화면이 "아직 모른다"와 "아니다"를 구분하지 못합니다.
+   */
+  openBarState: "before" | "forming" | "green" | "red" | "unknown";
+  /** 정규장 시가. 실제로 살 수 있었던 첫 가격입니다. */
+  openPrice: number | null;
 };
 
 /** One stock that could follow the leader of its theme. */

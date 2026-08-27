@@ -78,12 +78,59 @@ function SurgeCandidateRow({ candidate }: { candidate: SurgeCandidateDto }) {
  * probability travels with each row so it stays visible that the name was
  * flagged before it moved, not after.
  */
+/**
+ * 실측으로 갈린 두 조건을 한 칸에.
+ *
+ * 2024-08~2026-08 1,503건. 정규장 첫 봉 시가에 사서 30분 뒤 종가, 전부 중앙값입니다.
+ *
+ *   프리 50~100%  +21.2%     프리 150~300%  −3.1%
+ *   프리 100~150% +12.7%     프리 300%↑     −5.7%
+ *
+ * 많이 오를수록 나빠집니다 — 프리마켓에서 다 가버려 정규장에 남은 것이 없습니다.
+ * 그래서 50~150%를 "남아 있는 구간"으로 봅니다.
+ *
+ * 첫 5분봉이 그 다음을 가릅니다. 프리 150~300%에서 양봉이면 30분 종가 +3.7%에
+ * 승률 56%, 음봉이면 −9.8%에 33%였습니다.
+ *
+ * 아직 모르는 것(개장 전·봉 형성 중)과 아닌 것(음봉)을 다른 말로 적습니다. 같이
+ * 비워 두면 읽는 쪽이 둘을 구분할 수 없습니다.
+ */
+function OpenSignal({ mover }: { mover: PremarketMoverDto }) {
+  const pre = mover.preGain === null ? null : mover.preGain * 100;
+  const inBand = pre !== null && pre >= 50 && pre <= 150;
+  const label = {
+    before: "개장 전",
+    forming: "첫 봉 형성 중",
+    green: "첫 5분 양봉",
+    red: "첫 5분 음봉",
+    unknown: ""
+  }[mover.openBarState];
+
+  if (pre === null && !label) return null;
+
+  return (
+    <span className={styles.openSignal} data-hit={inBand && mover.openBarState === "green" ? "true" : undefined}>
+      {pre === null ? null : <b data-band={inBand ? "true" : undefined}>프리 {pre >= 0 ? "+" : ""}{pre.toFixed(0)}%</b>}
+      {label ? <i data-bar={mover.openBarState}>{label}</i> : null}
+    </span>
+  );
+}
+
 function PremarketStrip({ movers }: { movers: PremarketMoverDto[] }) {
   if (movers.length === 0) return null;
 
   return (
     <div className={styles.premarketStrip}>
-      <strong>{movers[0].phaseLabel} 진행 중 · 감시 종목 {movers.length}개 움직임</strong>
+      <strong>
+        {movers[0].phaseLabel} 진행 중 · 감시 종목 {movers.length}개 움직임
+        {(() => {
+          const hits = movers.filter((mover) =>
+            mover.preGain !== null && mover.preGain * 100 >= 50 && mover.preGain * 100 <= 150
+            && mover.openBarState === "green").length;
+
+          return hits === 0 ? null : <mark className={styles.openSignalCount}>조건 {hits}건</mark>;
+        })()}
+      </strong>
       <ol>
         {movers.map((mover) => (
           <li key={mover.id}>
@@ -103,6 +150,7 @@ function PremarketStrip({ movers }: { movers: PremarketMoverDto[] }) {
             {mover.probability === null
               ? null
               : <mark>후보 {(mover.probability * 100).toFixed(1)}%</mark>}
+            <OpenSignal mover={mover} />
           </li>
         ))}
       </ol>

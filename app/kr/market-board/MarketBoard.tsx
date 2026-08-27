@@ -1880,13 +1880,26 @@ export function MarketBoard({
                         </p>
                         <ol className={styles.candidateList}>
                           {group.rows.map((pair) => (
-                            <li className={styles.candidateRow} key={pair.id}>
-                              <span className={styles.candidateName}>{pair.second.name}</span>
-                              <span className={styles.candidateMove}>+{pair.second.changeRateValue.toFixed(2)}%</span>
+                            /*
+                              1등주와 2등주를 같은 크기로 세웁니다.
+
+                              1등주는 근거 줄에 간격·테마와 나란히 12px 회색으로 있었습니다.
+                              그런데 이 매매의 조건은 **1등주가 상한가에 잠겼다**는 것이고,
+                              2등주만 크게 보이면 판단의 절반이 안 보입니다. 2026-08-28에
+                              1등주로 파루 +159.96%가 올라온 적이 있는데 -- 상한가가 30%인데
+                              160%면 신규상장이라는 뜻이고, 조건이 성립하지 않는 자리였습니다.
+                              그 숫자가 눈에 띄는 자리에 있었으면 바로 걸렸을 것입니다.
+
+                              위가 1등주, 아래가 사는 쪽입니다. 읽는 순서가 매매 순서와 같습니다.
+                            */
+                            <li className={styles.candidatePair} key={pair.id}>
+                              <span className={styles.candidateRole}>1등주</span>
+                              <span className={styles.candidateName}>{pair.leader.name}</span>
+                              <span className={styles.candidateMove}>+{pair.leader.changeRateValue.toFixed(2)}%</span>
+                              <span className={styles.candidateRole} data-buy="true">2등주</span>
+                              <span className={styles.candidateName} data-buy="true">{pair.second.name}</span>
+                              <span className={styles.candidateMove} data-buy="true">+{pair.second.changeRateValue.toFixed(2)}%</span>
                               <span className={styles.candidateFacts}>
-                                <span className={styles.candidateLead}>
-                                  1등주 {pair.leader.name} +{pair.leader.changeRateValue.toFixed(2)}%
-                                </span>
                                 <span className={styles.candidateGap}>간격 {pair.leadGap.toFixed(2)}%p</span>
                                 <span className={styles.candidateTheme}>{pair.theme}</span>
                               </span>

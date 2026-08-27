@@ -3573,8 +3573,9 @@
 
 .themeSection .candidateName {
   min-width: 0;
-  color: #111827;
-  font-size: 16px;
+  // 1등주 줄은 조건이고 2등주 줄이 매매입니다. 둘 다 읽히되 무게는 다릅니다.
+  color: #4b5563;
+  font-size: 15px;
   font-weight: 900;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3582,9 +3583,14 @@
 }
 
 // 등락 색상은 국내 관행을 따릅니다 -- 상승 red.
+.themeSection .candidateName[data-buy="true"] {
+  color: #111827;
+  font-size: 16px;
+}
+
 .themeSection .candidateMove {
-  color: #da0000;
-  font-size: 17px;
+  color: #e06666;
+  font-size: 16px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -3597,6 +3603,47 @@
  * 라벨만 남은 줄과 숫자만 남은 줄이 생깁니다. 토막마다 nowrap을 걸고 줄바꿈은
  * 토막 사이에서만 일어나게 합니다.
  */
+/*
+ * 짝꿍 한 쌍. 1등주 위, 사는 쪽 아래.
+ *
+ * 한 줄짜리 `.candidateRow`였고 1등주는 아래 근거 줄에 12px 회색으로 붙어 있었습니다.
+ * 이 매매의 조건 자체가 1등주가 상한가에 잠겼다는 것이라, 그것을 작게 두면 조건이
+ * 성립하는지를 눈으로 확인할 수 없습니다.
+ *
+ * 세 칸입니다 -- 역할, 이름, 등락률. 두 줄이 같은 격자를 쓰므로 이름과 숫자가
+ * 세로로 맞아떨어지고, 두 등락률의 차이가 곧 간격으로 읽힙니다.
+ */
+.themeSection .candidatePair {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  border-left: 3px solid #e5e7eb;
+  padding-left: 10px;
+  gap: 2px 8px;
+  align-items: baseline;
+}
+
+/* 어느 쪽이 사는 쪽인지 한 글자로 말합니다. 색으로만 구분하면 흑백으로 인쇄하거나
+   색을 구별하지 못하는 눈에는 사라집니다. */
+.themeSection .candidateRole {
+  border-radius: 3px;
+  background: #eef1f5;
+  padding: 1px 5px;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.themeSection .candidateRole[data-buy="true"] {
+  background: #111827;
+  color: #ffffff;
+}
+
+.themeSection .candidateMove[data-buy="true"] {
+  color: #da0000;
+  font-size: 17px;
+}
+
 .themeSection .candidateFacts {
   display: flex;
   grid-column: 1 / -1;

@@ -3694,6 +3694,30 @@
   text-overflow: ellipsis;
 }
 
+// 테마 자체의 초과등락. 테마명 바로 뒤에 붙어 그 이름이 오늘 실제로 오른 것인지
+// 말해줍니다 -- 한 종목이 여러 테마 카드에 동시에 뜰 때 어느 쪽이 진짜인지 가르는
+// 숫자라, 테마명이 말줄임표로 잘려도 이것은 남아야 합니다(그래서 shrink 대상 밖).
+.themeSection .candidateThemeMove {
+  flex: none;
+  margin-left: 5px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+// 등락 색상은 국내 관행을 따릅니다 -- 상승 red, 하락 blue, 보합 gray.
+.themeSection .candidateThemeMove[data-change="up"] {
+  color: #da0000;
+}
+
+.themeSection .candidateThemeMove[data-change="down"] {
+  color: #0066da;
+}
+
+.themeSection .candidateThemeMove[data-change="flat"] {
+  color: #6b7280;
+}
+
 .measuredNote {
   display: block;
   flex: 0 0 100%;

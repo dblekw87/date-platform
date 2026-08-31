@@ -1902,6 +1902,27 @@ export function MarketBoard({
                               <span className={styles.candidateFacts}>
                                 <span className={styles.candidateGap}>간격 {pair.leadGap.toFixed(2)}%p</span>
                                 <span className={styles.candidateTheme}>{pair.theme}</span>
+                                {/*
+                                  테마 자체가 얼마나 앞섰는가.
+
+                                  짝은 공유 테마가 하나라도 있으면 서므로 한 종목이 여러 카드의
+                                  1등주로 동시에 나옵니다. 2026-08-31 사토시홀딩스가 드론과
+                                  건강기능식품 두 카드에 5분 간격으로 올라왔는데, 편입이 넷이라
+                                  틀린 카드는 없지만 +30%로 민 힘은 하나였습니다. 이 숫자 없이는
+                                  화면만 보고 어느 쪽이 진짜인지 가릴 수 없었습니다.
+
+                                  회원 수를 붙이는 것은 셋짜리 평균과 마흔짜리 평균을 같은
+                                  무게로 읽으면 안 되기 때문입니다.
+                                */}
+                                {pair.themeMove === null ? null : (
+                                  <span
+                                    className={styles.candidateThemeMove}
+                                    data-change={pair.themeMove > 0 ? "up" : pair.themeMove < 0 ? "down" : "flat"}
+                                  >
+                                    테마 {pair.themeMove > 0 ? "+" : ""}{pair.themeMove.toFixed(2)}%p
+                                    {pair.themeMembers === null ? "" : ` · ${pair.themeMembers}종목`}
+                                  </span>
+                                )}
                               </span>
                             </li>
                           ))}

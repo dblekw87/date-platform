@@ -157,7 +157,7 @@ const maintenancePage = `<!doctype html>
  * 끄려면 이 값을 false로 바꿔 커밋하면 됩니다. 배포를 기다릴 수 없는 상황이라면
  * MAINTENANCE_MODE=false 를 넣어 즉시 눌러 끌 수 있습니다.
  */
-const maintenanceMode = true;
+const maintenanceMode = false;
 
 function maintenanceOn() {
   // 운영만입니다. localhost와 프리뷰 배포는 이 화면을 보지 않습니다 -- 점검 중에도

@@ -3778,7 +3778,12 @@
 
 .premarketStrip ol {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  // 300px이었습니다. 한 행은 배지·티커·종목명·고가/현재·후보·프리·개장까지
+  // 일곱 조각이고 전부 nowrap이라, 최소 너비가 종목명을 빼고도 400px을 넘습니다.
+  // 칸이 그보다 좁으면 자식이 줄어들 수 없어 칸 밖으로 흘러나가고, 마지막 열은
+  // 테두리에서 잘립니다 -- 2026-09-01에 "개장 전"이 "개자 저"로 잘려 보였습니다.
+  // li의 min-width: 0은 li 자신만 줄일 뿐 nowrap 자식을 줄이지 못합니다.
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 8px 24px;
   margin: 0;
   padding: 0;
@@ -3787,9 +3792,21 @@
 
 .premarketStrip ol li {
   display: flex;
+  // 그래도 남는 폭이 모자라면 잘리는 대신 접힙니다. 여기 조각은 전부 값이라
+  // 말줄임표로 버릴 것이 없습니다 -- 종목명만 예외로 아래에서 줄입니다.
+  flex-wrap: wrap;
   min-width: 0;
-  gap: 8px;
+  gap: 4px 8px;
   align-items: center;
+}
+
+// 종목명만 길이가 예측 불가라 여기만 줄어들게 두고 넘치면 끊습니다. 숫자 조각을
+// 밀어내는 것은 늘 이쪽입니다.
+.premarketStrip ol li em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 // Darker than the board's #da0000 rise colour, and only here. White on full

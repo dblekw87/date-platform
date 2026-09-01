@@ -1914,12 +1914,14 @@ export function MarketBoard({
                                   회원 수를 붙이는 것은 셋짜리 평균과 마흔짜리 평균을 같은
                                   무게로 읽으면 안 되기 때문입니다.
                                 */}
-                                {pair.themeMove === null ? null : (
+                                {pair.themeMembers === 0 ? (
+                                  <span className={styles.candidateThemeMove} data-change="flat">나머지 없음</span>
+                                ) : pair.themeMove === null ? null : (
                                   <span
                                     className={styles.candidateThemeMove}
                                     data-change={pair.themeMove > 0 ? "up" : pair.themeMove < 0 ? "down" : "flat"}
                                   >
-                                    테마 {pair.themeMove > 0 ? "+" : ""}{pair.themeMove.toFixed(2)}%p
+                                    나머지 {pair.themeMove > 0 ? "+" : ""}{pair.themeMove.toFixed(2)}%p
                                     {pair.themeMembers === null ? "" : ` · ${pair.themeMembers}종목`}
                                   </span>
                                 )}

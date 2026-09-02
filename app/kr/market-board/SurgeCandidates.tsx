@@ -141,16 +141,22 @@ function PremarketStrip({ movers }: { movers: PremarketMoverDto[] }) {
                 since it was scored. Printing STKH twice says nothing. */}
             {mover.name === mover.symbol ? null : <em>{mover.name}</em>}
             <i />
-            {/* Both, because they are usually not the same story. STKH touched
-                +185% and was back to +21% by the time this rendered; the peak
-                alone reads as a position anybody could still have. */}
-            <small>
-              고가 {formatPrice(mover.high)} · 현재 {mover.changeRate >= 0 ? "+" : ""}{(mover.changeRate * 100).toFixed(0)}%
-            </small>
-            {mover.probability === null
-              ? null
-              : <mark>후보 {(mover.probability * 100).toFixed(1)}%</mark>}
-            <OpenSignal mover={mover} />
+            {/* 값 조각을 한 상자에 묶습니다. 묶지 않으면 이름 길이가 카드마다 다른
+                자리에서 줄을 넘겨, 어떤 카드는 고가가 1행 오른쪽에 붙고 어떤 카드는
+                2행 왼쪽에서 시작합니다 -- 열이 맞지 않는 원인이 그것입니다. 이제
+                이름이 아무리 길어도 값은 언제나 둘째 줄 같은 자리에서 시작합니다. */}
+            <div className={styles.premarketFacts}>
+              {/* Both, because they are usually not the same story. STKH touched
+                  +185% and was back to +21% by the time this rendered; the peak
+                  alone reads as a position anybody could still have. */}
+              <small>
+                고가 {formatPrice(mover.high)} · 현재 {mover.changeRate >= 0 ? "+" : ""}{(mover.changeRate * 100).toFixed(0)}%
+              </small>
+              {mover.probability === null
+                ? null
+                : <mark>후보 {(mover.probability * 100).toFixed(1)}%</mark>}
+              <OpenSignal mover={mover} />
+            </div>
           </li>
         ))}
       </ol>

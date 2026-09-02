@@ -1856,9 +1856,14 @@ export function MarketBoard({
                         <p className={styles.candidateGrade}>
                           <span className={styles.candidateGradeName}>{group.tier}</span>
                           {group.rows[0]?.measured ? (
+                            /* 기준을 등급 줄 자체에 답니다. 아래 주의문에도 적혀 있지만
+                               등급만 훑고 지나가는 사람은 그 문단을 안 읽고, 그러면 지금
+                               장중에 들어가도 이 숫자가 나온다고 읽힙니다. 실제로는
+                               장중 진입은 이 값과 무관합니다 — 아래 문단 참고. */
                             <span className={styles.candidateGradeScore}>
-                              과거 {group.rows[0].measured.samples.toLocaleString("ko-KR")}건 · 익일 시가까지
-                              시장 평균보다 {group.rows[0].measured.excessMean >= 0 ? "+" : ""}
+                              과거 {group.rows[0].measured.samples.toLocaleString("ko-KR")}건 ·
+                              종가 매수 → 익일 시가 매도 · 시장 평균보다
+                              {group.rows[0].measured.excessMean >= 0 ? " +" : " "}
                               {group.rows[0].measured.excessMean.toFixed(2)}%p ·
                               상회 {Math.round(group.rows[0].measured.beatRate * 100)}%
                             </span>
@@ -1938,12 +1943,20 @@ export function MarketBoard({
                           1등주가 상한가에서 풀리거나 2등주가 더 가면 목록이 바뀝니다.{" "}
                         </>
                       ) : null}
-                      성적은 종가에 사서 익일 시가에 판 값입니다. 실제 짝꿍매매는 장중에 들어가 장중에
-                      나오니, 같은 자리를 재긴 했어도 보유구간은 다릅니다. 분봉이 쌓이면 그쪽으로 다시
-                      잽니다. 1등주가 <b>실제로 잠기고 간격이 2%p 이내</b>일 때만 크게 좋았습니다
-                      (612건 +5.55%p·상회 76%). 같은 상한가라도 간격 2~5%p는 +0.16%p로 사실상 0입니다.
-                      1등주 높이로만 보면 20~25% −0.10%p, 25~27% +0.40%p, 27~29% +0.79%p로 오르다가
-                      잠기는 순간 +2.58%p로 뜁니다. 문턱을 27%에 둔 이유입니다.
+                      성적은 <b>종가에 사서 익일 시가에 판</b> 값입니다. 1등주가 실제로 잠기고 간격이
+                      2%p 이내일 때만 크게 좋았습니다(612건 +5.55%p·상회 76%). 같은 상한가라도 간격
+                      2~5%p는 +0.16%p로 사실상 0입니다. 1등주 높이로만 보면 20~25% −0.10%p,
+                      25~27% +0.40%p, 27~29% +0.79%p로 오르다가 잠기는 순간 +2.58%p로 뜁니다.
+                      문턱을 27%에 둔 이유입니다.{" "}
+                      {/* 2026-09-02 실측. 분봉이 쌓이면 장중 구간으로 다시 재겠다고 이 자리에
+                          적어 두었던 약속의 답입니다. 답이 부정이라 지우지 않고 남깁니다 --
+                          등급 숫자만 있고 이 문단이 없으면, 지금 들어가도 저 숫자가 나온다고
+                          읽힙니다. */}
+                      <b>장중에 들어가 장중에 나오는 구간은 성립하지 않았습니다.</b> 12개 장 149건에서
+                      진입 뒤 마감까지 평균 −2.41%·상회 30%였고, 같은 순간에 오르던 다른 급등주
+                      (3,668건 −2.19%)와 구별되지 않았습니다. 위 등급은 장중 진입의 근거가 아닙니다.
+                      최고점이 평균 +3.6%로 있기는 하지만 중앙 14분 만에 지나가고, 최대 되돌림 중앙이
+                      −4.1%라 −2% 손절선에 70%가 걸립니다.
                       <NightTriggerNote candidates={limitPairs} items={marketTrendItems} />
                     </p>
                   </div>

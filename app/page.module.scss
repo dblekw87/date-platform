@@ -5324,16 +5324,25 @@ a.dayLeaderReason:hover {
 
   .newsSignalBar,
   .liveDisclosureBar,
+  /*
+   * 네 줄을 2×2로 접습니다.
+   *
+   * 한 줄에 하나씩 쌓여 있었고, 각 줄이 라벨과 값 두 조각뿐이라 오른쪽 절반이
+   * 통째로 비었습니다 -- 390px에서 라벨 90 + 값 30이면 200px이 남습니다. 값을
+   * 오른쪽으로 밀면 폭은 채워지지만 가운데가 비어 짝이 안 맞아 보이고, 두 칸으로
+   * 접으면 폭도 차고 세로도 절반이 됩니다. 넷은 2×2로 나누어떨어집니다.
+   */
   .leaderSignalBar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
-    gap: 8px;
+    gap: 8px 12px;
     margin: 0 0 18px;
   }
 
   .newsSignalBar div,
   .liveDisclosureBar div,
   .leaderSignalBar div {
-    grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
     gap: 10px;
   }
 
@@ -6058,9 +6067,18 @@ a.dayLeaderReason:hover {
     margin-bottom: 14px;
   }
 
+  /*
+   * 칸 수를 칩 수가 정하게 둡니다.
+   *
+   * `repeat(5, ...)`였습니다. 국내는 거래대금·상승률·거래량·ETF·주의로 다섯이지만
+   * 미국에는 `주의`가 없어 넷뿐이고, 다섯째 칸이 그대로 빈 채 남아 ETF 오른쪽에
+   * 흰 여백이 생겼습니다. 필터는 payload에 있는 것만 그리므로(개수 0인 것은
+   * 애초에 빠집니다) 개수가 고정이 아닙니다.
+   */
   .leaderFilterTabs {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     width: 100%;
     overflow: visible;
   }

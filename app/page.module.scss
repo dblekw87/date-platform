@@ -3687,6 +3687,60 @@
   font-weight: 900;
 }
 
+/*
+ * 재료 줄. 이름·등락률 아래 두 칸을 통째로 씁니다.
+ *
+ * 조건이 가격과 거래량뿐이라 목록만 보면 왜 이 종목인지 알 수 없습니다. 그 답이
+ * 기사에 있고, 기사는 제목이 길어 옆 칸에 못 넣습니다.
+ */
+.themeSection .candidateEvidence {
+  display: grid;
+  grid-column: 1 / -1;
+  margin: 3px 0 0;
+  padding: 0;
+  gap: 2px;
+  list-style: none;
+}
+
+.themeSection .candidateEvidence li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-width: 0;
+  gap: 6px;
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.themeSection .candidateEvidence b {
+  color: #8f2d1f;
+  font-variant-numeric: tabular-nums;
+}
+
+// 제목은 길이가 예측 불가라 여기만 줄입니다. 시각은 늘 보여야 합니다 --
+// 기사가 오르기 전인지 뒤인지가 이 매매에서 갈리는 지점입니다.
+.themeSection .candidateEvidence a,
+.themeSection .candidateEvidence span {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.themeSection .candidateEvidence a:hover {
+  text-decoration: underline;
+}
+
+.themeSection .candidateEvidenceEmpty {
+  grid-column: 1 / -1;
+  margin: 3px 0 0;
+  color: #9aa2ae;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 // 테마명만 길어질 수 있으니 여기만 줄어들게 두고 넘치면 말줄임표로 끊습니다.
 .themeSection .candidateTheme {
   min-width: 0;

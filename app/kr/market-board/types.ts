@@ -181,6 +181,16 @@ export type CloseBetCandidateDto = {
   upperShadow: number;
   /** 60일 고점을 몇 % 넘겼는가. */
   breakMargin: number;
+  /**
+   * 진입 전에 나온 기사만. 창은 **당일 15:30까지**입니다 -- 15:00~15:20에 재료를
+   * 보고 종가에 사는 매매라, 그 뒤 기사는 판단에 쓸 수 없었던 것이고 대개 결과
+   * 보도입니다(기사 시점에 이미 20%↑면 초과 +0.00%p). 2026-09-03 신스틸이 그
+   * 예로, 09:16·09:32의 "상한가" 보도가 재료처럼 보였습니다.
+   *
+   * 이른 것부터 최대 셋. 방아쇠는 대개 앞에 있고, 어느 것이 재료인지는 사람이
+   * 고르는 편이 낫습니다.
+   */
+  evidence?: Array<{ at: string; headline: string; url: string | null }>;
   nightTrigger: NightTriggerDto | null;
   sessionDate: string;
   /**

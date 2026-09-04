@@ -2004,6 +2004,30 @@ export function MarketBoard({
                                 <span className={styles.candidateLead}>회전율 {candidate.turnoverRatio}%</span>
                                 <span className={styles.candidateGap}>60일 고점 +{candidate.breakMargin}% 돌파</span>
                               </span>
+                              {/* 재료를 근거로 답니다. 조건은 가격과 거래량뿐이라 목록만
+                                  보면 왜 이 종목인지 알 수 없고, 그 답은 기사에 있습니다.
+                                  15:30까지 나온 것만 -- 그 뒤 기사는 진입 시점에 없었고
+                                  대개 결과 보도입니다. */}
+                              {/* payload가 이 필드보다 오래됐을 수 있습니다 -- 보드는
+                                  스냅샷에서도 그려지고 백엔드가 먼저 재기동되지 않을
+                                  수도 있습니다. 없으면 없는 대로 그립니다. */}
+                              {(candidate.evidence ?? []).length > 0 ? (
+                                <ul className={styles.candidateEvidence}>
+                                  {(candidate.evidence ?? []).map((item) => (
+                                    <li key={`${candidate.id}-${item.at}-${item.headline}`}>
+                                      <b>{item.at}</b>
+                                      {item.url
+                                        ? <a href={item.url} rel="noreferrer" target="_blank">{item.headline}</a>
+                                        : <span>{item.headline}</span>}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                /* 비워 두면 "아직 안 붙었다"로 읽힙니다. 재료가 없는 것도
+                                   판단 재료입니다 -- 실측에서 뉴스 없는 쪽이 +1.05%p로
+                                   있는 쪽(+3.38%p)보다 뚜렷이 낮았습니다. */
+                                <p className={styles.candidateEvidenceEmpty}>15:30까지 붙은 기사 없음</p>
+                              )}
                             </li>
                           ))}
                         </ol>

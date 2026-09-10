@@ -45,7 +45,7 @@ export default async function Image() {
           투자 판단 전 확인 흐름
         </div>
         <div style={{ color: "#9aa3ad", fontSize: 30, marginTop: 20 }}>
-          시황 · 뉴스 · 일정 · 속보와 공시 · 수급과 차트 · 매매참고
+          시황 · 매매참고 · 뉴스 · 일정 · 속보와 공시 · 수급과 차트
         </div>
         <div
           style={{

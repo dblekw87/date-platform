@@ -63,7 +63,7 @@ export default async function LoginPage({
         ) : null}
         <div className={styles.providers}>
           {providers.map((provider) => (
-            <Link data-provider={provider.key} href={`/auth/${provider.key}?next=${encodeURIComponent(nextPath)}`} key={provider.key}>
+            <Link data-provider={provider.key} href={`/auth/${provider.key}?next=${encodeURIComponent(nextPath)}`} key={provider.key} prefetch={false}>
               <ProviderMark provider={provider.key} />
               <span>{provider.label}</span>
             </Link>
@@ -72,7 +72,6 @@ export default async function LoginPage({
         <p className={styles.notice}>
           계속 진행하면 <Link href="/terms">이용약관</Link>과 <Link href="/privacy">개인정보처리방침</Link>에 동의한 것으로 봅니다.
         </p>
-        <footer>OAuth 앱 키를 연결하면 실제 SNS 로그인으로 전환됩니다.</footer>
       </section>
     </main>
   );

@@ -5765,7 +5765,9 @@ a.dayLeaderReason:hover {
   border: 0;
   border-bottom: 1px solid #000000;
   border-radius: 0;
-  color: #b1bbc8;
+  // #b1bbc8이었습니다 -- 흰 바탕에 1.8:1이라 쉬는 탭 이름이 읽히지 않았습니다
+  // (2026-09-16 화면 점검, 저대비 스윕). 쉬는 탭은 조용해야 하지만 안 보여선 안 됩니다.
+  color: #6f7a88;
   // Six labels share the strip now rather than five, so each gets less of it.
   font-size: 18px;
   font-weight: 800;
@@ -5801,10 +5803,16 @@ a.dayLeaderReason:hover {
   }
 }
 
-@media (max-width: 360px) {
+/*
+ * 좁은 화면에서 탭은 가로로 밀어서 봅니다. 그런데 360px에서 84px짜리 넷이 폭을 딱 채워
+ * 5·6번 탭(속보·공시, 수급·차트)이 있다는 표시가 하나도 없었습니다 -- 스크롤바도 숨겼으니
+ * 넷이 전부인 줄 압니다(2026-09-16 화면 점검). 다섯 번째가 조금 걸쳐 보이게 폭을 비율로
+ * 둡니다: 360px에서 23%면 4.3개가 보여 잘린 탭이 "더 있다"를 말합니다.
+ */
+@media (max-width: 600px) {
   .tabs a {
-    min-width: 84px;
-    padding-inline: 14px;
+    min-width: 23%;
+    padding-inline: 12px;
   }
 }
 

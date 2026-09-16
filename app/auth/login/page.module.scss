@@ -195,15 +195,6 @@
   font-weight: 900;
 }
 
-.card footer {
-  border-top: 1px solid rgba(17, 17, 17, 0.12);
-  color: #9a8f85;
-  padding-top: 14px;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-}
-
 @media (max-width: 860px) {
   .page {
     grid-template-columns: minmax(0, 1fr);
@@ -211,6 +202,21 @@
 
   .visualPanel {
     min-height: 280px;
+  }
+
+  // 280px 높이에선 글이 그림 위쪽 밝은 벽에 걸립니다 -- 흰 제목이 베이지 위에 1.2:1로
+  // 읽히지 않았습니다(2026-09-16 화면 점검). 좁은 화면에선 어둠을 위까지 올리고
+  // 글자를 줄입니다.
+  .roomVisual::after {
+    background: linear-gradient(180deg, rgba(16, 18, 19, 0.28) 0%, rgba(16, 18, 19, 0.62) 55%, rgba(16, 18, 19, 0.86) 100%);
+  }
+
+  .visualCopy h2 {
+    font-size: 24px;
+  }
+
+  .visualCopy p {
+    font-size: 14px;
   }
 
   .card {

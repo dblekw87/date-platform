@@ -84,7 +84,18 @@ async function readSnapshotBoard(): Promise<MarketBoardData | null> {
      * own CDN, so paying for a real fetch every render is cheap next to
      * serving stale board data indefinitely.
      */
-    const response = await fetch(snapshotUrl, { cache: "no-store" });
+    /*
+     * A cache-busting query param on top of no-store. no-store only stops
+     * Next.js from caching the response; raw.githubusercontent.com sits
+     * behind its own CDN (Fastly), which caches per URL for a few minutes
+     * regardless - and the region Vercel's function calls out from can be
+     * a few minutes further behind than a direct request from elsewhere,
+     * which is exactly what made this look fixed everywhere except
+     * production right after the no-store change. A unique URL each call
+     * is a cache miss at that layer too.
+     */
+    const bustCacheUrl = `${snapshotUrl}${snapshotUrl.includes("?") ? "&" : "?"}_=${Date.now()}`;
+    const response = await fetch(bustCacheUrl, { cache: "no-store" });
 
     if (!response.ok) return null;
 

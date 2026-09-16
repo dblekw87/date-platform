@@ -73,9 +73,18 @@ async function readSnapshotBoard(): Promise<MarketBoardData | null> {
   if (!snapshotUrl) return null;
 
   try {
-    // Revalidated rather than no-store: the publisher runs on a timer, so asking
-    // GitHub on every render would spend requests to be told the same thing.
-    const response = await fetch(snapshotUrl, { next: { revalidate: 120 } });
+    /*
+     * no-store, not revalidate. It was next.revalidate=120 on the reasoning
+     * that a timed publisher makes re-asking GitHub every render wasteful -
+     * true in principle, but on 2026-09-16 production kept serving a fetch
+     * response from *before* a backend text-encoding fix for 20+ minutes,
+     * past the window many times over and through a fresh deployment. The
+     * data cache entry for this URL was not reliably invalidating in
+     * practice. raw.githubusercontent.com is a small static file behind its
+     * own CDN, so paying for a real fetch every render is cheap next to
+     * serving stale board data indefinitely.
+     */
+    const response = await fetch(snapshotUrl, { cache: "no-store" });
 
     if (!response.ok) return null;
 

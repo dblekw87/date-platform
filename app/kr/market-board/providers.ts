@@ -1,11 +1,22 @@
 import type { MarketBoardData } from "./types";
 
 const backendUrl = process.env.DATE_BACKEND_URL ?? "http://localhost:4010";
-// Defaulted rather than required. The snapshot repository is public and its URL
-// is fixed, so making production depend on an environment variable only creates
-// a way for the deploy to be silently dataless. The variable still wins when set.
+/*
+ * Defaulted rather than required. The snapshot repository is public and its URL
+ * is fixed, so making production depend on an environment variable only creates
+ * a way for the deploy to be silently dataless. The variable still wins when set.
+ *
+ * jsdelivr's GitHub mirror, not raw.githubusercontent.com directly. On
+ * 2026-09-16, one Vercel edge region kept serving a raw.githubusercontent.com
+ * response from hours before a content fix, past every no-store and
+ * cache-busting attempt on this end - that CDN has no public way to force an
+ * invalidation, only its own unpredictable per-region TTL. jsdelivr serves the
+ * same file and does have a purge API; the backend calls it right after every
+ * publish (snapshot.mjs), so whichever edge answers next has already been told
+ * to drop what it had.
+ */
 const snapshotUrl = process.env.DATE_BOARD_SNAPSHOT_URL
-  ?? "https://raw.githubusercontent.com/dblekw87/date-board-snapshot/main/board.json";
+  ?? "https://cdn.jsdelivr.net/gh/dblekw87/date-board-snapshot@main/board.json";
 
 // Rendered when the backend is unreachable. It carries the board's fixed
 // structure only — tabs, ad slots, and a provider status explaining the gap —
@@ -76,26 +87,15 @@ async function readSnapshotBoard(): Promise<MarketBoardData | null> {
     /*
      * no-store, not revalidate. It was next.revalidate=120 on the reasoning
      * that a timed publisher makes re-asking GitHub every render wasteful -
-     * true in principle, but on 2026-09-16 production kept serving a fetch
-     * response from *before* a backend text-encoding fix for 20+ minutes,
-     * past the window many times over and through a fresh deployment. The
-     * data cache entry for this URL was not reliably invalidating in
-     * practice. raw.githubusercontent.com is a small static file behind its
-     * own CDN, so paying for a real fetch every render is cheap next to
-     * serving stale board data indefinitely.
+     * true in principle, and still the plan: jsdelivr's own CDN cache does
+     * that job now, kept in sync by the backend's purge call after every
+     * publish (snapshot.mjs), so this fetch stays cheap without a fixed
+     * revalidate window this app has no way to force early when it matters.
+     * A cache-busting query param would work against that - it would ask
+     * for a URL the purge never touches, paying for a fresh origin read on
+     * every single render instead of one shared, correctly-invalidated copy.
      */
-    /*
-     * A cache-busting query param on top of no-store. no-store only stops
-     * Next.js from caching the response; raw.githubusercontent.com sits
-     * behind its own CDN (Fastly), which caches per URL for a few minutes
-     * regardless - and the region Vercel's function calls out from can be
-     * a few minutes further behind than a direct request from elsewhere,
-     * which is exactly what made this look fixed everywhere except
-     * production right after the no-store change. A unique URL each call
-     * is a cache miss at that layer too.
-     */
-    const bustCacheUrl = `${snapshotUrl}${snapshotUrl.includes("?") ? "&" : "?"}_=${Date.now()}`;
-    const response = await fetch(bustCacheUrl, { cache: "no-store" });
+    const response = await fetch(snapshotUrl, { cache: "no-store" });
 
     if (!response.ok) return null;
 

@@ -25,7 +25,9 @@ export default async function LoginPage({
   const nextParam = Array.isArray(params?.next) ? params?.next[0] : params?.next;
   const errorParam = Array.isArray(params?.error) ? params?.error[0] : params?.error;
   const detailParam = Array.isArray(params?.detail) ? params?.detail[0] : params?.detail;
-  const nextPath = nextParam?.startsWith("/") ? nextParam : "/community";
+  // 로그인 뒤 갈 곳. 막힌 페이지에서 왔으면 거기로(next=), 그냥 로그인 버튼을 눌렀으면
+  // 시장 보드로. 커뮤니티가 기본이었는데, 이 서비스의 첫 화면은 보드입니다.
+  const nextPath = nextParam?.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
   const errorMessage = errorParam?.startsWith("missing_")
     ? "로그인 API 키 설정이 필요합니다."
     : errorParam === "kakao_token_failed"

@@ -4267,6 +4267,38 @@
   background: #d5d9e2;
 }
 
+/*
+ * 순위 행은 **항상 한 줄**입니다.
+ *
+ * 이름과 테마에 아무 제약이 없어서 긴 것이 오면 그 행만 높아졌습니다 -- 2026-09-29
+ * 폰 화면에서 대부분 26px인데 "Warner Bros. Discovery, Inc."만 33px이었습니다.
+ * 한 종목 때문에 목록의 리듬이 깨지면 스무 줄을 훑는 눈이 거기서 걸립니다.
+ *
+ * 이름이 먼저 자리를 갖고(테마보다 중요합니다), 테마는 남는 만큼만 씁니다.
+ * 둘 다 넘치면 말줄임표로 자릅니다 -- 순위 행에서 잘린 이름은 펼치면 전부 보이고,
+ * 행 높이가 들쑥날쑥한 쪽이 더 비쌉니다.
+ */
+.dayLeader summary span,
+.dayLeader summary small {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dayLeader summary span {
+  flex: 1 1 auto;
+}
+
+.dayLeader summary small {
+  flex: 0 1 auto;
+}
+
+.dayLeader summary b {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .dayLeaderDetail {
   display: grid;
   gap: 8px;
@@ -4678,10 +4710,25 @@ a.dayLeaderReason:hover {
   padding: 12px 14px;
 }
 
+/*
+ * 머리줄은 **항상 두 줄**입니다.
+ *
+ * flex 한 줄이었을 때는 테마 이름 길이에 따라 1등주와 등락률이 첫 줄에 붙기도 하고
+ * 둘째 줄로 떨어지기도 했습니다. 같은 카드 묶음 안에서 어떤 것은 한 줄, 어떤 것은
+ * 두 줄이라 눈이 값을 찾는 자리가 매번 달라졌습니다 -- 2026-09-29 폰 화면에서
+ * "고령화 사회(노인복지)"는 두 줄, "로봇(산업용/협동로봇 등)"은 한 줄이었습니다.
+ *
+ * 격자로 두 줄을 고정하면 테마 이름이 길든 짧든 자리가 같습니다. 첫 줄은 테마와
+ * 간격 배지, 둘째 줄은 1등주와 등락률이고, 오른쪽 끝이 항상 맞습니다. 한 줄로
+ * 우겨넣는 방법도 있었지만 390px에서는 이름을 잘라야 했고, 자른 이름은 읽을 수
+ * 없는 값입니다.
+ */
 .pairTrade summary {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   min-width: 0;
-  gap: 8px;
+  row-gap: 4px;
+  column-gap: 8px;
   align-items: center;
   cursor: pointer;
   list-style: none;
@@ -4699,7 +4746,10 @@ a.dayLeaderReason:hover {
 .pairTrade summary strong {
   width: auto;
   max-width: none;
-  flex: 0 0 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   background: none;
   padding: 0;
   color: #000000;
@@ -4711,7 +4761,7 @@ a.dayLeaderReason:hover {
 // when there is real room left; a theme already followed through reads grey,
 // because it is the same information arriving too late to act on.
 .pairTrade summary em {
-  flex: 0 0 auto;
+  justify-self: end;
   border: 1px solid #d5d9e2;
   color: #707070;
   padding: 1px 6px;
@@ -4727,15 +4777,12 @@ a.dayLeaderReason:hover {
  * 없었습니다. 이제 읽을 수 있는 사실 하나이지 강조할 값이 아닙니다.
  */
 
+/* 한 줄이던 시절 왼쪽과 오른쪽을 밀어내던 선입니다. 두 줄 격자에서는 자리가 없습니다. */
 .pairTrade summary i {
-  height: 1px;
-  min-width: 16px;
-  flex: 1 1 auto;
-  background: #d5d9e2;
+  display: none;
 }
 
 .pairTrade summary span {
-  flex: 0 1 auto;
   overflow: hidden;
   min-width: 0;
   color: #526077;
@@ -4746,7 +4793,7 @@ a.dayLeaderReason:hover {
 }
 
 .pairTrade summary b {
-  flex: 0 0 auto;
+  justify-self: end;
   color: #da0000;
   font-size: 13px;
   font-weight: 900;

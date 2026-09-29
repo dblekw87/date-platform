@@ -4744,6 +4744,9 @@ a.dayLeaderReason:hover {
 // name should be, in the one place the reader looks first. The background has
 // to come off with the padding and the width that shaped the badge.
 .pairTrade summary strong {
+  /* 자리를 명시합니다. 자동 배치에 맡겼더니 둘째 줄 1등주가 칸 오른쪽에 붙어
+     가운데 떠 보였습니다 -- 네 칸이므로 헷갈릴 여지를 없앱니다. */
+  grid-area: 1 / 1;
   width: auto;
   max-width: none;
   min-width: 0;
@@ -4761,6 +4764,7 @@ a.dayLeaderReason:hover {
 // when there is real room left; a theme already followed through reads grey,
 // because it is the same information arriving too late to act on.
 .pairTrade summary em {
+  grid-area: 1 / 2;
   justify-self: end;
   border: 1px solid #d5d9e2;
   color: #707070;
@@ -4783,6 +4787,9 @@ a.dayLeaderReason:hover {
 }
 
 .pairTrade summary span {
+  /* 테마 이름 바로 아래에 붙어야 둘이 한 덩어리로 읽힙니다. */
+  grid-area: 2 / 1;
+  justify-self: start;
   overflow: hidden;
   min-width: 0;
   color: #526077;
@@ -4793,6 +4800,7 @@ a.dayLeaderReason:hover {
 }
 
 .pairTrade summary b {
+  grid-area: 2 / 2;
   justify-self: end;
   color: #da0000;
   font-size: 13px;
@@ -5688,6 +5696,22 @@ a.dayLeaderReason:hover {
   // next line instead - the row already wraps, so there is a line for it.
   .themeSection li small {
     word-break: keep-all;
+  }
+
+  /*
+   * 다만 주도주 순위 행은 예외입니다.
+   *
+   * 바로 위 규칙은 테마 카드의 줄을 위한 것인데 후손 선택자라 순위 행의 테마까지
+   * 같이 잡습니다. 특정도가 같고 뒤에 있어서 `.dayLeader summary small`의 nowrap을
+   * 덮었고, 그래서 이름이 긴 종목만 행이 26px에서 33px로 튀었습니다 -- 2026-09-29
+   * 폰 화면에서 NVIDIA·Kodiak·Palo Alto·Warner Bros·Chipotle 다섯 행이 그랬습니다.
+   *
+   * 순위 행은 스무 줄을 훑는 목록이라 높이가 같아야 합니다. 테마는 그 행에서
+   * 부차적인 값이고, 잘려도 행을 펼치면 전부 보입니다. 테마 카드 쪽 줄바꿈은
+   * 그대로 둡니다 -- 거기는 테마 이름이 주인공입니다.
+   */
+  .dayLeader summary small {
+    white-space: nowrap;
   }
 
   // Both surge lists auto-fill their columns, and both hold a row that cannot

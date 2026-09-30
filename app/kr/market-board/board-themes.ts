@@ -7,6 +7,7 @@
  */
 
 import type { LeadingStock } from "./board-types";
+import { signedPercent } from "./board-format";
 
 /**
  * The theme a row belongs to.
@@ -130,7 +131,20 @@ export function sessionRatePair(stock: LeadingStock) {
   ];
 }
 
+/**
+ * 오늘 등락률 — 문장에서 캐내지 말고 숫자에서.
+ *
+ * 화면은 `intraday` 문장에 박힌 퍼센트를 정규식으로 뽑아 썼는데, 그 정규식은
+ * 부호를 요구합니다. 그래서 보합은 "0.00%"라 매치가 안 되고 "확인"으로 떨어졌고,
+ * 문장 자체가 없는 목록(강세 테마)은 한 줄도 남김없이 "확인"이 됐습니다.
+ *
+ * `changeRateValue`가 그 문장이 서술하던 바로 그 숫자입니다 -- 실측: 오늘 보드의
+ * 주도주·ETF 213행에서 파싱값과 한 건도 어긋나지 않았습니다. 타입이 있는 필드를
+ * 먼저 읽고 문장은 뒤로 미룹니다. leaderTheme이 이미 같은 순서를 씁니다.
+ */
 export function leaderChangeRate(stock: LeadingStock) {
+  if (Number.isFinite(stock.changeRateValue)) return signedPercent(stock.changeRateValue as number);
+
   const match = `${stock.burst} ${stock.intraday}`.match(/[+-]\d+(?:\.\d+)?%/);
 
   return match?.[0] ?? "확인";

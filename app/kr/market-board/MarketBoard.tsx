@@ -89,6 +89,7 @@ export function MarketBoard({
     (sessionThemeStocks?.regular?.length ?? 0) > 0 ? sessionThemeStocks!.regular : liveBoard.krLeadingStocks
   );
   const krAfterThemeLeaders = rankedThemeGroups(sessionThemeStocks?.after ?? []);
+  const limitUpEvening = liveBoard.krLimitUpEvening ?? [];
   const krHaltedStocks = liveBoard.krHaltedStocks ?? [];
   const closeBetCandidates = liveBoard.krCloseBetCandidates ?? [];
   const limitPairs = liveBoard.krLimitPairs ?? [];
@@ -820,6 +821,25 @@ export function MarketBoard({
                           </li>
                         ))}
                       </ol>
+                      {/* 위 목록이 구조적으로 담지 못하는 것. 상한가로 잠긴 종목은
+                          저녁에 체결이 없어 순위에 안 들고, 그래서 그날 가장 궁금한
+                          종목이 화면에서 통째로 사라집니다. 목록에 섞으면 정규장
+                          등락률이 저녁 등락률로 읽히므로 아래에 따로 적습니다. */}
+                      {limitUpEvening.length > 0 ? (
+                        <p className={styles.emptyDisclosure}>
+                          정규장 상한가 {limitUpEvening.length}종목 ·{" "}
+                          {limitUpEvening.map((row) => (
+                            <span key={row.symbol}>
+                              <EnglishText text={row.name} />{" "}
+                              {row.traded
+                                ? `저녁 ${row.after?.toFixed(2)}%`
+                                : "저녁 체결 없음"}{" "}
+                            </span>
+                          ))}
+                          <br />
+                          저녁 체결이 없는 것은 되돌림이 없었다는 뜻이 아니라 그 책에서 거래가 없었다는 뜻입니다.
+                        </p>
+                      ) : null}
                     </div>
                   </article>
                 ) : null}

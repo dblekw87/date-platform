@@ -668,6 +668,26 @@ export type MarketBoardData = {
    * left the regular session with no panel. Grouping still happens here — the
    * two-rising-names rule lives in one place — but the rows come pre-split.
    */
+  /**
+   * 정규장 상한가로 마감한 종목과 그날 저녁 결과.
+   *
+   * 저녁 테마 패널은 NXT 애프터마켓에서 체결된 종목만 담습니다. 상한가로 잠긴
+   * 종목은 파는 사람이 없어 저녁 체결이 안 나고 그래서 그 목록에서 빠지는데,
+   * 하필 그날 가장 궁금한 종목들이 그것들입니다. 목록에 섞지 않고 따로 받습니다 --
+   * 저 패널의 숫자는 저녁 숫자라 정규장 +29.9%가 끼면 저녁에 오른 것으로 읽힙니다.
+   *
+   * `after`가 null인 것은 "버텼다"가 아니라 **저녁 책에서 체결이 없었다**입니다.
+   */
+  krLimitUpEvening?: {
+    after: number | null;
+    gap: number | null;
+    name: string;
+    regular: number;
+    symbol: string;
+    theme?: string;
+    traded: boolean;
+    turnover: string;
+  }[];
   krSessionThemeStocks?: { after: LeadingStockDto[]; regular: LeadingStockDto[] };
   usSurgeCandidates: SurgeCandidateDto[];
   usPremarketMovers: PremarketMoverDto[];

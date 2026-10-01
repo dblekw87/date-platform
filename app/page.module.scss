@@ -5599,10 +5599,29 @@ a.dayLeaderReason:hover {
     gap: 18px;
   }
 
+  /*
+   * 2열을 max-content로 두면 긴 종목명이 폭을 다 먹고 테마 칩이 화면 밖으로
+   * 밀려납니다. 390px에서 "Super Micro Computer, Inc."가 226px을 가져가고
+   * 3열에 32px만 남았는데, 칩은 `width: max-content`라 안 줄어서 84px로 그대로
+   * 터졌습니다(2026-10-01 화면 점검, 수급·차트 탭 #15·#21 등).
+   *
+   * 양보해야 하는 쪽은 이름입니다 -- `.leaderName strong`에 이미
+   * `overflow-wrap: anywhere`가 있어 줄바꿈되지만, 칩은 한 줄짜리 라벨이라
+   * 줄바꿈도 생략도 자연스럽지 않습니다.
+   */
   .leaderRows article {
-    grid-template-columns: 44px minmax(0, max-content) minmax(0, 1fr);
+    grid-template-columns: 44px minmax(96px, 1fr) minmax(0, auto);
     gap: 8px 10px;
     padding: 12px 0 12px 10px;
+  }
+
+  /* 테마 이름이 아주 긴 경우(피지컬 AI/휴머노이드 로봇)에도 이름 열을 0으로
+     만들지 않도록 칩 자신에게도 상한을 둡니다. */
+  .leaderTheme {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .leaderName {

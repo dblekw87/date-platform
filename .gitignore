@@ -16,3 +16,6 @@ data/runtime/
 
 # 개발 서버를 백그라운드로 띄울 때 쓰는 로그. 기계 상태입니다.
 *.log
+
+# 개인 Claude Code 설정(권한 허용 등). 기계마다 다릅니다.
+.claude/settings.local.json

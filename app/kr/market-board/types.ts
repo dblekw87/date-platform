@@ -691,5 +691,21 @@ export type MarketBoardData = {
   krSessionThemeStocks?: { after: LeadingStockDto[]; regular: LeadingStockDto[] };
   usSurgeCandidates: SurgeCandidateDto[];
   usPremarketMovers: PremarketMoverDto[];
+  /**
+   * 직전 미국 정규장에서 많이 오른 보통주(거래대금 약 $20M 이상).
+   *
+   * 화면에는 아직 안 쓰고, 07:30 클라우드 아침 브리핑이 보드 스냅샷에서 읽습니다.
+   * group은 "거래대금 $500M 이상"(최대 5) 또는 "상승률 상위"(최대 10).
+   * turnoverValue는 전날 종가 × 거래량 어림값입니다.
+   */
+  usOvernightGainers?: {
+    changeRateValue: number;
+    group: string;
+    name: string;
+    sector: string;
+    sessionDate: string;
+    symbol: string;
+    turnoverValue: number;
+  }[];
   smallCapScanner: ReactionCandidateDto[];
 };

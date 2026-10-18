@@ -707,5 +707,10 @@ export type MarketBoardData = {
     symbol: string;
     turnoverValue: number;
   }[];
+  /**
+   * 미국 섹터 지도 이미지(시총 상위 500 · 섹터별). 수집기가 정규장 뒤 한 번 그려
+   * 스냅샷 저장소에 올리고, 07:30 아침 브리핑이 텔레그램에 붙입니다. 아직 없으면 null.
+   */
+  usSectorMap?: { sessionDate: string; stocks: number; url: string } | null;
   smallCapScanner: ReactionCandidateDto[];
 };
